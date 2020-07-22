@@ -1,24 +1,33 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
-
+import React, { useEffect, useRef } from "react";
+import "./App.css";
+import igv from "igv";
+//import igv from 'igv.esm.min.js'
 function App() {
+  const ref = useRef();
+  useEffect(() => {
+    var igvOptions = { genome: "hg38", locus: "BRCA1" };
+    return igv.createBrowser(ref.current, igvOptions);
+  }, []);
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <div className="header">
+        <h1>graphgenome browser</h1>
+      </div>
+      <div className="with-sidebar">
+        <div className="sidebar">d3 js</div>
+        <div className="body">
+          Body
+          <div
+            ref={ref}
+            style={{
+              paddingTop: "10px",
+              paddingBottom: "10px",
+              margin: "8px",
+              border: "1px solid lightgray",
+            }}
+          />
+        </div>
+      </div>
     </div>
   );
 }
