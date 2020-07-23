@@ -2,25 +2,31 @@ import React, { useEffect, useRef } from 'react'
 import './App.css'
 import igv from 'igv'
 import { Graph } from './Graph'
-import {
-  Navbar,
-  Nav,
-  NavDropdown,
-  Form,
-  FormControl,
-  Button,
-} from 'react-bootstrap'
+import { Navbar, Nav, NavDropdown } from 'react-bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css'
 
 import graph from './MT.json'
-
-function App() {
-  const ref = useRef()
+function IGV() {
   useEffect(() => {
-    var igvOptions = { genome: 'hg38', locus: 'BRCA1' }
-    return igv.createBrowser(ref.current, igvOptions)
+    igv.createBrowser(ref.current, { genome: 'hg38', locus: 'BRCA1' })
   }, [])
 
+  const ref = useRef()
+  return (
+    <div
+      ref={ref}
+      style={{
+        paddingTop: '10px',
+        paddingBottom: '10px',
+        margin: '8px',
+        border: '1px solid lightgray',
+      }}
+    />
+  )
+}
+
+function App() {
+  console.log('4001 rendering')
   return (
     <div>
       <Navbar bg="light" expand="lg">
@@ -50,15 +56,7 @@ function App() {
           <Graph graph={graph} />
         </div>
         <div className="body">
-          <div
-            ref={ref}
-            style={{
-              paddingTop: '10px',
-              paddingBottom: '10px',
-              margin: '8px',
-              border: '1px solid lightgray',
-            }}
-          />
+          <IGV />
         </div>
       </div>
     </div>
