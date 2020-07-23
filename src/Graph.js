@@ -84,6 +84,7 @@ export function Graph(props) {
     //})
 
     const svg = d3.create('svg').attr('viewBox', [0, 0, width, height])
+    let thickness = 5
 
     const link = svg
       .append('g')
@@ -92,7 +93,7 @@ export function Graph(props) {
       .selectAll('line')
       .data(links)
       .join('line')
-      .attr('stroke-width', d => Math.sqrt(d.value))
+      .attr('stroke-width', d => (d.sequence ? thickness * 1.5 : 3))
 
     const node = svg
       .append('g')
@@ -101,7 +102,7 @@ export function Graph(props) {
       .selectAll('circle')
       .data(nodes)
       .join('circle')
-      .attr('r', 5)
+      .attr('r', thickness)
       .attr('fill', color)
     //.call(drag(simulation));
 
