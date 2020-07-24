@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useCallback, useEffect, useState, useRef } from 'react'
 import { Graph } from './Graph'
 import { saveAs } from 'file-saver'
 import { OpenDialog } from './OpenDialog'
@@ -75,6 +75,9 @@ export function GraphContainer(props) {
 function App() {
   const [show, setShow] = useState(false)
   const [featureData, setFeatureData] = useState()
+  const callback = useCallback(data => {
+    setFeatureData(data)
+  }, [])
   return (
     <div>
       <Header
@@ -96,12 +99,7 @@ function App() {
       ) : null}
       <div className="flexcontainer">
         <div id="sidebar" className="sidebar">
-          <GraphContainer
-            graph={graph}
-            onFeatureClick={data => {
-              setFeatureData(data)
-            }}
-          />
+          <GraphContainer graph={graph} onFeatureClick={callback} />
         </div>
         <div className="body">
           <IGV />
