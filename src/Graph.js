@@ -75,7 +75,7 @@ function reprocessGraph(G, step = 1000) {
 }
 
 const Graph = React.forwardRef((props, ref) => {
-  const { graph, thickness = 10, color, width = 400, height = 500 } = props
+  const { graph, thickness = 10, color, width = 1000, height = 1000 } = props
   const data = useMemo(() => {
     return reprocessGraph(graph)
   }, [graph])
@@ -131,6 +131,35 @@ const Graph = React.forwardRef((props, ref) => {
       .attr('y1', d => d.source.y)
       .attr('x2', d => d.target.x)
       .attr('y2', d => d.target.y)
+      .on('mouseover', handleMouseOver)
+      .on('mouseout', handleMouseOut)
+
+    let oldColor
+    function handleMouseOver(d, i) {
+      const elt = d3.select(this)
+      oldColor = elt.attr('stroke')
+      elt.attr('stroke', 'red')
+      console.log(elt.data())
+      console.log(d, i)
+      // const elt = d3.select(this)
+      const x1 = elt.attr('x1')
+      const x2 = elt.attr('x2')
+      const y1 = elt.attr('y1')
+      const y2 = elt.attr('y2')
+
+      // Specify where to put label of text
+      svg
+        .append('text')
+        .attr('id', 'graph_mouseover')
+        .attr('x', x1 - 30)
+        .attr('y', y1 - 15)
+        .text('hello world')
+    }
+    function handleMouseOut() {
+      console.log(oldColor)
+      d3.select(this).attr('stroke', oldColor)
+      d3.select('#graph_mouseover').remove()
+    }
 
     // zoom logic, similar to https://observablehq.com/@d3/zoom
     function zoomed() {
