@@ -13,9 +13,9 @@ function reprocessGraph(G) {
     for (let j = 0; j < sequence.length; j += step) {
       let source
       if (j === 0) {
-        source = id + '-' + 'start'
+        source = id + '-start'
       } else if (j + step >= sequence.length) {
-        source = id + '-' + 'end'
+        source = id + '-end'
         done = true
       } else {
         source = id + '-' + j
@@ -24,7 +24,7 @@ function reprocessGraph(G) {
       last = j
     }
     if (!done) {
-      nodes.push({ ...rest, id: id + '-' + 'end', pos: last })
+      nodes.push({ ...rest, id: id + '-end', pos: last })
     }
     Gp.nodes = Gp.nodes.concat(nodes)
     for (let j = 0; j < nodes.length - 1; j++) {
@@ -72,8 +72,9 @@ function reprocessGraph(G) {
   }
   return Gp
 }
+
 export function Graph(props) {
-  const { graph: pre } = props
+  const { graph: pre, thickness = 10 } = props
   const ref = useRef()
   const graph = reprocessGraph(pre)
   let width = 400
@@ -82,12 +83,15 @@ export function Graph(props) {
   useEffect(() => {
     const links = graph.links.map(d => Object.create(d))
     const nodes = graph.nodes.map(d => Object.create(d))
-    const scale = d3.scaleOrdinal(d3.schemeCategory10)
-    const color = d => scale(d.group)
     let max = 0
     for (let i = 0; i < graph.links.length; i++) {
       max = Math.max(max, (graph.links[i].sequence || {}).length || 0)
     }
+
+    function zoomed() {
+      g.attr('transform', d3.event.transform)
+    }
+
     const simulation = d3
       .forceSimulation(nodes)
       .force(
@@ -107,10 +111,8 @@ export function Graph(props) {
     }
 
     const svg = d3.create('svg').attr('viewBox', [0, 0, width, height])
-    let thickness = 10
-
-    const link = svg
-      .append('g')
+    const g = svg.append('g')
+    const link = g
       .attr('stroke', '#999')
       .attr('stroke-opacity', 0.6)
       .selectAll('line')
@@ -124,12 +126,19 @@ export function Graph(props) {
       .attr('x2', d => d.target.x)
       .attr('y2', d => d.target.y)
 
-    ref.current.appendChild(svg.node())
-  }, [graph.links, graph.nodes, height, width])
+    svg.call(
+      d3
+        .zoom()
+        .extent([
+          [0, 0],
+          [width, height],
+        ])
+        .scaleExtent([0.1, 8])
+        .on('zoom', zoomed),
+    )
 
-  return (
-    <svg ref={ref} width="100%" height="100%" id="graph">
-      {' '}
-    </svg>
-  )
+    ref.current.appendChild(svg.node())
+  }, [graph.links, graph.nodes, height, thickness, width])
+
+  return <div ref={ref} />
 }
