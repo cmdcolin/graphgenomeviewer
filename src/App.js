@@ -1,9 +1,10 @@
-import React, { useEffect, useRef } from 'react'
-import './App.css'
+import React, { useEffect, useState, useRef } from 'react'
 import igv from 'igv'
 import { Graph } from './Graph'
-import { Navbar, Nav, NavDropdown } from 'react-bootstrap'
+import { Modal, Button, Navbar, Nav, NavDropdown } from 'react-bootstrap'
+import { parseGFA } from './util'
 import 'bootstrap/dist/css/bootstrap.min.css'
+import './App.css'
 
 import graph from './MT.json'
 function IGV() {
@@ -25,8 +26,29 @@ function IGV() {
   )
 }
 
+function OpenDialog({ show, onHide }) {
+  return (
+    <Modal show={show}>
+      <Modal.Header closeButton>
+        <Modal.Title>Modal title</Modal.Title>
+      </Modal.Header>
+
+      <Modal.Body>
+        <p>Modal body text goes here.</p>
+      </Modal.Body>
+
+      <Modal.Footer>
+        <Button variant="secondary" onClick={onHide}>
+          Close
+        </Button>
+        <Button variant="primary">Save changes</Button>
+      </Modal.Footer>
+    </Modal>
+  )
+}
+
 function App() {
-  console.log('4001 rendering')
+  const [show, setShow] = useState(false)
   return (
     <div>
       <Navbar bg="light" expand="lg">
@@ -34,22 +56,16 @@ function App() {
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="mr-auto">
-            <Nav.Link href="#home">Home</Nav.Link>
-            <Nav.Link href="#link">Link</Nav.Link>
-            <NavDropdown title="Dropdown" id="basic-nav-dropdown">
-              <NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
-              <NavDropdown.Item href="#action/3.2">
-                Another action
-              </NavDropdown.Item>
-              <NavDropdown.Item href="#action/3.3">Something</NavDropdown.Item>
-              <NavDropdown.Divider />
-              <NavDropdown.Item href="#action/3.4">
-                Separated link
+            <NavDropdown title="File" id="basic-nav-dropdown">
+              <NavDropdown.Item onClick={() => setShow(true)}>
+                Open
               </NavDropdown.Item>
             </NavDropdown>
+            <Nav.Link href="#link">About</Nav.Link>
           </Nav>
         </Navbar.Collapse>
       </Navbar>
+      <OpenDialog show={show} onHide={() => setShow(false)} />
 
       <div className="with-sidebar">
         <div id="sidebar" className="sidebar">

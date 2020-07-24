@@ -31,7 +31,6 @@ function reprocessGraph(G) {
       const pos = nodes[j].pos
       const source = nodes[j].id
       const target = nodes[j + 1].id
-      console.log({ sequence, pos, len: sequence.length })
       Gp.links.push({
         source,
         target,
@@ -100,7 +99,6 @@ export function Graph(props) {
           .forceLink(links)
           .id(d => d.id)
           .distance(link => {
-            console.log(link, link.sequence ? 0.1 : 1)
             return link.sequence ? 1 : 10
           }),
       )
