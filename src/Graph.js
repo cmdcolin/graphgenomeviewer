@@ -1,6 +1,5 @@
-import React, { useMemo, useEffect, useRef } from 'react'
+import React, { useMemo, useEffect } from 'react'
 import * as d3 from 'd3'
-
 function reprocessGraph(G, step = 1000) {
   const Gp = { nodes: [], links: [] } // G'
 
@@ -33,6 +32,7 @@ function reprocessGraph(G, step = 1000) {
         source,
         target,
         originalId: id,
+        linkNum: i,
         sequence: !!sequence, // could put actual sequence here if needed
       })
     }
@@ -74,14 +74,8 @@ function reprocessGraph(G, step = 1000) {
   return Gp
 }
 
-export function Graph({
-  graph,
-  thickness = 10,
-  color,
-  width = 400,
-  height = 500,
-}) {
-  const ref = useRef()
+const Graph = React.forwardRef((props, ref) => {
+  const { graph, thickness = 10, color, width = 400, height = 500 } = props
   const data = useMemo(() => {
     return reprocessGraph(graph)
   }, [graph])
@@ -119,8 +113,6 @@ export function Graph({
   useEffect(() => {
     ref.current.innerHTML = ''
     const svg = d3.create('svg').attr('viewBox', [0, 0, width, height])
-    let i = 0
-    let current = ''
     const g = svg
       .append('g')
       .attr('stroke-opacity', 0.6)
@@ -131,12 +123,8 @@ export function Graph({
         return d.sequence ? thickness * 1.5 : 3
       })
       .attr('stroke', d => {
-        if (d.originalId !== current) {
-          i++
-          current = d.originalId
-        }
         return d.sequence
-          ? d3.hsl(d3[`interpolate${color}`](i / total)).darker()
+          ? d3.hsl(d3[`interpolate${color}`](d.linkNum / total)).darker()
           : 'grey'
       })
       .attr('x1', d => d.source.x)
@@ -144,6 +132,7 @@ export function Graph({
       .attr('x2', d => d.target.x)
       .attr('y2', d => d.target.y)
 
+    // zoom logic, similar to https://observablehq.com/@d3/zoom
     function zoomed() {
       g.attr('transform', d3.event.transform)
     }
@@ -159,7 +148,19 @@ export function Graph({
     )
 
     ref.current.appendChild(svg.node())
-  }, [color, data.links, data.nodes, height, links, thickness, total, width])
+  }, [
+    color,
+    data.links,
+    data.nodes,
+    height,
+    links,
+    ref,
+    thickness,
+    total,
+    width,
+  ])
 
   return <div ref={ref} />
-}
+})
+
+export { Graph }
