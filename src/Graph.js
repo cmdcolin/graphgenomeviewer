@@ -31,7 +31,7 @@ function reprocessGraph(G, step = 1000) {
       Gp.links.push({
         source,
         target,
-        originalId: id,
+        id,
         linkNum: i,
         sequence, // could put actual sequence here if needed
       })
@@ -75,7 +75,14 @@ function reprocessGraph(G, step = 1000) {
 }
 
 const Graph = React.forwardRef((props, ref) => {
-  const { graph, thickness = 10, color, width = 1000, height = 1000 } = props
+  const {
+    graph,
+    thickness = 10,
+    color,
+    width = 1000,
+    height = 1000,
+    onFeatureClick,
+  } = props
   const data = useMemo(() => {
     return reprocessGraph(graph)
   }, [graph])
@@ -143,7 +150,7 @@ const Graph = React.forwardRef((props, ref) => {
         div.transition().style('opacity', 0.9)
 
         const text =
-          link.originalId ||
+          link.id ||
           `${link.source.replace(/-start|-end/, '')}-${link.target.replace(
             /-start|-end/,
             '',
@@ -155,6 +162,11 @@ const Graph = React.forwardRef((props, ref) => {
       })
       .on('mouseout', () => {
         div.transition().style('opacity', 0)
+      })
+      .on('click', (d, i) => {
+        div.transition().style('opacity', 0)
+        const link = data.links[i]
+        onFeatureClick(link)
       })
 
     // zoom logic, similar to https://observablehq.com/@d3/zoom
@@ -180,6 +192,7 @@ const Graph = React.forwardRef((props, ref) => {
     graph.links,
     height,
     links,
+    onFeatureClick,
     ref,
     thickness,
     total,

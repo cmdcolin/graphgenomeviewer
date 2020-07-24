@@ -2,6 +2,8 @@ import React, { useEffect, useState, useRef } from 'react'
 import { Graph } from './Graph'
 import { saveAs } from 'file-saver'
 import { OpenDialog } from './OpenDialog'
+import { FeatureDialog } from './FeatureDialog'
+import { serialize } from './util'
 import { Button, Form, Navbar, Nav, NavDropdown } from 'react-bootstrap'
 import igv from 'igv'
 
@@ -35,43 +37,13 @@ function Header({ onOpen }) {
       <Navbar.Collapse id="basic-navbar-nav">
         <Nav className="mr-auto">
           <NavDropdown title="File" id="basic-nav-dropdown">
-            <NavDropdown.Item onClick={() => onOpen(true)}>
-              Open
-            </NavDropdown.Item>
+            <NavDropdown.Item onClick={() => onOpen(true)}>Open</NavDropdown.Item>
           </NavDropdown>
           <Nav.Link href="#link">About</Nav.Link>
         </Nav>
       </Navbar.Collapse>
     </Navbar>
   )
-}
-
-// adapted from https://observablehq.com/@mbostock/saving-svg
-function serialize(svg) {
-  const xmlns = 'http://www.w3.org/2000/xmlns/'
-  const xlinkns = 'http://www.w3.org/1999/xlink'
-  const svgns = 'http://www.w3.org/2000/svg'
-
-  svg = svg.cloneNode(true)
-  const fragment = `${window.location.href}#`
-  const walker = document.createTreeWalker(
-    svg,
-    NodeFilter.SHOW_ELEMENT,
-    null,
-    false,
-  )
-  while (walker.nextNode()) {
-    for (const attr of walker.currentNode.attributes) {
-      if (attr.value.includes(fragment)) {
-        attr.value = attr.value.replace(fragment, '#')
-      }
-    }
-  }
-  svg.setAttributeNS(xmlns, 'xmlns', svgns)
-  svg.setAttributeNS(xmlns, 'xmlns:xlink', xlinkns)
-  const serializer = new window.XMLSerializer()
-  const string = serializer.serializeToString(svg)
-  return new Blob([string], { type: 'image/svg+xml' })
 }
 
 export function GraphContainer(props) {
@@ -102,6 +74,7 @@ export function GraphContainer(props) {
 }
 function App() {
   const [show, setShow] = useState(false)
+  const [featureData, setFeatureData] = useState()
   return (
     <div>
       <Header
@@ -110,9 +83,25 @@ function App() {
         }}
       />
       <OpenDialog show={show} onHide={() => setShow(false)} />
+      {featureData ? (
+        <FeatureDialog
+          data={featureData}
+          onModal={data => {
+            setFeatureData(data)
+          }}
+          onHide={() => {
+            setFeatureData(undefined)
+          }}
+        />
+      ) : null}
       <div className="flexcontainer">
         <div id="sidebar" className="sidebar">
-          <GraphContainer graph={graph} />
+          <GraphContainer
+            graph={graph}
+            onFeatureClick={data => {
+              setFeatureData(data)
+            }}
+          />
         </div>
         <div className="body">
           <IGV />
