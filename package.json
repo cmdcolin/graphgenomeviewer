@@ -27,7 +27,9 @@
   "eslintConfig": {
     "extends": "react-app",
     "rules": {
-      "prefer-template": "error"
+      "prefer-template": "error",
+      "prefer-const": "error",
+      "no-var": "error"
     }
   },
   "browserslist": {

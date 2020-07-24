@@ -5,7 +5,7 @@ function reprocessGraph(G, step = 1000) {
 
   for (let i = 0; i < G.nodes.length; i++) {
     const { id, sequence, ...rest } = G.nodes[i]
-    let nodes = []
+    const nodes = []
     let done = false
     let last = 0
     for (let j = 0; j < sequence.length; j += step) {
@@ -33,7 +33,7 @@ function reprocessGraph(G, step = 1000) {
         target,
         originalId: id,
         linkNum: i,
-        sequence: !!sequence, // could put actual sequence here if needed
+        sequence, // could put actual sequence here if needed
       })
     }
   }
@@ -79,7 +79,7 @@ const Graph = React.forwardRef((props, ref) => {
   const data = useMemo(() => {
     return reprocessGraph(graph)
   }, [graph])
-  let total = graph.nodes.length
+  const total = graph.nodes.length
 
   const links = useMemo(() => {
     const links = data.links.map(d => Object.create(d))
@@ -104,7 +104,7 @@ const Graph = React.forwardRef((props, ref) => {
       .force('center', d3.forceCenter(width / 2, height / 2))
 
     /// run a 1000 simulation node ticks
-    for (var i = 0; i < 1000; ++i) {
+    for (let i = 0; i < 1000; ++i) {
       simulation.tick()
     }
     return links
@@ -112,6 +112,13 @@ const Graph = React.forwardRef((props, ref) => {
 
   useEffect(() => {
     ref.current.innerHTML = ''
+    // Define the div for the tooltip
+    const div = d3
+      .select('body')
+      .append('div')
+      .attr('class', 'tooltip')
+      .style('opacity', 0)
+
     const svg = d3.create('svg').attr('viewBox', [0, 0, width, height])
     const g = svg
       .append('g')
@@ -131,35 +138,24 @@ const Graph = React.forwardRef((props, ref) => {
       .attr('y1', d => d.source.y)
       .attr('x2', d => d.target.x)
       .attr('y2', d => d.target.y)
-      .on('mouseover', handleMouseOver)
-      .on('mouseout', handleMouseOut)
+      .on('mouseover', (d, i) => {
+        const link = data.links[i]
+        div.transition().style('opacity', 0.9)
 
-    let oldColor
-    function handleMouseOver(d, i) {
-      const elt = d3.select(this)
-      oldColor = elt.attr('stroke')
-      elt.attr('stroke', 'red')
-      console.log(elt.data())
-      console.log(d, i)
-      // const elt = d3.select(this)
-      const x1 = elt.attr('x1')
-      const x2 = elt.attr('x2')
-      const y1 = elt.attr('y1')
-      const y2 = elt.attr('y2')
-
-      // Specify where to put label of text
-      svg
-        .append('text')
-        .attr('id', 'graph_mouseover')
-        .attr('x', x1 - 30)
-        .attr('y', y1 - 15)
-        .text('hello world')
-    }
-    function handleMouseOut() {
-      console.log(oldColor)
-      d3.select(this).attr('stroke', oldColor)
-      d3.select('#graph_mouseover').remove()
-    }
+        const text =
+          link.originalId ||
+          `${link.source.replace(/-start|-end/, '')}-${link.target.replace(
+            /-start|-end/,
+            '',
+          )}`
+        div
+          .html(text)
+          .style('left', `${d3.event.pageX}px`)
+          .style('top', `${d3.event.pageY - 28}px`)
+      })
+      .on('mouseout', () => {
+        div.transition().style('opacity', 0)
+      })
 
     // zoom logic, similar to https://observablehq.com/@d3/zoom
     function zoomed() {
@@ -181,6 +177,7 @@ const Graph = React.forwardRef((props, ref) => {
     color,
     data.links,
     data.nodes,
+    graph.links,
     height,
     links,
     ref,
