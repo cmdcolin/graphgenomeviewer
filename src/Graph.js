@@ -78,10 +78,12 @@ const Graph = React.forwardRef((props, ref) => {
   const {
     graph,
     thickness = 10,
-    color,
+    color = 'Rainbow',
     width = 1000,
     height = 1000,
-    onFeatureClick,
+    onFeatureClick = () => {
+      console.log('no feature click configured')
+    },
   } = props
   const data = useMemo(() => {
     return reprocessGraph(graph)
