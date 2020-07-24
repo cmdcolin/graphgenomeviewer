@@ -3,7 +3,7 @@ import { Button, Modal } from 'react-bootstrap'
 
 export function OpenDialog({ show, onHide, onResult }) {
   return (
-    <Modal show={show}>
+    <Modal show={show} onHide={onHide}>
       <Modal.Header closeButton>
         <Modal.Title>Modal title</Modal.Title>
       </Modal.Header>

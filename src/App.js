@@ -27,32 +27,35 @@ function IGV() {
     />
   )
 }
-
+function Header({ onOpen }) {
+  return (
+    <Navbar bg="light" expand="lg">
+      <Navbar.Brand href="#home">graphgenome browser</Navbar.Brand>
+      <Navbar.Toggle aria-controls="basic-navbar-nav" />
+      <Navbar.Collapse id="basic-navbar-nav">
+        <Nav className="mr-auto">
+          <NavDropdown title="File" id="basic-nav-dropdown">
+            <NavDropdown.Item onClick={() => onOpen(true)}>
+              Open
+            </NavDropdown.Item>
+          </NavDropdown>
+          <Nav.Link href="#link">About</Nav.Link>
+        </Nav>
+      </Navbar.Collapse>
+    </Navbar>
+  )
+}
 function App() {
   const [show, setShow] = useState(false)
   return (
     <div>
-      <Navbar bg="light" expand="lg">
-        <Navbar.Brand href="#home">graphgenome browser</Navbar.Brand>
-        <Navbar.Toggle aria-controls="basic-navbar-nav" />
-        <Navbar.Collapse id="basic-navbar-nav">
-          <Nav className="mr-auto">
-            <NavDropdown title="File" id="basic-nav-dropdown">
-              <NavDropdown.Item onClick={() => setShow(true)}>
-                Open
-              </NavDropdown.Item>
-            </NavDropdown>
-            <Nav.Link href="#link">About</Nav.Link>
-          </Nav>
-        </Navbar.Collapse>
-      </Navbar>
-      <OpenDialog
-        show={show}
-        onHide={() => setShow(false)}
-        onResults={results => {}}
+      <Header
+        onOpen={() => {
+          setShow(true)
+        }}
       />
-
-      <div className="with-sidebar">
+      <OpenDialog show={show} onHide={() => setShow(false)} />
+      <div className="flexcontainer">
         <div id="sidebar" className="sidebar">
           <Graph graph={graph} />
         </div>
