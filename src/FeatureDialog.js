@@ -12,9 +12,12 @@ export function FeatureDialog({ show, data, onHide }) {
         {Object.entries(data)
           .filter(entry => !['source', 'target', 'linkNum'].includes(entry[0]))
           .map(([key, value]) => (
-            <div key={`${key}_${value}`} style={{ display: 'flex', margin: 3 }}>
+            <div
+              key={`${key}_${value}`}
+              style={{ display: 'flex', maxHeight: 150, margin: 3 }}
+            >
               <div style={{ backgroundColor: '#dda', minWidth: 100 }}>{key}</div>
-              <div style={{ wordBreak: 'break-word' }}>{value}</div>
+              <div style={{ wordBreak: 'break-word', overflow: 'auto' }}>{value}</div>
             </div>
           ))}
         <Modal.Footer>
