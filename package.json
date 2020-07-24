@@ -24,7 +24,10 @@
     "lint": "eslint src"
   },
   "eslintConfig": {
-    "extends": "react-app"
+    "extends": "react-app",
+    "rules": {
+      "prefer-template": "error"
+    }
   },
   "browserslist": {
     "production": [

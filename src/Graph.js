@@ -13,18 +13,18 @@ function reprocessGraph(G) {
     for (let j = 0; j < sequence.length; j += step) {
       let source
       if (j === 0) {
-        source = id + '-start'
+        source = `${id}-start`
       } else if (j + step >= sequence.length) {
-        source = id + '-end'
+        source = `${id}-end`
         done = true
       } else {
-        source = id + '-' + j
+        source = `${id}-${j}`
       }
       nodes.push({ ...rest, id: source, pos: j })
       last = j
     }
     if (!done) {
-      nodes.push({ ...rest, id: id + '-end', pos: last })
+      nodes.push({ ...rest, id: `${id}-end`, pos: last })
     }
     Gp.nodes = Gp.nodes.concat(nodes)
     for (let j = 0; j < nodes.length - 1; j++) {
@@ -43,29 +43,29 @@ function reprocessGraph(G) {
     const { strand1, strand2, source, target, rest } = G.links[i]
     if (strand1 === '+' && strand2 === '+') {
       Gp.links.push({
-        source: source + '-end',
-        target: target + '-start',
+        source: `${source}-end`,
+        target: `${target}-start`,
         ...rest,
       })
     }
     if (strand1 === '-' && strand2 === '+') {
       Gp.links.push({
-        source: source + '-start',
-        target: target + '-start',
+        source: `${source}-start`,
+        target: `${target}-start`,
         ...rest,
       })
     }
     if (strand1 === '-' && strand2 === '-') {
       Gp.links.push({
-        source: source + '-start',
-        target: target + '-end',
+        source: `${source}-start`,
+        target: `${target}-end`,
         ...rest,
       })
     }
     if (strand1 === '+' && strand2 === '-') {
       Gp.links.push({
-        source: source + '-end',
-        target: target + '-end',
+        source: `${source}-end`,
+        target: `${target}-end`,
         ...rest,
       })
     }
