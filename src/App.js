@@ -1,8 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react'
 import igv from 'igv'
 import { Graph } from './Graph'
-import { Modal, Button, Navbar, Nav, NavDropdown } from 'react-bootstrap'
+import { OpenDialog } from './OpenDialog'
+import { Navbar, Nav, NavDropdown } from 'react-bootstrap'
 import { parseGFA } from './util'
+
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './App.css'
 
@@ -26,27 +28,6 @@ function IGV() {
   )
 }
 
-function OpenDialog({ show, onHide }) {
-  return (
-    <Modal show={show}>
-      <Modal.Header closeButton>
-        <Modal.Title>Modal title</Modal.Title>
-      </Modal.Header>
-
-      <Modal.Body>
-        <p>Modal body text goes here.</p>
-      </Modal.Body>
-
-      <Modal.Footer>
-        <Button variant="secondary" onClick={onHide}>
-          Close
-        </Button>
-        <Button variant="primary">Save changes</Button>
-      </Modal.Footer>
-    </Modal>
-  )
-}
-
 function App() {
   const [show, setShow] = useState(false)
   return (
@@ -65,7 +46,11 @@ function App() {
           </Nav>
         </Navbar.Collapse>
       </Navbar>
-      <OpenDialog show={show} onHide={() => setShow(false)} />
+      <OpenDialog
+        show={show}
+        onHide={() => setShow(false)}
+        onResults={results => {}}
+      />
 
       <div className="with-sidebar">
         <div id="sidebar" className="sidebar">
