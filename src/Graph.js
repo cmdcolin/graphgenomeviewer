@@ -29,6 +29,7 @@ function reprocessGraph(G, step = 1000) {
       const source = nodes[j].id
       const target = nodes[j + 1].id
       Gp.links.push({
+        ...rest,
         source,
         target,
         id,
@@ -38,7 +39,7 @@ function reprocessGraph(G, step = 1000) {
     }
   }
   for (let i = 0; i < G.links.length; i++) {
-    const { strand1, strand2, source, target, rest } = G.links[i]
+    const { strand1, strand2, source, target, ...rest } = G.links[i]
 
     // enumerates cases for which end of source connects to
     // which end of the target
@@ -168,6 +169,7 @@ const Graph = React.forwardRef((props, ref) => {
       .on('click', (d, i) => {
         div.transition().style('opacity', 0)
         const link = data.links[i]
+        console.log(link)
         onFeatureClick(link)
       })
 
