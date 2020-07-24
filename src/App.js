@@ -2,8 +2,7 @@ import React, { useEffect, useState, useRef } from 'react'
 import igv from 'igv'
 import { Graph } from './Graph'
 import { OpenDialog } from './OpenDialog'
-import { Navbar, Nav, NavDropdown } from 'react-bootstrap'
-import { parseGFA } from './util'
+import { Form, Navbar, Nav, NavDropdown } from 'react-bootstrap'
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './App.css'
@@ -45,6 +44,31 @@ function Header({ onOpen }) {
     </Navbar>
   )
 }
+
+export function GraphContainer(props) {
+  const [value, setValue] = useState('Rainbow')
+  return (
+    <div>
+      <Form.Group>
+        <Form.Label>Example select</Form.Label>
+        <Form.Control
+          value={value}
+          onChange={event => {
+            setValue(event.target.value)
+          }}
+          as="select"
+        >
+          <option>Turbo</option>
+          <option>Rainbow</option>
+          <option>Spectral</option>
+          <option>Viridis</option>
+          <option>RdYlBu</option>
+        </Form.Control>
+      </Form.Group>
+      <Graph {...props} color={value} />
+    </div>
+  )
+}
 function App() {
   const [show, setShow] = useState(false)
   return (
@@ -57,7 +81,7 @@ function App() {
       <OpenDialog show={show} onHide={() => setShow(false)} />
       <div className="flexcontainer">
         <div id="sidebar" className="sidebar">
-          <Graph graph={graph} />
+          <GraphContainer graph={graph} />
         </div>
         <div className="body">
           <IGV />

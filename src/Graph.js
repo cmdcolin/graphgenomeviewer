@@ -1,12 +1,11 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useMemo, useEffect, useRef } from 'react'
 import * as d3 from 'd3'
 
-function reprocessGraph(G) {
+function reprocessGraph(G, step = 1000) {
   const Gp = { nodes: [], links: [] } // G'
 
   for (let i = 0; i < G.nodes.length; i++) {
     const { id, sequence, ...rest } = G.nodes[i]
-    let step = 1000
     let nodes = []
     let done = false
     let last = 0
@@ -28,18 +27,21 @@ function reprocessGraph(G) {
     }
     Gp.nodes = Gp.nodes.concat(nodes)
     for (let j = 0; j < nodes.length - 1; j++) {
-      const pos = nodes[j].pos
       const source = nodes[j].id
       const target = nodes[j + 1].id
       Gp.links.push({
         source,
         target,
-        sequence: !!sequence,
+        originalId: id,
+        sequence: !!sequence, // could put actual sequence here if needed
       })
     }
   }
   for (let i = 0; i < G.links.length; i++) {
     const { strand1, strand2, source, target, rest } = G.links[i]
+
+    // enumerates cases for which end of source connects to
+    // which end of the target
     if (strand1 === '+' && strand2 === '+') {
       Gp.links.push({
         source: `${source}-end`,
@@ -72,23 +74,25 @@ function reprocessGraph(G) {
   return Gp
 }
 
-export function Graph(props) {
-  const { graph: pre, thickness = 10 } = props
+export function Graph({
+  graph,
+  thickness = 10,
+  color,
+  width = 400,
+  height = 500,
+}) {
   const ref = useRef()
-  const graph = reprocessGraph(pre)
-  let width = 400
-  let height = 500
+  const data = useMemo(() => {
+    return reprocessGraph(graph)
+  }, [graph])
+  let total = graph.nodes.length
 
-  useEffect(() => {
-    const links = graph.links.map(d => Object.create(d))
-    const nodes = graph.nodes.map(d => Object.create(d))
+  const links = useMemo(() => {
+    const links = data.links.map(d => Object.create(d))
+    const nodes = data.nodes.map(d => Object.create(d))
     let max = 0
-    for (let i = 0; i < graph.links.length; i++) {
-      max = Math.max(max, (graph.links[i].sequence || {}).length || 0)
-    }
-
-    function zoomed() {
-      g.attr('transform', d3.event.transform)
+    for (let i = 0; i < data.links.length; i++) {
+      max = Math.max(max, (data.links[i].sequence || {}).length || 0)
     }
 
     const simulation = d3
@@ -104,26 +108,45 @@ export function Graph(props) {
       )
       .force('charge', d3.forceManyBody().strength(-100))
       .force('center', d3.forceCenter(width / 2, height / 2))
+
+    /// run a 1000 simulation node ticks
     for (var i = 0; i < 1000; ++i) {
       simulation.tick()
     }
+    return links
+  }, [data.links, data.nodes, height, width])
 
+  useEffect(() => {
+    ref.current.innerHTML = ''
     const svg = d3.create('svg').attr('viewBox', [0, 0, width, height])
-    const g = svg.append('g')
-    const link = g
-      .attr('stroke', '#999')
+    let i = 0
+    let current = ''
+    const g = svg
+      .append('g')
       .attr('stroke-opacity', 0.6)
       .selectAll('line')
       .data(links)
       .join('line')
-      .attr('stroke-width', d => (d.sequence ? thickness * 1.5 : 3))
-
-    link
+      .attr('stroke-width', d => {
+        return d.sequence ? thickness * 1.5 : 3
+      })
+      .attr('stroke', d => {
+        if (d.originalId !== current) {
+          i++
+          current = d.originalId
+        }
+        return d.sequence
+          ? d3.hsl(d3[`interpolate${color}`](i / total)).darker()
+          : 'grey'
+      })
       .attr('x1', d => d.source.x)
       .attr('y1', d => d.source.y)
       .attr('x2', d => d.target.x)
       .attr('y2', d => d.target.y)
 
+    function zoomed() {
+      g.attr('transform', d3.event.transform)
+    }
     svg.call(
       d3
         .zoom()
@@ -136,7 +159,7 @@ export function Graph(props) {
     )
 
     ref.current.appendChild(svg.node())
-  }, [graph.links, graph.nodes, height, thickness, width])
+  }, [color, data.links, data.nodes, height, links, thickness, total, width])
 
   return <div ref={ref} />
 }
