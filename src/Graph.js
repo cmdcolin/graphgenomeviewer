@@ -1,7 +1,7 @@
 import React, { useMemo, useEffect } from 'react'
 import * as d3 from 'd3'
 
-function reprocessGraph(G, blockSize = 500) {
+function reprocessGraph(G, blockSize) {
   const Gp = { nodes: [], links: [] } // G'
 
   for (let i = 0; i < G.nodes.length; i++) {
@@ -76,7 +76,7 @@ function* generatePaths(links, graph) {
     const link = links[i]
     if (currentLinkId !== link.linkNum) {
       if (original.id) {
-        yield { links: currentLinkSet, id: original.id, sequence: original.sequence }
+        yield { links: currentLinkSet, ...original }
       }
       currentLinkSet = []
       currentLinkId = link.linkNum
@@ -85,7 +85,6 @@ function* generatePaths(links, graph) {
     currentLinkSet.push([link.source.x, link.source.y])
     currentLinkSet.push([link.target.x, link.target.y])
   }
-  //yield { links: currentLinkSet, id: original.id, sequence: original.sequence }
 }
 
 function* generateEdges(links, graph) {
