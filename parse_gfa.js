@@ -6,11 +6,11 @@ const rl = readline.createInterface({
 })
 
 ;(async () => {
-  let graph = { nodes: [], links: [] }
+  const graph = { nodes: [], links: [] }
   for await (const line of rl) {
     if (line.startsWith('S')) {
       const [, name, sequence, ...rest] = line.split('\t')
-      let tags = {}
+      const tags = {}
       for (let i = 0; i < rest.length; i++) {
         const [name, type, val] = rest[i].split(':')
         if (type === 'i') {
@@ -21,10 +21,8 @@ const rl = readline.createInterface({
       }
       graph.nodes.push({ id: name, sequence, tags })
     } else if (line.startsWith('L')) {
-      const [, source, strand1, target, strand2, cigar, ...rest] = line.split(
-        '\t',
-      )
-      let tags = {}
+      const [, source, strand1, target, strand2, cigar, ...rest] = line.split('\t')
+      const tags = {}
       for (let i = 0; i < rest.length; i++) {
         const [name, type, val] = rest[i].split(':')
         if (type === 'i') {
