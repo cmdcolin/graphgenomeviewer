@@ -1,7 +1,7 @@
 import React from 'react'
 import { Button, Modal } from 'react-bootstrap'
 
-export function FeatureDialog({ show, data, onHide }) {
+export function FeatureDialog({ data, onHide }) {
   return (
     <Modal show={true} onHide={onHide}>
       <Modal.Header closeButton>
@@ -24,7 +24,7 @@ export function FeatureDialog({ show, data, onHide }) {
             </div>
           ))}
         <hr />
-        {data.tags ? (
+        {data.tags && Object.keys(data.tags).length ? (
           <>
             <div>Tags</div>
             {Object.entries(data.tags).map(([key, value]) => (

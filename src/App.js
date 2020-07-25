@@ -1,16 +1,14 @@
 import React, { useCallback, useEffect, useState, useRef } from 'react'
-import { Graph } from './Graph'
-import { saveAs } from 'file-saver'
 import { OpenDialog } from './OpenDialog'
 import { FeatureDialog } from './FeatureDialog'
-import { serialize } from './util'
-import { Button, Form, Navbar, Nav, NavDropdown } from 'react-bootstrap'
+import { GraphContainer } from './GraphContainer'
+import { Navbar, Nav, NavDropdown } from 'react-bootstrap'
 import igv from 'igv'
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './App.css'
 
-import graph from './MT.json'
+import graph from './toy_example.json'
 function IGV() {
   useEffect(() => {
     igv.createBrowser(ref.current, { genome: 'hg38', locus: 'BRCA1' })
@@ -46,30 +44,6 @@ function Header({ onOpen }) {
   )
 }
 
-export function GraphContainer(props) {
-  const [value, setValue] = useState('Rainbow')
-  const ref = useRef()
-  return (
-    <div>
-      <Form.Group>
-        <Form.Label>Example select</Form.Label>
-        <Form.Control
-          value={value}
-          onChange={event => setValue(event.target.value)}
-          as="select"
-        >
-          <option>Turbo</option>
-          <option>Rainbow</option>
-          <option>Spectral</option>
-          <option>Viridis</option>
-          <option>RdYlBu</option>
-        </Form.Control>
-        <Button onClick={() => saveAs(serialize(ref.current))}>Export SVG</Button>
-      </Form.Group>
-      <Graph ref={ref} {...props} color={value} />
-    </div>
-  )
-}
 function App() {
   const [show, setShow] = useState(false)
   const [featureData, setFeatureData] = useState()

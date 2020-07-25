@@ -7,6 +7,19 @@ import * as d3 from 'd3'
 function reprocessGraph(G, blockSize) {
   const Gp = { nodes: [], links: [] }
 
+  const seen = {}
+  for (let i = 0; i < G.paths.length; i++) {
+    const path = G.paths[i]
+    const pathNodes = path.path.split(',')
+    for (let j = 0; j < pathNodes.length - 1; j++) {
+      const curr = `${pathNodes[j]}_${pathNodes[j + 1]}`
+      if (!seen[curr]) {
+        seen[curr] = 1
+      } else {
+        seen[curr]++
+      }
+    }
+  }
   for (let i = 0; i < G.nodes.length; i++) {
     const { id, sequence, ...rest } = G.nodes[i]
 
@@ -33,6 +46,8 @@ function reprocessGraph(G, blockSize) {
   }
   for (let i = 0; i < G.links.length; i++) {
     const { strand1, strand2, source, target, ...rest } = G.links[i]
+    const score = seen[`${source}${strand1}_${target}${strand2}`] || 0
+    console.log({ score })
     const loop = source === target
 
     // enumerates cases for which end of source connects to
@@ -42,6 +57,7 @@ function reprocessGraph(G, blockSize) {
         source: `${source}-end`,
         target: `${target}-start`,
         loop,
+        score,
         ...rest,
       })
     } else if (strand1 === '-' && strand2 === '+') {
@@ -49,6 +65,7 @@ function reprocessGraph(G, blockSize) {
         source: `${source}-start`,
         target: `${target}-start`,
         loop,
+        score,
         ...rest,
       })
     } else if (strand1 === '-' && strand2 === '-') {
@@ -56,6 +73,7 @@ function reprocessGraph(G, blockSize) {
         source: `${source}-start`,
         target: `${target}-end`,
         loop,
+        score,
         ...rest,
       })
     } else if (strand1 === '+' && strand2 === '-') {
@@ -63,11 +81,13 @@ function reprocessGraph(G, blockSize) {
         source: `${source}-end`,
         target: `${target}-end`,
         loop,
+        score,
         ...rest,
       })
-    } else {
-      Gp.links.push({ source: `${source}-start`, target: `${target}-end`, loop, ...rest })
     }
+    // else {
+    //   Gp.links.push({ source: `${source}-start`, target: `${target}-end`, loop, ...rest })
+    // }
   }
   return Gp
 }
@@ -110,9 +130,10 @@ function* generateEdges(links, graph) {
 const Graph = React.forwardRef((props, ref) => {
   const {
     graph, // {nodes:[{id}], links:[{source,target}]
+    path = 'Edge',
     blockSize = 1000,
     contigThickness = 10,
-    edgeThickness = 3,
+    edgeThickness = 2,
     color = 'Rainbow',
     width = 1000,
     height = 1000,
@@ -172,6 +193,9 @@ const Graph = React.forwardRef((props, ref) => {
 
   const paths = [...generatePaths(links, data.links)]
   const edges = [...generateEdges(links, data.links)]
+  const maxScore = edges.reduce((a, b) => {
+    return Math.max(b.original.score, a)
+  }, 0)
   return (
     <svg ref={ref} viewBox={[0, 0, width, height].toString()}>
       <g className="gref">
@@ -231,16 +255,15 @@ const Graph = React.forwardRef((props, ref) => {
           } else {
             path = line(p.links)
           }
-
           return (
             <path
               key={path.toString()}
               d={path}
-              strokeWidth={edgeThickness}
-              stroke="black"
+              strokeWidth={p.original.score * edgeThickness}
+              stroke={d3.interpolateGreys(p.original.score / maxScore)}
               fill="none"
               onClick={() => onFeatureClick(p.original)}
-            ></path>
+            />
           )
         })}
       </g>
