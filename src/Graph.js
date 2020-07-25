@@ -151,103 +151,18 @@ const Graph = React.forwardRef((props, ref) => {
     return links
   }, [data, height, steps, width])
 
-  // Add the valueline path.
-  // svg.append('path').data([data]).attr('class', 'line').attr('d', valueline)
-
-  // const g = svg
-  //   .append('g')
-  //   .attr('stroke-opacity', 0.6)
-  //   .selectAll('line')
-  //   .data(links)
-  //   .join('line')
-  //   .attr('stroke-width', d => {
-  //     return d.sequence ? thickness * 1.5 : 3
-  //   })
-  //   .attr('stroke', d => {
-  //     return d.sequence
-  //       ? d3.hsl(d3[`interpolate${color}`](d.linkNum / total)).darker()
-  //       : 'grey'
-  //   })
-  //   .attr('x1', d => d.source.x)
-  //   .attr('y1', d => d.source.y)
-  //   .attr('x2', d => d.target.x)
-  //   .attr('y2', d => d.target.y)
-  //   .on('mouseover', (d, i) => {
-  //     const link = data.links[i]
-  //     div.transition().style('opacity', 0.9)
-
-  //     const text =
-  //       link.id ||
-  //       `${link.source.replace(/-start|-end/, '')}-${link.target.replace(
-  //         /-start|-end/,
-  //         '',
-  //       )}`
-  //     div
-  //       .html(text)
-  //       .style('left', `${d3.event.pageX}px`)
-  //       .style('top', `${d3.event.pageY - 28}px`)
-  //   })
-  //   .on('mouseout', () => {
-  //     div.transition().style('opacity', 0)
-  //   })
-  //   .on('click', (d, i) => {
-  //     div.transition().style('opacity', 0)
-  //     const link = data.links[i]
-  //     onFeatureClick(link)
-  //   })
-
-  // // zoom logic, similar to https://observablehq.com/@d3/zoom
-  // function zoomed() {
-  //   g.attr('transform', d3.event.transform)
-  // }
-  // svg.call(
-  //   d3
-  //     .zoom()
-  //     .extent([
-  //       [0, 0],
-  //       [width, height],
-  //     ])
-  //     .scaleExtent([0.1, 8])
-  //     .on('zoom', zoomed),
-  // )
-
-  // ref.current.appendChild(svg.node())
-  // }, [
-  // color,
-  // data,
-  // data.links,
-  // data.nodes,
-  // graph.links,
-  // height,
-  // links,
-  // onFeatureClick,
-  // ref,
-  // thickness,
-  // total,
-  // width,
-  // ])
-
-  // const edges = []
-  // const contigs = []
-  // for (let i = 0; i < links.length; i++) {
-  //   if (links[i].sequence) {
-  //     edges.push(links[i])
-  //   } else {
-  //     contigs.push(links[i])
-  //   }
-  // }
   const paths = [...generatePaths(links, data.links)]
   const edges = [...generateEdges(links, data.links)]
   return (
     <svg ref={ref} viewBox={[0, 0, width, height].toString()}>
-      {paths.map(p => {
+      {paths.map((p, i) => {
         const line = d3.line().context(null)
         return p.id ? (
           <path
             d={line(p.links)}
             title={p.id}
             strokeWidth={contigThickness}
-            stroke="black"
+            stroke={d3.hsl(d3[`interpolate${color}`](i / paths.length)).darker()}
             fill="none"
             onClick={() => onFeatureClick(p)}
           />
