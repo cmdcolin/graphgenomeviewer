@@ -7,15 +7,11 @@ function reprocessGraph(G, blockSize) {
   for (let i = 0; i < G.nodes.length; i++) {
     const { id, sequence, ...rest } = G.nodes[i]
     const nodes = []
-    let pos = 0
-    for (pos = 0; pos < sequence.length - blockSize; pos += blockSize) {
-      if (pos === 0) {
-        nodes.push({ ...rest, id: `${id}-start`, pos })
-      } else {
-        nodes.push({ ...rest, id: `${id}-${pos}`, pos })
-      }
+    nodes.push({ ...rest, id: `${id}-start` })
+    for (let i = blockSize; i < sequence.length - blockSize; i += blockSize) {
+      nodes.push({ ...rest, id: `${id}-${i}` })
     }
-    nodes.push({ ...rest, id: `${id}-end`, pos })
+    nodes.push({ ...rest, id: `${id}-end` })
     for (let j = 0; j < nodes.length - 1; j++) {
       const source = nodes[j].id
       const target = nodes[j + 1].id
@@ -106,13 +102,13 @@ function* generateEdges(links, graph) {
 const Graph = React.forwardRef((props, ref) => {
   const {
     graph,
-    blockSize = 500,
+    blockSize = 1000,
     contigThickness = 10,
     edgeThickness = 3,
     color = 'Rainbow',
     width = 1000,
     height = 1000,
-    steps = 2000,
+    steps = 500,
     onFeatureClick = () => {
       console.log('no feature click configured')
     },
@@ -143,7 +139,6 @@ const Graph = React.forwardRef((props, ref) => {
       .force('charge', d3.forceManyBody().strength(-100))
       .force('center', d3.forceCenter(width / 2, height / 2))
 
-    /// run a 1000 simulation node ticks
     for (let i = 0; i < steps; ++i) {
       simulation.tick()
     }
