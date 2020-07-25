@@ -196,33 +196,33 @@ const Graph = React.forwardRef((props, ref) => {
     <svg ref={ref} viewBox={[0, 0, width, height].toString()}>
       <g className="gref">
         {edges.map(p => {
-          const line = d3.line().context(null)
+          // const line = d3.line().context(null)
           const x1 = p.links[0][0]
           const y1 = p.links[0][1]
-          let x2 = p.links[1][0]
-          let y2 = p.links[1][1]
-          const dx = x2 - x1
-          const dy = y2 - y1
-          const dr = Math.sqrt(dx * dx + dy * dy)
-          // Defaults for normal edge.
-          let drx = dr
-          let dry = dr
-          let xRot = 0 // degrees
-          let largeArc = 0 // 1 or 0
-          const sweep = 0 // 1 or 0
+          const x2 = p.links[1][0]
+          const y2 = p.links[1][1]
+          // const dx = x2 - x1
+          // const dy = y2 - y1
+          // const dr = Math.sqrt(dx * dx + dy * dy)
+          // // Defaults for normal edge.
+          // let drx = dr
+          // let dry = dr
+          // let xRot = 0 // degrees
+          // let largeArc = 0 // 1 or 0
+          // const sweep = 0 // 1 or 0
 
-          let path
-          if (p.original.loop) {
-            xRot = 90
-            largeArc = 1
-            drx = -30
-            dry = -20
-            x2 = x2 + 1
-            y2 = y2 + 1
-            path = `M${x1},${y1}A${drx},${dry} ${xRot},${largeArc},${sweep} ${x2},${y2}`
-          } else {
-            path = line(p.links)
-          }
+          // let path
+          // if (p.original.loop) {
+          //   xRot = 90
+          //   largeArc = 1
+          //   drx = -30
+          //   dry = -20
+          //   x2 = x2 + 1
+          //   y2 = y2 + 1
+          //   path = `M${x1},${y1}A${drx},${dry} ${xRot},${largeArc},${sweep} ${x2},${y2}`
+          // } else {
+          //   path = line(p.links)
+          // }
           const { source: s1, target: t1 } = map[p.original.source]
           const { source: s2, target: t2 } = map[p.original.target]
           // implements this algorithm to calculate a control point
@@ -231,37 +231,36 @@ const Graph = React.forwardRef((props, ref) => {
           const dp1 = Math.sqrt((t1.y - s1.y) ** 2 + (t1.x - s1.x) ** 2)
           const dp2 = Math.sqrt((t2.y - s2.y) ** 2 + (t2.x - s2.x) ** 2)
 
-          return (
-            <>
-              {p.original.paths.map((pp, index) => {
-                const d1 = (60 + index * 50) / dp1
-                const d2 = (60 + index * 50) / dp2
-                const cx1 = (1 - d1) * s1.x + d1 * t1.x
-                const cy1 = (1 - d1) * s1.y + d1 * t1.y
-                const cx2 = (1 - d2) * s2.x + d2 * t2.x
-                const cy2 = (1 - d2) * s2.y + d2 * t2.y
-                const cpath = d3.path()
-                cpath.moveTo(x1, y1)
-                cpath.bezierCurveTo(cx1, cy1, cx2, cy2, x2, y2) //(cx1, cy1, cx2, cy2, x2, y2, 1)
-                return (
-                  <path
-                    d={cpath}
-                    strokeWidth={edgeThickness}
-                    stroke={colors[pp]}
-                    fill="none"
-                    onClick={() => onFeatureClick(p.original)}
-                  />
-                )
-              })}
-            </>
-          )
+          return p.original.paths.map((pp, index) => {
+            const d1 = (60 + index * 50) / dp1
+            const d2 = (60 + index * 50) / dp2
+            const cx1 = (1 - d1) * s1.x + d1 * t1.x
+            const cy1 = (1 - d1) * s1.y + d1 * t1.y
+            const cx2 = (1 - d2) * s2.x + d2 * t2.x
+            const cy2 = (1 - d2) * s2.y + d2 * t2.y
+            const cpath = d3.path()
+            cpath.moveTo(x1, y1)
+            cpath.bezierCurveTo(cx1, cy1, cx2, cy2, x2, y2) //(cx1, cy1, cx2, cy2, x2, y2, 1)
+            return (
+              <path
+                key={cpath.toString()}
+                d={cpath}
+                strokeWidth={edgeThickness}
+                stroke={colors[pp]}
+                fill="none"
+                onClick={() => onFeatureClick(p.original)}
+              />
+            )
+          })
         })}
 
         {paths.map((p, i) => {
           const line = d3.line().context(null)
+          const path = line(p.links)
           return (
             <path
-              d={line(p.links)}
+              key={path.toString()}
+              d={path}
               title={p.id}
               strokeWidth={contigThickness}
               stroke={
@@ -280,36 +279,4 @@ const Graph = React.forwardRef((props, ref) => {
     </svg>
   )
 })
-
-// // <path
-//                 key={path.toString()}
-//                 d={path}
-//                 strokeWidth={score * edgeThickness}
-//                 stroke={d3.interpolateGreys(score / maxScore)}
-//                 fill="none"
-//                 onClick={() => onFeatureClick(p.original)}
-//               />
-//
-//
-//
-//const cx1 = ((x1 + x2) * 1) / 4
-//const cy1 = ((y1 + y2) * 1) / 4
-//const cx2 = ((x1 + x2) * 3) / 4
-//const cy2 = ((y1 + y2) * 3) / 4
-////const yp = (y1 + y2) / 2
-//const cpath = d3.path()
-//cpath.moveTo(x1, y1)
-//const c1 = 20
-//if (x1 < x2 && y1 < y2) {
-//}
-//
-//
-//
-//
-//debugging
-//<line x1={s1.x} x2={t1.x} y1={s1.y} y2={t1.y} stroke="rgba(0,0,0,0.5)" />
-// <rect x={cx2} y={cy2} width={2} height={2} fill="red" />
-// <rect x={cx2} y={cy2} width={2} height={2} fill="green" />
-// <rect x={x2} y={y2} width={2} height={2} fill="blue" />
-// <rect x={x2} y={y2} width={2} height={2} fill="yellow" />
 export { Graph }
