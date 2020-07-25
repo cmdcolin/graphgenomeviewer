@@ -269,8 +269,8 @@ const Graph = React.forwardRef((props, ref) => {
           const dp2 = Math.sqrt(
             (t2.y - s2.y) * (t2.y - s2.y) + (t2.x - s2.x) * (t2.x - s2.x),
           )
-          const d1 = 100 / dp1
-          const d2 = 100 / dp2
+          const d1 = 60 / dp1
+          const d2 = 60 / dp2
           const cx1 = (1 - d1) * s1.x + d1 * t1.x
           const cy1 = (1 - d1) * s1.y + d1 * t1.y
           const cx2 = (1 - d2) * s2.x + d2 * t2.x
@@ -280,20 +280,13 @@ const Graph = React.forwardRef((props, ref) => {
           cpath.bezierCurveTo(cx1, cy1, cx2, cy2, x2, y2) //(cx1, cy1, cx2, cy2, x2, y2, 1)
 
           return (
-            <>
-              <line x1={s1.x} x2={t1.x} y1={s1.y} y2={t1.y} stroke="rgba(0,0,0,0.5)" />
-              <rect x={cx2} y={cy2} width={2} height={2} fill="red" />
-              <rect x={cx2} y={cy2} width={2} height={2} fill="green" />
-              <rect x={x2} y={y2} width={2} height={2} fill="blue" />
-              <rect x={x2} y={y2} width={2} height={2} fill="yellow" />
-              <path
-                d={cpath}
-                strokeWidth={2}
-                stroke="rgba(255,0,255,0.5)"
-                fill="none"
-                onClick={() => onFeatureClick(p.original)}
-              />
-            </>
+            <path
+              d={cpath}
+              strokeWidth={2}
+              stroke="rgba(255,0,255,0.5)"
+              fill="none"
+              onClick={() => onFeatureClick(p.original)}
+            />
           )
         })}
 
@@ -338,4 +331,14 @@ const Graph = React.forwardRef((props, ref) => {
 //const c1 = 20
 //if (x1 < x2 && y1 < y2) {
 //}
+//
+//
+//
+//
+//debugging
+//<line x1={s1.x} x2={t1.x} y1={s1.y} y2={t1.y} stroke="rgba(0,0,0,0.5)" />
+// <rect x={cx2} y={cy2} width={2} height={2} fill="red" />
+// <rect x={cx2} y={cy2} width={2} height={2} fill="green" />
+// <rect x={x2} y={y2} width={2} height={2} fill="blue" />
+// <rect x={x2} y={y2} width={2} height={2} fill="yellow" />
 export { Graph }
