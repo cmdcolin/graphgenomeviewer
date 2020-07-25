@@ -6,7 +6,6 @@ import { serialize } from './util'
 
 export function GraphContainer(props) {
   const [color, setColor] = useState('Rainbow')
-  const [path, setPath] = useState('Edge')
   const ref = useRef()
   return (
     <div>
@@ -23,19 +22,9 @@ export function GraphContainer(props) {
           <option>Viridis</option>
           <option>RdYlBu</option>
         </Form.Control>
-        <Form.Control
-          value={path}
-          onChange={event => setPath(event.target.value)}
-          as="select"
-        >
-          <option>Edge</option>
-          <option>Node</option>
-          <option>Edge+node</option>
-          <option>None</option>
-        </Form.Control>
         <Button onClick={() => saveAs(serialize(ref.current))}>Export SVG</Button>
       </Form.Group>
-      <Graph ref={ref} {...props} color={color} path={path} />
+      <Graph ref={ref} {...props} color={color} />
     </div>
   )
 }

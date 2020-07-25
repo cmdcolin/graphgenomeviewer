@@ -51,42 +51,13 @@ function reprocessGraph(G, blockSize) {
 
     // enumerates cases for which end of source connects to
     // which end of the target
-    if (strand1 === '+' && strand2 === '+') {
-      Gp.links.push({
-        source: `${source}-end`,
-        target: `${target}-start`,
-        loop,
-        paths,
-        ...rest,
-      })
-    } else if (strand1 === '-' && strand2 === '+') {
-      Gp.links.push({
-        source: `${source}-start`,
-        target: `${target}-start`,
-        loop,
-        paths,
-        ...rest,
-      })
-    } else if (strand1 === '-' && strand2 === '-') {
-      Gp.links.push({
-        source: `${source}-start`,
-        target: `${target}-end`,
-        loop,
-        paths,
-        ...rest,
-      })
-    } else if (strand1 === '+' && strand2 === '-') {
-      Gp.links.push({
-        source: `${source}-end`,
-        target: `${target}-end`,
-        loop,
-        paths,
-        ...rest,
-      })
-    }
-    // else {
-    //   Gp.links.push({ source: `${source}-start`, target: `${target}-end`, loop, ...rest })
-    // }
+    Gp.links.push({
+      source: `${source}-${strand1 === '+' ? 'end' : 'start'}`,
+      target: `${target}-${strand2 === '+' ? 'start' : 'end'}`,
+      loop,
+      paths,
+      ...rest,
+    })
   }
   return Gp
 }
@@ -128,7 +99,7 @@ function* generateEdges(links, graph) {
 
 const Graph = React.forwardRef((props, ref) => {
   const {
-    graph, // {nodes:[{id}], links:[{source,target}]
+    graph,
     path = 'Edge',
     blockSize = 1000,
     contigThickness = 10,
@@ -144,7 +115,13 @@ const Graph = React.forwardRef((props, ref) => {
   const data = useMemo(() => {
     return reprocessGraph(graph, blockSize)
   }, [blockSize, graph])
-
+  const colors = useMemo(() => {
+    const colors = {}
+    ;(graph.paths || []).forEach((p, i) => {
+      colors[p.name] = d3.schemeCategory10[i]
+    })
+    return colors
+  }, [graph.paths])
   const links = useMemo(() => {
     const links = data.links.map(d => Object.create(d))
     const nodes = data.nodes.map(d => Object.create(d))
@@ -192,10 +169,6 @@ const Graph = React.forwardRef((props, ref) => {
 
   const paths = [...generatePaths(links, data.links)]
   const edges = [...generateEdges(links, data.links)]
-  const colors = {}
-  ;(graph.paths || []).forEach(p => {
-    colors[p.name] = d3.interpolateTurbo(Math.random())
-  })
 
   const map = {}
   paths.forEach(path => {
@@ -252,21 +225,17 @@ const Graph = React.forwardRef((props, ref) => {
           }
           const { source: s1, target: t1 } = map[p.original.source]
           const { source: s2, target: t2 } = map[p.original.target]
-          // implements https://math.stackexchange.com/questions/175896/finding-a-point-along-a-line-a-certain-distance-away-from-another-point/175906
-          const m1 = (t1.y - s1.y) / (t1.x - s1.x)
-          const m2 = (t2.y - s2.y) / (t2.x - s2.x)
-          const dp1 = Math.sqrt(
-            (t1.y - s1.y) * (t1.y - s1.y) + (t1.x - s1.x) * (t1.x - s1.x),
-          )
-          const dp2 = Math.sqrt(
-            (t2.y - s2.y) * (t2.y - s2.y) + (t2.x - s2.x) * (t2.x - s2.x),
-          )
+          // implements this algorithm to calculate a control point
+          // that points "forwards" of a given contig node
+          // https://math.stackexchange.com/questions/175896/finding-a-point-along-a-line-a-certain-distance-away-from-another-point/175906
+          const dp1 = Math.sqrt((t1.y - s1.y) ** 2 + (t1.x - s1.x) ** 2)
+          const dp2 = Math.sqrt((t2.y - s2.y) ** 2 + (t2.x - s2.x) ** 2)
 
           return (
             <>
-              {p.original.paths.map(pp => {
-                const d1 = (60 + Math.random() * 50) / dp1
-                const d2 = (60 + Math.random() * 50) / dp2
+              {p.original.paths.map((pp, index) => {
+                const d1 = (60 + index * 50) / dp1
+                const d2 = (60 + index * 50) / dp2
                 const cx1 = (1 - d1) * s1.x + d1 * t1.x
                 const cy1 = (1 - d1) * s1.y + d1 * t1.y
                 const cx2 = (1 - d2) * s2.x + d2 * t2.x
@@ -277,7 +246,7 @@ const Graph = React.forwardRef((props, ref) => {
                 return (
                   <path
                     d={cpath}
-                    strokeWidth={2}
+                    strokeWidth={edgeThickness}
                     stroke={colors[pp]}
                     fill="none"
                     onClick={() => onFeatureClick(p.original)}
