@@ -18,7 +18,9 @@ export function FeatureDialog({ show, data, onHide }) {
               style={{ display: 'flex', maxHeight: 150, margin: 3 }}
             >
               <div style={{ backgroundColor: '#dda', minWidth: 100 }}>{key}</div>
-              <div style={{ wordBreak: 'break-word', overflow: 'auto' }}>{value}</div>
+              <div style={{ wordBreak: 'break-word', overflow: 'auto' }}>
+                {String(value)}
+              </div>
             </div>
           ))}
         <hr />
@@ -31,7 +33,9 @@ export function FeatureDialog({ show, data, onHide }) {
                 style={{ display: 'flex', maxHeight: 150, margin: 3 }}
               >
                 <div style={{ backgroundColor: '#dda', minWidth: 100 }}>{key}</div>
-                <div style={{ wordBreak: 'break-word', overflow: 'auto' }}>{value}</div>
+                <div style={{ wordBreak: 'break-word', overflow: 'auto' }}>
+                  {String(value)}
+                </div>
               </div>
             ))}
           </>

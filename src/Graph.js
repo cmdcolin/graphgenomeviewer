@@ -235,7 +235,7 @@ const Graph = React.forwardRef((props, ref) => {
               strokeWidth={edgeThickness}
               stroke="black"
               fill="none"
-              onClick={() => onFeatureClick(p)}
+              onClick={() => onFeatureClick(p.original)}
             ></path>
           )
         })}
