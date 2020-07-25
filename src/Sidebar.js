@@ -1,18 +1,16 @@
-import React, { useState, useRef } from 'react'
+import React from 'react'
 import { Form, Button } from 'react-bootstrap'
-import { Graph } from './Graph'
-import { saveAs } from 'file-saver'
 import { serialize } from './util'
+import saveAs from 'file-saver'
 
-export function GraphContainer(props) {
-  const [color, setColor] = useState('Rainbow')
-  const ref = useRef()
+export function Sidebar({ onColorChange, ref, color }) {
   return (
     <div>
+      <p>Settings</p>
       <Form.Group>
         <Form.Control
           value={color}
-          onChange={event => setColor(event.target.value)}
+          onChange={event => onColorChange(event.target.value)}
           as="select"
         >
           <option>JustGrey</option>
@@ -22,9 +20,9 @@ export function GraphContainer(props) {
           <option>Viridis</option>
           <option>RdYlBu</option>
         </Form.Control>
+        <br />
         <Button onClick={() => saveAs(serialize(ref.current))}>Export SVG</Button>
       </Form.Group>
-      <Graph ref={ref} {...props} color={color} />
     </div>
   )
 }

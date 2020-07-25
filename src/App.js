@@ -1,19 +1,21 @@
-import React, { useEffect, useState } from 'react'
-import { OpenDialog } from './OpenDialog'
+import React, { useEffect, useRef, useState } from 'react'
 import { FeatureDialog } from './FeatureDialog'
-import { GraphContainer } from './GraphContainer'
+import { Graph } from './Graph'
+import { Sidebar } from './Sidebar'
 import { Header } from './Header'
 import { parseGFA } from './util'
+import { Form } from 'react-bootstrap'
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './App.css'
 
 function App() {
-  const [show, setShow] = useState(false)
   const [featureData, setFeatureData] = useState()
   const [dataset, setDataset] = useState('MT.gfa')
   const [graph, setGraph] = useState()
   const [error, setError] = useState()
+  const [color, setColor] = useState('Rainbow')
+  const ref = useRef()
   useEffect(() => {
     ;(async () => {
       try {
@@ -23,7 +25,6 @@ function App() {
         }
         const text = await result.text()
         const d = parseGFA(text)
-        console.log(text, d)
         setGraph(d)
         setError(undefined)
       } catch (e) {
@@ -36,14 +37,10 @@ function App() {
   return (
     <div>
       <Header
-        onOpen={() => {
-          setShow(true)
-        }}
         onData={d => {
           setDataset(d)
         }}
       />
-      <OpenDialog show={show} onHide={() => setShow(false)} />
       {featureData ? (
         <FeatureDialog
           data={featureData}
@@ -57,17 +54,21 @@ function App() {
       ) : null}
       <div className="flexcontainer">
         <div id="sidebar" className="sidebar">
+          <Sidebar ref={ref} onColorChange={c => setColor(c)} />
+        </div>
+        <div className="body">
           {error ? <div style={{ color: 'red' }}>{error}</div> : null}
           {graph ? (
-            <GraphContainer
+            <Graph
               graph={graph}
+              ref={ref}
+              color={color}
               onFeatureClick={data => {
                 setFeatureData(data)
               }}
             />
           ) : null}
         </div>
-        <div className="body" />
       </div>
     </div>
   )
