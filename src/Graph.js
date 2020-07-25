@@ -171,14 +171,7 @@ const Graph = React.forwardRef((props, ref) => {
   const paths = [...generatePaths(links, data.links)]
   const edges = [...generateEdges(links, data.links)]
   return (
-    <svg
-      ref={ref}
-      viewBox={[0, 0, width, height].toString()}
-      onWheel={event => {
-        const { deltaY } = event
-        console.log(d3.event)
-      }}
-    >
+    <svg ref={ref} viewBox={[0, 0, width, height].toString()}>
       <g className="gref">
         {paths.map((p, i) => {
           const line = d3.line().context(null)
@@ -190,7 +183,9 @@ const Graph = React.forwardRef((props, ref) => {
               stroke={d3.hsl(d3[`interpolate${color}`](i / paths.length)).darker()}
               fill="none"
               onClick={() => onFeatureClick(p)}
-            />
+            >
+              <title>{p.id}</title>
+            </path>
           )
         })}
         {edges.map(p => {
@@ -202,7 +197,7 @@ const Graph = React.forwardRef((props, ref) => {
               stroke="black"
               fill="none"
               onClick={() => onFeatureClick(p)}
-            />
+            ></path>
           )
         })}
       </g>
