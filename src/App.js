@@ -64,9 +64,7 @@ export function GraphContainer(props) {
           <option>Viridis</option>
           <option>RdYlBu</option>
         </Form.Control>
-        <Button onClick={() => saveAs(serialize(ref.current.children[0]))}>
-          Export SVG
-        </Button>
+        <Button onClick={() => saveAs(serialize(ref.current))}>Export SVG</Button>
       </Form.Group>
       <Graph ref={ref} {...props} color={value} />
     </div>
