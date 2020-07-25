@@ -11,7 +11,7 @@ import './App.css'
 function App() {
   const [show, setShow] = useState(false)
   const [featureData, setFeatureData] = useState()
-  const [dataset, setDataset] = useState('toy_pangenome.gfa')
+  const [dataset, setDataset] = useState('MT.gfa')
   const [graph, setGraph] = useState()
   const [error, setError] = useState()
   useEffect(() => {
