@@ -1,5 +1,6 @@
+// simple handcoded GFA parser
 export function parseGFA(file) {
-  const graph = { nodes: [], links: [] }
+  const graph = { nodes: [], links: [], paths: [] }
   for (const line of file.split('\n')) {
     if (line.startsWith('S')) {
       const [, name, sequence, ...rest] = line.split('\t')
@@ -25,6 +26,10 @@ export function parseGFA(file) {
         }
       }
       graph.links.push({ source, target, strand1, strand2, cigar, tags })
+    } else if (line.startsWith('P')) {
+      const [, name, path, ...rest] = line.split('\t')
+
+      graph.paths.push({ name, path, rest })
     }
   }
   return graph
