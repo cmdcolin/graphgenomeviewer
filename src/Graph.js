@@ -29,6 +29,7 @@ function reprocessGraph(G, blockSize) {
   }
   for (let i = 0; i < G.links.length; i++) {
     const { strand1, strand2, source, target, ...rest } = G.links[i]
+    const loop = source === target
 
     // enumerates cases for which end of source connects to
     // which end of the target
@@ -36,29 +37,32 @@ function reprocessGraph(G, blockSize) {
       Gp.links.push({
         source: `${source}-end`,
         target: `${target}-start`,
+        loop,
         ...rest,
       })
-    }
-    if (strand1 === '-' && strand2 === '+') {
+    } else if (strand1 === '-' && strand2 === '+') {
       Gp.links.push({
         source: `${source}-start`,
         target: `${target}-start`,
+        loop,
         ...rest,
       })
-    }
-    if (strand1 === '-' && strand2 === '-') {
+    } else if (strand1 === '-' && strand2 === '-') {
       Gp.links.push({
         source: `${source}-start`,
         target: `${target}-end`,
+        loop,
         ...rest,
       })
-    }
-    if (strand1 === '+' && strand2 === '-') {
+    } else if (strand1 === '+' && strand2 === '-') {
       Gp.links.push({
         source: `${source}-end`,
         target: `${target}-end`,
+        loop,
         ...rest,
       })
+    } else {
+      Gp.links.push({ source: `${source}-start`, target: `${target}-end`, loop, ...rest })
     }
   }
   return Gp
@@ -142,7 +146,6 @@ const Graph = React.forwardRef((props, ref) => {
     for (let i = 0; i < steps; ++i) {
       simulation.tick()
     }
-    console.log('here', data, links)
     return links
   }, [data, height, steps, width])
 
@@ -185,9 +188,50 @@ const Graph = React.forwardRef((props, ref) => {
         })}
         {edges.map(p => {
           const line = d3.line().context(null)
+          const x1 = p.links[0][0]
+          const y1 = p.links[0][1]
+          let x2 = p.links[1][0]
+          let y2 = p.links[1][1]
+          const dx = x2 - x1
+          const dy = y2 - y1
+          const dr = Math.sqrt(dx * dx + dy * dy)
+          // Defaults for normal edge.
+          let drx = dr
+          let dry = dr
+          let xRot = 0 // degrees
+          let largeArc = 0 // 1 or 0
+          const sweep = 0 // 1 or 0
+
+          let path
+          // Self edge.
+          if (p.original.loop) {
+            // Fiddle with this angle to get loop oriented.
+            xRot = 90
+
+            // Needs to be 1.
+            largeArc = 1
+
+            // Change sweep to change orientation of loop.
+            //sweep = 0;
+
+            // Make drx and dry different to get an ellipse
+            // instead of a circle.
+            drx = -30
+            dry = -20
+
+            // For whatever reason the arc collapses to a point if the beginning
+            // and ending points of the arc are the same, so kludge it.
+            x2 = x2 + 1
+            y2 = y2 + 1
+            path = `M${x1},${y1}A${drx},${dry} ${xRot},${largeArc},${sweep} ${x2},${y2}`
+          } else {
+            path = line(p.links)
+          }
+
           return (
             <path
-              d={line(p.links)}
+              key={path.toString()}
+              d={path}
               strokeWidth={edgeThickness}
               stroke="black"
               fill="none"
