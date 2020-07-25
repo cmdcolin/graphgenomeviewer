@@ -108,8 +108,8 @@ const Graph = React.forwardRef((props, ref) => {
     contigThickness = 10,
     edgeThickness = 2,
     color = 'Rainbow',
-    width = 500,
-    height = 500,
+    width = 2000,
+    height = 1000,
     steps = 500,
     onFeatureClick = () => {
       console.log('no feature click configured')
