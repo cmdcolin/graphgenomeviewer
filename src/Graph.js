@@ -70,7 +70,7 @@ function* generatePaths(links, graph) {
     const link = links[i]
     if (currentLinkId !== link.linkNum) {
       if (original.id) {
-        yield { links: currentLinkSet, ...original }
+        yield { links: currentLinkSet, original }
       }
       currentLinkSet = []
       currentLinkId = link.linkNum
@@ -172,23 +172,24 @@ const Graph = React.forwardRef((props, ref) => {
 
   const map = {}
   paths.forEach(path => {
-    if (path.source.endsWith('start')) {
-      map[path.source] = {
-        source: links[path.linkNum].target,
-        target: links[path.linkNum].source,
+    const { source, target, linkNum } = path.original
+    if (source.endsWith('start')) {
+      map[source] = {
+        source: links[linkNum].target,
+        target: links[linkNum].source,
       }
-      map[path.target] = {
-        target: links[path.linkNum].target,
-        source: links[path.linkNum].source,
+      map[target] = {
+        target: links[linkNum].target,
+        source: links[linkNum].source,
       }
     } else {
-      map[path.source] = {
-        source: links[path.linkNum].source,
-        target: links[path.linkNum].target,
+      map[source] = {
+        source: links[linkNum].source,
+        target: links[linkNum].target,
       }
-      map[path.target] = {
-        target: links[path.linkNum].source,
-        source: links[path.linkNum].target,
+      map[target] = {
+        target: links[linkNum].source,
+        source: links[linkNum].target,
       }
     }
   })
@@ -269,7 +270,7 @@ const Graph = React.forwardRef((props, ref) => {
                   : d3.hsl(d3[`interpolate${color}`](i / paths.length)).darker()
               }
               fill="none"
-              onClick={() => onFeatureClick(p)}
+              onClick={() => onFeatureClick(p.original)}
             >
               <title>{p.id}</title>
             </path>

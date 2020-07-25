@@ -19,7 +19,6 @@ export function Header({ onOpen, onData }) {
               Paths example
             </NavDropdown.Item>
           </NavDropdown>
-          <Nav.Link href="#link">About</Nav.Link>
         </Nav>
       </Navbar.Collapse>
     </Navbar>
