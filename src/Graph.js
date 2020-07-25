@@ -14,9 +14,9 @@ function reprocessGraph(G, blockSize) {
     for (let j = 0; j < pathNodes.length - 1; j++) {
       const curr = `${pathNodes[j]}_${pathNodes[j + 1]}`
       if (!seen[curr]) {
-        seen[curr] = 1
+        seen[curr] = [path.name]
       } else {
-        seen[curr]++
+        seen[curr].push(path.name)
       }
     }
   }
@@ -46,8 +46,7 @@ function reprocessGraph(G, blockSize) {
   }
   for (let i = 0; i < G.links.length; i++) {
     const { strand1, strand2, source, target, ...rest } = G.links[i]
-    const score = seen[`${source}${strand1}_${target}${strand2}`] || 0
-    console.log({ score })
+    const paths = seen[`${source}${strand1}_${target}${strand2}`] || []
     const loop = source === target
 
     // enumerates cases for which end of source connects to
@@ -57,7 +56,7 @@ function reprocessGraph(G, blockSize) {
         source: `${source}-end`,
         target: `${target}-start`,
         loop,
-        score,
+        paths,
         ...rest,
       })
     } else if (strand1 === '-' && strand2 === '+') {
@@ -65,7 +64,7 @@ function reprocessGraph(G, blockSize) {
         source: `${source}-start`,
         target: `${target}-start`,
         loop,
-        score,
+        paths,
         ...rest,
       })
     } else if (strand1 === '-' && strand2 === '-') {
@@ -73,7 +72,7 @@ function reprocessGraph(G, blockSize) {
         source: `${source}-start`,
         target: `${target}-end`,
         loop,
-        score,
+        paths,
         ...rest,
       })
     } else if (strand1 === '+' && strand2 === '-') {
@@ -81,7 +80,7 @@ function reprocessGraph(G, blockSize) {
         source: `${source}-end`,
         target: `${target}-end`,
         loop,
-        score,
+        paths,
         ...rest,
       })
     }
@@ -196,24 +195,27 @@ const Graph = React.forwardRef((props, ref) => {
   const maxScore = edges.reduce((a, b) => {
     return Math.max(b.original.score, a)
   }, 0)
+  const colors = {}
+  graph.paths.forEach(p => {
+    colors[p.name] = d3.interpolateTurbo(Math.random())
+  })
+  console.log({ paths, links })
+
+  const map = {}
+  paths.forEach(path => {
+    console.log(path.source)
+    map[path.source] = {
+      source: links[path.linkNum].target,
+      target: links[path.linkNum].source,
+    }
+    map[path.target] = {
+      target: links[path.linkNum].target,
+      source: links[path.linkNum].source,
+    }
+  })
   return (
     <svg ref={ref} viewBox={[0, 0, width, height].toString()}>
       <g className="gref">
-        {paths.map((p, i) => {
-          const line = d3.line().context(null)
-          return (
-            <path
-              d={line(p.links)}
-              title={p.id}
-              strokeWidth={contigThickness}
-              stroke={d3.hsl(d3[`interpolate${color}`](i / paths.length)).darker()}
-              fill="none"
-              onClick={() => onFeatureClick(p)}
-            >
-              <title>{p.id}</title>
-            </path>
-          )
-        })}
         {edges.map(p => {
           const line = d3.line().context(null)
           const x1 = p.links[0][0]
@@ -231,39 +233,60 @@ const Graph = React.forwardRef((props, ref) => {
           const sweep = 0 // 1 or 0
 
           let path
-          // Self edge.
           if (p.original.loop) {
-            // Fiddle with this angle to get loop oriented.
             xRot = 90
-
-            // Needs to be 1.
             largeArc = 1
-
-            // Change sweep to change orientation of loop.
-            //sweep = 0;
-
-            // Make drx and dry different to get an ellipse
-            // instead of a circle.
             drx = -30
             dry = -20
-
-            // For whatever reason the arc collapses to a point if the beginning
-            // and ending points of the arc are the same, so kludge it.
             x2 = x2 + 1
             y2 = y2 + 1
             path = `M${x1},${y1}A${drx},${dry} ${xRot},${largeArc},${sweep} ${x2},${y2}`
           } else {
             path = line(p.links)
           }
+          const { source: s1, target: t1 } = map[p.original.source]
+          console.log(p.original.target)
+          const { source: s2, target: t2 } = map[p.original.target]
+          // implements https://math.stackexchange.com/questions/175896/finding-a-point-along-a-line-a-certain-distance-away-from-another-point/175906
+          const m1 = (t1.y - s1.y) / (t1.x - s1.x)
+          const m2 = (t2.y - s2.y) / (t2.x - s2.x)
+          console.log(m1, m2)
+          const dp1 = Math.sqrt(
+            (t1.y - s1.y) * (t1.y - s1.y) + (t1.x - s1.x) * (t1.x - s1.x),
+          )
+          const dp2 = Math.sqrt(
+            (t2.y - s2.y) * (t2.y - s2.y) + (t2.x - s2.x) * (t2.x - s2.x),
+          )
+          const d1 = 10 / dp1
+          const d2 = 10 / dp2
+          const cx1 = (1 - d1) * s1.x + d1 * t1.x
+          const cy1 = (1 - d1) * s1.y + d1 * t1.y
+          const cx2 = (1 - d2) * s2.x + d2 * t2.x
+          const cy2 = (1 - d2) * s2.y + d2 * t2.y
+          console.log(cx1, cy1)
+
+          const cpath = d3.path()
+          cpath.moveTo(x1, y1)
+          cpath.bezierCurveTo(cx1, cy1, cx2, cy2, x2, y2) //(cx1, cy1, cx2, cy2, x2, y2, 1)
+          console.log({ s1, t1 })
+
           return (
-            <path
-              key={path.toString()}
-              d={path}
-              strokeWidth={p.original.score * edgeThickness}
-              stroke={d3.interpolateGreys(p.original.score / maxScore)}
-              fill="none"
-              onClick={() => onFeatureClick(p.original)}
-            />
+            <>
+              <line x1={s1.x} x2={t1.x} y1={s1.y} y2={t1.y} stroke="black" />
+              <rect x={cx1} y={cy1} width={1} height={1} fill="red" />
+              <rect x={cx2} y={cy2} width={1} height={1} fill="green" />
+              {p.original.paths.map((graphPath, i) => {
+                return (
+                  <path
+                    d={cpath}
+                    strokeWidth={2}
+                    stroke={colors[graphPath]}
+                    fill="none"
+                    onClick={() => onFeatureClick(p.original)}
+                  />
+                )
+              })}
+            </>
           )
         })}
       </g>
@@ -271,4 +294,40 @@ const Graph = React.forwardRef((props, ref) => {
   )
 })
 
+// {paths.map((p, i) => {
+//           const line = d3.line().context(null)
+//           return (
+//             <path
+//               d={line(p.links)}
+//               title={p.id}
+//               strokeWidth={contigThickness}
+//               stroke={d3.hsl(d3[`interpolate${color}`](i / paths.length)).darker()}
+//               fill="none"
+//               onClick={() => onFeatureClick(p)}
+//             >
+//               <title>{p.id}</title>
+//             </path>
+//           )
+//         })}
+// // <path
+//                 key={path.toString()}
+//                 d={path}
+//                 strokeWidth={score * edgeThickness}
+//                 stroke={d3.interpolateGreys(score / maxScore)}
+//                 fill="none"
+//                 onClick={() => onFeatureClick(p.original)}
+//               />
+//
+//
+//
+//const cx1 = ((x1 + x2) * 1) / 4
+//const cy1 = ((y1 + y2) * 1) / 4
+//const cx2 = ((x1 + x2) * 3) / 4
+//const cy2 = ((y1 + y2) * 3) / 4
+////const yp = (y1 + y2) / 2
+//const cpath = d3.path()
+//cpath.moveTo(x1, y1)
+//const c1 = 20
+//if (x1 < x2 && y1 < y2) {
+//}
 export { Graph }
