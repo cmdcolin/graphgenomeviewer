@@ -75,7 +75,9 @@ function* generatePaths(links, graph) {
   for (let i = 0; i < links.length; i++) {
     const link = links[i]
     if (currentLinkId !== link.linkNum) {
-      yield { links: currentLinkSet, id: original.id, sequence: original.sequence }
+      if (original.id) {
+        yield { links: currentLinkSet, id: original.id, sequence: original.sequence }
+      }
       currentLinkSet = []
       currentLinkId = link.linkNum
     }
@@ -83,7 +85,7 @@ function* generatePaths(links, graph) {
     currentLinkSet.push([link.source.x, link.source.y])
     currentLinkSet.push([link.target.x, link.target.y])
   }
-  yield { links: currentLinkSet, id: original.id, sequence: original.sequence }
+  //yield { links: currentLinkSet, id: original.id, sequence: original.sequence }
 }
 
 function* generateEdges(links, graph) {
@@ -119,7 +121,6 @@ const Graph = React.forwardRef((props, ref) => {
   const data = useMemo(() => {
     return reprocessGraph(graph, blockSize)
   }, [blockSize, graph])
-  const total = graph.nodes.length
 
   const links = useMemo(() => {
     const links = data.links.map(d => Object.create(d))
@@ -151,35 +152,61 @@ const Graph = React.forwardRef((props, ref) => {
     return links
   }, [data, height, steps, width])
 
+  useEffect(() => {
+    // zoom logic, similar to https://observablehq.com/@d3/zoom
+    function zoomed() {
+      d3.select('.gref').attr('transform', d3.event.transform)
+    }
+    d3.select('svg').call(
+      d3
+        .zoom()
+        .extent([
+          [0, 0],
+          [width, height],
+        ])
+        .scaleExtent([0.1, 8])
+        .on('zoom', zoomed),
+    )
+  }, [height, ref, width])
+
   const paths = [...generatePaths(links, data.links)]
   const edges = [...generateEdges(links, data.links)]
   return (
-    <svg ref={ref} viewBox={[0, 0, width, height].toString()}>
-      {paths.map((p, i) => {
-        const line = d3.line().context(null)
-        return p.id ? (
-          <path
-            d={line(p.links)}
-            title={p.id}
-            strokeWidth={contigThickness}
-            stroke={d3.hsl(d3[`interpolate${color}`](i / paths.length)).darker()}
-            fill="none"
-            onClick={() => onFeatureClick(p)}
-          />
-        ) : null
-      })}
-      {edges.map(p => {
-        const line = d3.line().context(null)
-        return (
-          <path
-            d={line(p.links)}
-            strokeWidth={edgeThickness}
-            stroke="black"
-            fill="none"
-            onClick={() => onFeatureClick(p)}
-          />
-        )
-      })}
+    <svg
+      ref={ref}
+      viewBox={[0, 0, width, height].toString()}
+      onWheel={event => {
+        const { deltaY } = event
+        console.log(d3.event)
+      }}
+    >
+      <g className="gref">
+        {paths.map((p, i) => {
+          const line = d3.line().context(null)
+          return (
+            <path
+              d={line(p.links)}
+              title={p.id}
+              strokeWidth={contigThickness}
+              stroke={d3.hsl(d3[`interpolate${color}`](i / paths.length)).darker()}
+              fill="none"
+              onClick={() => onFeatureClick(p)}
+            />
+          )
+        })}
+        {edges.map(p => {
+          const line = d3.line().context(null)
+          return (
+            <path
+              d={line(p.links)}
+              strokeWidth={edgeThickness}
+              stroke="black"
+              fill="none"
+              onClick={() => onFeatureClick(p)}
+            />
+          )
+        })}
+      </g>
     </svg>
   )
 })
