@@ -2,7 +2,7 @@ import React from 'react'
 import { Form, Button } from 'react-bootstrap'
 import { serialize } from './util'
 import saveAs from 'file-saver'
-const Sidebar = React.forwardRef(({ onColorChange, color }, ref) => {
+const Sidebar = React.forwardRef(({ onColorChange, onPathDraw, color }, ref) => {
   return (
     <div>
       <p>Settings</p>
@@ -21,6 +21,13 @@ const Sidebar = React.forwardRef(({ onColorChange, color }, ref) => {
         </Form.Control>
         <br />
         <Button onClick={() => saveAs(serialize(ref.current))}>Export SVG</Button>
+        <Form.Group
+          onChange={event => {
+            onPathDraw(event.target.checked)
+          }}
+        >
+          <Form.Check type="checkbox" label="Draw paths" />
+        </Form.Group>
       </Form.Group>
     </div>
   )

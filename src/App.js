@@ -15,6 +15,7 @@ function App() {
   const [graph, setGraph] = useState()
   const [error, setError] = useState()
   const [color, setColor] = useState('Rainbow')
+  const [pathDraw, setPathDraw] = useState(false)
   const ref = useRef()
   useEffect(() => {
     ;(async () => {
@@ -33,7 +34,6 @@ function App() {
       }
     })()
   }, [dataset])
-  console.log(graph)
   return (
     <div>
       <Header
@@ -54,7 +54,12 @@ function App() {
       ) : null}
       <div className="flexcontainer">
         <div id="sidebar" className="sidebar">
-          <Sidebar ref={ref} onColorChange={c => setColor(c)} />
+          <Sidebar
+            ref={ref}
+            color={color}
+            onColorChange={c => setColor(c)}
+            onPathDraw={d => setPathDraw(d)}
+          />
         </div>
         <div className="body">
           {error ? <div style={{ color: 'red' }}>{error}</div> : null}
@@ -63,6 +68,7 @@ function App() {
               graph={graph}
               ref={ref}
               color={color}
+              drawPaths={pathDraw}
               onFeatureClick={data => {
                 setFeatureData(data)
               }}

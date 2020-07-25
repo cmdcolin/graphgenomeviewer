@@ -196,6 +196,10 @@ const Graph = React.forwardRef((props, ref) => {
       }
     }
   })
+
+  if (drawPaths && !edges[0].original.paths) {
+    return <h1>no paths found</h1>
+  }
   return (
     <svg ref={ref} viewBox={[0, 0, width, height].toString()}>
       <g ref={gref}>
