@@ -8,7 +8,7 @@ function reprocessGraph(G, blockSize) {
   const Gp = { nodes: [], links: [] }
 
   const seen = {}
-  for (let i = 0; i < G.paths.length; i++) {
+  for (let i = 0; i < (G.paths || {}).length; i++) {
     const path = G.paths[i]
     const pathNodes = path.path.split(',')
     for (let j = 0; j < pathNodes.length - 1; j++) {
@@ -196,7 +196,7 @@ const Graph = React.forwardRef((props, ref) => {
     return Math.max(b.original.score, a)
   }, 0)
   const colors = {}
-  graph.paths.forEach(p => {
+  ;(graph.paths || []).forEach(p => {
     colors[p.name] = d3.interpolateTurbo(Math.random())
   })
   console.log({ paths, links })
@@ -257,36 +257,41 @@ const Graph = React.forwardRef((props, ref) => {
             path = line(p.links)
           }
           const { source: s1, target: t1 } = map[p.original.source]
-          console.log(p.original.target)
           const { source: s2, target: t2 } = map[p.original.target]
           // implements https://math.stackexchange.com/questions/175896/finding-a-point-along-a-line-a-certain-distance-away-from-another-point/175906
           const m1 = (t1.y - s1.y) / (t1.x - s1.x)
           const m2 = (t2.y - s2.y) / (t2.x - s2.x)
-          console.log(m1, m2)
           const dp1 = Math.sqrt(
             (t1.y - s1.y) * (t1.y - s1.y) + (t1.x - s1.x) * (t1.x - s1.x),
           )
           const dp2 = Math.sqrt(
             (t2.y - s2.y) * (t2.y - s2.y) + (t2.x - s2.x) * (t2.x - s2.x),
           )
-          const d1 = 60 / dp1
-          const d2 = 60 / dp2
-          const cx1 = (1 - d1) * s1.x + d1 * t1.x
-          const cy1 = (1 - d1) * s1.y + d1 * t1.y
-          const cx2 = (1 - d2) * s2.x + d2 * t2.x
-          const cy2 = (1 - d2) * s2.y + d2 * t2.y
-          const cpath = d3.path()
-          cpath.moveTo(x1, y1)
-          cpath.bezierCurveTo(cx1, cy1, cx2, cy2, x2, y2) //(cx1, cy1, cx2, cy2, x2, y2, 1)
 
           return (
-            <path
-              d={cpath}
-              strokeWidth={2}
-              stroke="rgba(255,0,255,0.5)"
-              fill="none"
-              onClick={() => onFeatureClick(p.original)}
-            />
+            <>
+              {p.original.paths.map(pp => {
+                const d1 = (60 + Math.random() * 50) / dp1
+                const d2 = (60 + Math.random() * 50) / dp2
+                const cx1 = (1 - d1) * s1.x + d1 * t1.x
+                const cy1 = (1 - d1) * s1.y + d1 * t1.y
+                const cx2 = (1 - d2) * s2.x + d2 * t2.x
+                const cy2 = (1 - d2) * s2.y + d2 * t2.y
+                const cpath = d3.path()
+                cpath.moveTo(x1, y1)
+                cpath.bezierCurveTo(cx1, cy1, cx2, cy2, x2, y2) //(cx1, cy1, cx2, cy2, x2, y2, 1)
+                console.log(colors, pp)
+                return (
+                  <path
+                    d={cpath}
+                    strokeWidth={2}
+                    stroke={colors[pp]}
+                    fill="none"
+                    onClick={() => onFeatureClick(p.original)}
+                  />
+                )
+              })}
+            </>
           )
         })}
 
