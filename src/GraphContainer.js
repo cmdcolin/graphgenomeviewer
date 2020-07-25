@@ -16,6 +16,7 @@ export function GraphContainer(props) {
           onChange={event => setColor(event.target.value)}
           as="select"
         >
+          <option>JustGrey</option>
           <option>Turbo</option>
           <option>Rainbow</option>
           <option>Spectral</option>

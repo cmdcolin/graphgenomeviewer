@@ -1,32 +1,14 @@
-import React, { useCallback, useEffect, useState, useRef } from 'react'
+import React, { useCallback, useState } from 'react'
 import { OpenDialog } from './OpenDialog'
 import { FeatureDialog } from './FeatureDialog'
 import { GraphContainer } from './GraphContainer'
 import { Navbar, Nav, NavDropdown } from 'react-bootstrap'
-import igv from 'igv'
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './App.css'
 
 import graph from './toy_example.json'
-function IGV() {
-  useEffect(() => {
-    igv.createBrowser(ref.current, { genome: 'hg38', locus: 'BRCA1' })
-  }, [])
 
-  const ref = useRef()
-  return (
-    <div
-      ref={ref}
-      style={{
-        paddingTop: '10px',
-        paddingBottom: '10px',
-        margin: '8px',
-        border: '1px solid lightgray',
-      }}
-    />
-  )
-}
 function Header({ onOpen }) {
   return (
     <Navbar bg="light" expand="lg">
@@ -72,9 +54,6 @@ function App() {
       <div className="flexcontainer">
         <div id="sidebar" className="sidebar">
           <GraphContainer graph={graph} onFeatureClick={callback} />
-        </div>
-        <div className="body">
-          <IGV />
         </div>
       </div>
     </div>

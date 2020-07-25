@@ -302,7 +302,11 @@ const Graph = React.forwardRef((props, ref) => {
               d={line(p.links)}
               title={p.id}
               strokeWidth={contigThickness}
-              stroke={d3.hsl(d3[`interpolate${color}`](i / paths.length)).darker()}
+              stroke={
+                color.startsWith('Just')
+                  ? color.replace('Just', '').toLowerCase()
+                  : d3.hsl(d3[`interpolate${color}`](i / paths.length)).darker()
+              }
               fill="none"
               onClick={() => onFeatureClick(p)}
             >

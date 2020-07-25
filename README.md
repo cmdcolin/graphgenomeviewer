@@ -1,4 +1,4 @@
-Shows adding igv.js inside a div
+# graphgenomeviewer
 
 To install
 
