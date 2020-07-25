@@ -1,30 +1,20 @@
 import React, { useMemo, useEffect } from 'react'
 import * as d3 from 'd3'
-function reprocessGraph(G, step = 1000) {
+function reprocessGraph(G, blockSize = 500) {
   const Gp = { nodes: [], links: [] } // G'
 
   for (let i = 0; i < G.nodes.length; i++) {
     const { id, sequence, ...rest } = G.nodes[i]
     const nodes = []
-    let done = false
-    let last = 0
-    for (let j = 0; j < sequence.length; j += step) {
-      let source
-      if (j === 0) {
-        source = `${id}-start`
-      } else if (j + step >= sequence.length) {
-        source = `${id}-end`
-        done = true
+    let pos = 0
+    for (pos = 0; pos < sequence.length - blockSize; pos += blockSize) {
+      if (pos === 0) {
+        nodes.push({ ...rest, id: `${id}-start`, pos })
       } else {
-        source = `${id}-${j}`
+        nodes.push({ ...rest, id: `${id}-${pos}`, pos })
       }
-      nodes.push({ ...rest, id: source, pos: j })
-      last = j
     }
-    if (!done) {
-      nodes.push({ ...rest, id: `${id}-end`, pos: last })
-    }
-    Gp.nodes = Gp.nodes.concat(nodes)
+    nodes.push({ ...rest, id: `${id}-end`, pos })
     for (let j = 0; j < nodes.length - 1; j++) {
       const source = nodes[j].id
       const target = nodes[j + 1].id
@@ -34,9 +24,11 @@ function reprocessGraph(G, step = 1000) {
         target,
         id,
         linkNum: i,
+        length: sequence.length,
         sequence, // could put actual sequence here if needed
       })
     }
+    Gp.nodes = Gp.nodes.concat(nodes)
   }
   for (let i = 0; i < G.links.length; i++) {
     const { strand1, strand2, source, target, ...rest } = G.links[i]
@@ -78,17 +70,19 @@ function reprocessGraph(G, step = 1000) {
 const Graph = React.forwardRef((props, ref) => {
   const {
     graph,
+    blockSize = 500,
     thickness = 10,
     color = 'Rainbow',
     width = 1000,
     height = 1000,
+    steps = 2000,
     onFeatureClick = () => {
       console.log('no feature click configured')
     },
   } = props
   const data = useMemo(() => {
-    return reprocessGraph(graph)
-  }, [graph])
+    return reprocessGraph(graph, blockSize)
+  }, [blockSize, graph])
   const total = graph.nodes.length
 
   const links = useMemo(() => {
@@ -114,11 +108,11 @@ const Graph = React.forwardRef((props, ref) => {
       .force('center', d3.forceCenter(width / 2, height / 2))
 
     /// run a 1000 simulation node ticks
-    for (let i = 0; i < 1000; ++i) {
+    for (let i = 0; i < steps; ++i) {
       simulation.tick()
     }
     return links
-  }, [data.links, data.nodes, height, width])
+  }, [data.links, data.nodes, height, steps, width])
 
   useEffect(() => {
     ref.current.innerHTML = ''
@@ -169,7 +163,6 @@ const Graph = React.forwardRef((props, ref) => {
       .on('click', (d, i) => {
         div.transition().style('opacity', 0)
         const link = data.links[i]
-        console.log(link)
         onFeatureClick(link)
       })
 
