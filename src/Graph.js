@@ -134,8 +134,8 @@ const Graph = React.forwardRef((props, ref) => {
     contigThickness = 10,
     edgeThickness = 2,
     color = 'Rainbow',
-    width = 1000,
-    height = 1000,
+    width = 500,
+    height = 500,
     steps = 500,
     onFeatureClick = () => {
       console.log('no feature click configured')
@@ -192,18 +192,13 @@ const Graph = React.forwardRef((props, ref) => {
 
   const paths = [...generatePaths(links, data.links)]
   const edges = [...generateEdges(links, data.links)]
-  const maxScore = edges.reduce((a, b) => {
-    return Math.max(b.original.score, a)
-  }, 0)
   const colors = {}
   ;(graph.paths || []).forEach(p => {
     colors[p.name] = d3.interpolateTurbo(Math.random())
   })
-  console.log({ paths, links })
 
   const map = {}
   paths.forEach(path => {
-    console.log(path.source, path.target)
     if (path.source.endsWith('start')) {
       map[path.source] = {
         source: links[path.linkNum].target,
@@ -214,7 +209,6 @@ const Graph = React.forwardRef((props, ref) => {
         source: links[path.linkNum].source,
       }
     } else {
-      console.log('here')
       map[path.source] = {
         source: links[path.linkNum].source,
         target: links[path.linkNum].target,
@@ -280,7 +274,6 @@ const Graph = React.forwardRef((props, ref) => {
                 const cpath = d3.path()
                 cpath.moveTo(x1, y1)
                 cpath.bezierCurveTo(cx1, cy1, cx2, cy2, x2, y2) //(cx1, cy1, cx2, cy2, x2, y2, 1)
-                console.log(colors, pp)
                 return (
                   <path
                     d={cpath}
