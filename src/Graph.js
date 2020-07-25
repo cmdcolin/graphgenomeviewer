@@ -1,5 +1,6 @@
 import React, { useMemo, useEffect } from 'react'
 import * as d3 from 'd3'
+
 function reprocessGraph(G, blockSize = 500) {
   const Gp = { nodes: [], links: [] } // G'
 
@@ -67,11 +68,46 @@ function reprocessGraph(G, blockSize = 500) {
   return Gp
 }
 
+function* generatePaths(links, graph) {
+  let currentLinkId = links[0].linkNum
+  let currentLinkSet = []
+  let original
+  for (let i = 0; i < links.length; i++) {
+    const link = links[i]
+    if (currentLinkId !== link.linkNum) {
+      yield { links: currentLinkSet, id: original.id, sequence: original.sequence }
+      currentLinkSet = []
+      currentLinkId = link.linkNum
+    }
+    original = graph[i]
+    currentLinkSet.push([link.source.x, link.source.y])
+    currentLinkSet.push([link.target.x, link.target.y])
+  }
+  yield { links: currentLinkSet, id: original.id, sequence: original.sequence }
+}
+
+function* generateEdges(links, graph) {
+  for (let i = 0; i < links.length; i++) {
+    const link = links[i]
+    const original = graph[i]
+    if (!original.id) {
+      yield {
+        links: [
+          [link.source.x, link.source.y],
+          [link.target.x, link.target.y],
+        ],
+        original,
+      }
+    }
+  }
+}
+
 const Graph = React.forwardRef((props, ref) => {
   const {
     graph,
     blockSize = 500,
-    thickness = 10,
+    contigThickness = 10,
+    edgeThickness = 3,
     color = 'Rainbow',
     width = 1000,
     height = 1000,
@@ -111,92 +147,126 @@ const Graph = React.forwardRef((props, ref) => {
     for (let i = 0; i < steps; ++i) {
       simulation.tick()
     }
+    console.log('here', data, links)
     return links
-  }, [data.links, data.nodes, height, steps, width])
+  }, [data, height, steps, width])
 
-  useEffect(() => {
-    ref.current.innerHTML = ''
-    // Define the div for the tooltip
-    const div = d3
-      .select('body')
-      .append('div')
-      .attr('class', 'tooltip')
-      .style('opacity', 0)
+  // Add the valueline path.
+  // svg.append('path').data([data]).attr('class', 'line').attr('d', valueline)
 
-    const svg = d3.create('svg').attr('viewBox', [0, 0, width, height])
-    const g = svg
-      .append('g')
-      .attr('stroke-opacity', 0.6)
-      .selectAll('line')
-      .data(links)
-      .join('line')
-      .attr('stroke-width', d => {
-        return d.sequence ? thickness * 1.5 : 3
-      })
-      .attr('stroke', d => {
-        return d.sequence
-          ? d3.hsl(d3[`interpolate${color}`](d.linkNum / total)).darker()
-          : 'grey'
-      })
-      .attr('x1', d => d.source.x)
-      .attr('y1', d => d.source.y)
-      .attr('x2', d => d.target.x)
-      .attr('y2', d => d.target.y)
-      .on('mouseover', (d, i) => {
-        const link = data.links[i]
-        div.transition().style('opacity', 0.9)
+  // const g = svg
+  //   .append('g')
+  //   .attr('stroke-opacity', 0.6)
+  //   .selectAll('line')
+  //   .data(links)
+  //   .join('line')
+  //   .attr('stroke-width', d => {
+  //     return d.sequence ? thickness * 1.5 : 3
+  //   })
+  //   .attr('stroke', d => {
+  //     return d.sequence
+  //       ? d3.hsl(d3[`interpolate${color}`](d.linkNum / total)).darker()
+  //       : 'grey'
+  //   })
+  //   .attr('x1', d => d.source.x)
+  //   .attr('y1', d => d.source.y)
+  //   .attr('x2', d => d.target.x)
+  //   .attr('y2', d => d.target.y)
+  //   .on('mouseover', (d, i) => {
+  //     const link = data.links[i]
+  //     div.transition().style('opacity', 0.9)
 
-        const text =
-          link.id ||
-          `${link.source.replace(/-start|-end/, '')}-${link.target.replace(
-            /-start|-end/,
-            '',
-          )}`
-        div
-          .html(text)
-          .style('left', `${d3.event.pageX}px`)
-          .style('top', `${d3.event.pageY - 28}px`)
-      })
-      .on('mouseout', () => {
-        div.transition().style('opacity', 0)
-      })
-      .on('click', (d, i) => {
-        div.transition().style('opacity', 0)
-        const link = data.links[i]
-        onFeatureClick(link)
-      })
+  //     const text =
+  //       link.id ||
+  //       `${link.source.replace(/-start|-end/, '')}-${link.target.replace(
+  //         /-start|-end/,
+  //         '',
+  //       )}`
+  //     div
+  //       .html(text)
+  //       .style('left', `${d3.event.pageX}px`)
+  //       .style('top', `${d3.event.pageY - 28}px`)
+  //   })
+  //   .on('mouseout', () => {
+  //     div.transition().style('opacity', 0)
+  //   })
+  //   .on('click', (d, i) => {
+  //     div.transition().style('opacity', 0)
+  //     const link = data.links[i]
+  //     onFeatureClick(link)
+  //   })
 
-    // zoom logic, similar to https://observablehq.com/@d3/zoom
-    function zoomed() {
-      g.attr('transform', d3.event.transform)
-    }
-    svg.call(
-      d3
-        .zoom()
-        .extent([
-          [0, 0],
-          [width, height],
-        ])
-        .scaleExtent([0.1, 8])
-        .on('zoom', zoomed),
-    )
+  // // zoom logic, similar to https://observablehq.com/@d3/zoom
+  // function zoomed() {
+  //   g.attr('transform', d3.event.transform)
+  // }
+  // svg.call(
+  //   d3
+  //     .zoom()
+  //     .extent([
+  //       [0, 0],
+  //       [width, height],
+  //     ])
+  //     .scaleExtent([0.1, 8])
+  //     .on('zoom', zoomed),
+  // )
 
-    ref.current.appendChild(svg.node())
-  }, [
-    color,
-    data.links,
-    data.nodes,
-    graph.links,
-    height,
-    links,
-    onFeatureClick,
-    ref,
-    thickness,
-    total,
-    width,
-  ])
+  // ref.current.appendChild(svg.node())
+  // }, [
+  // color,
+  // data,
+  // data.links,
+  // data.nodes,
+  // graph.links,
+  // height,
+  // links,
+  // onFeatureClick,
+  // ref,
+  // thickness,
+  // total,
+  // width,
+  // ])
 
-  return <div ref={ref} />
+  // const edges = []
+  // const contigs = []
+  // for (let i = 0; i < links.length; i++) {
+  //   if (links[i].sequence) {
+  //     edges.push(links[i])
+  //   } else {
+  //     contigs.push(links[i])
+  //   }
+  // }
+  const paths = [...generatePaths(links, data.links)]
+  const edges = [...generateEdges(links, data.links)]
+  return (
+    <svg ref={ref} viewBox={[0, 0, width, height].toString()}>
+      {paths.map(p => {
+        const line = d3.line().context(null)
+        return p.id ? (
+          <path
+            d={line(p.links)}
+            title={p.id}
+            strokeWidth={contigThickness}
+            stroke="black"
+            fill="none"
+            onClick={() => onFeatureClick(p)}
+          />
+        ) : null
+      })}
+      {edges.map(p => {
+        const line = d3.line().context(null)
+        return (
+          <path
+            d={line(p.links)}
+            strokeWidth={edgeThickness}
+            stroke="black"
+            fill="none"
+            onClick={() => onFeatureClick(p)}
+          />
+        )
+      })}
+    </svg>
+  )
 })
 
 export { Graph }

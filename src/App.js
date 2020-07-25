@@ -101,9 +101,6 @@ function App() {
         <div id="sidebar" className="sidebar">
           <GraphContainer graph={graph} onFeatureClick={callback} />
         </div>
-        <div className="body">
-          <IGV />
-        </div>
       </div>
     </div>
   )
