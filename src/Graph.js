@@ -1,11 +1,15 @@
 import React, { useMemo, useEffect } from 'react'
 import * as d3 from 'd3'
 
+// Given a GFA graph with sequence nodes ('S' tags), it breaks the S tags into
+// multiple nodes depending on how long the sequence is, which gives the graph
+// an organic look when the layout algorithm is applied
 function reprocessGraph(G, blockSize) {
-  const Gp = { nodes: [], links: [] } // G'
+  const Gp = { nodes: [], links: [] }
 
   for (let i = 0; i < G.nodes.length; i++) {
     const { id, sequence, ...rest } = G.nodes[i]
+
     const nodes = []
     nodes.push({ ...rest, id: `${id}-start` })
     for (let i = blockSize; i < sequence.length - blockSize; i += blockSize) {
@@ -105,7 +109,7 @@ function* generateEdges(links, graph) {
 
 const Graph = React.forwardRef((props, ref) => {
   const {
-    graph,
+    graph, // {nodes:[{id}], links:[{source,target}]
     blockSize = 1000,
     contigThickness = 10,
     edgeThickness = 3,

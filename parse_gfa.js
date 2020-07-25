@@ -1,12 +1,11 @@
 const readline = require('readline')
-//const fileStream = fs.createReadStream('input.txt');
 
 const rl = readline.createInterface({
   input: process.stdin, //or fileStream
 })
 
 ;(async () => {
-  const graph = { nodes: [], links: [] }
+  const graph = { nodes: [], links: [], paths: [] }
   for await (const line of rl) {
     if (line.startsWith('S')) {
       const [, name, sequence, ...rest] = line.split('\t')
@@ -32,6 +31,10 @@ const rl = readline.createInterface({
         }
       }
       graph.links.push({ source, target, strand1, strand2, cigar, tags })
+    } else if (line.startsWith('P')) {
+      const [, name, path, ...rest] = line.split('\t')
+
+      graph.paths.push({ name, path, rest })
     }
   }
   console.log(JSON.stringify(graph, null, 2))
