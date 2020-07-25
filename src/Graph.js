@@ -51,13 +51,14 @@ function reprocessGraph(G, blockSize) {
 
     // enumerates cases for which end of source connects to
     // which end of the target
-    Gp.links.push({
+    const link = {
       source: `${source}-${strand1 === '+' ? 'end' : 'start'}`,
       target: `${target}-${strand2 === '+' ? 'start' : 'end'}`,
-      loop,
-      paths,
       ...rest,
-    })
+    }
+    if (loop) link.loop = true
+    if (paths.length) link.paths = paths
+    Gp.links.push(link)
   }
   return Gp
 }
@@ -283,7 +284,7 @@ const Graph = React.forwardRef((props, ref) => {
                 strokeWidth={edgeThickness}
                 stroke="black"
                 fill="none"
-                onClick={() => onFeatureClick(p)}
+                onClick={() => onFeatureClick(p.original)}
               ></path>
             )
           }
