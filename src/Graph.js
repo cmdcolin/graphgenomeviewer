@@ -203,14 +203,26 @@ const Graph = React.forwardRef((props, ref) => {
 
   const map = {}
   paths.forEach(path => {
-    console.log(path.source)
-    map[path.source] = {
-      source: links[path.linkNum].target,
-      target: links[path.linkNum].source,
-    }
-    map[path.target] = {
-      target: links[path.linkNum].target,
-      source: links[path.linkNum].source,
+    console.log(path.source, path.target)
+    if (path.source.endsWith('start')) {
+      map[path.source] = {
+        source: links[path.linkNum].target,
+        target: links[path.linkNum].source,
+      }
+      map[path.target] = {
+        target: links[path.linkNum].target,
+        source: links[path.linkNum].source,
+      }
+    } else {
+      console.log('here')
+      map[path.source] = {
+        source: links[path.linkNum].source,
+        target: links[path.linkNum].target,
+      }
+      map[path.target] = {
+        target: links[path.linkNum].source,
+        source: links[path.linkNum].target,
+      }
     }
   })
   return (
@@ -257,36 +269,47 @@ const Graph = React.forwardRef((props, ref) => {
           const dp2 = Math.sqrt(
             (t2.y - s2.y) * (t2.y - s2.y) + (t2.x - s2.x) * (t2.x - s2.x),
           )
-          const d1 = 10 / dp1
-          const d2 = 10 / dp2
+          const d1 = 100 / dp1
+          const d2 = 100 / dp2
           const cx1 = (1 - d1) * s1.x + d1 * t1.x
           const cy1 = (1 - d1) * s1.y + d1 * t1.y
           const cx2 = (1 - d2) * s2.x + d2 * t2.x
           const cy2 = (1 - d2) * s2.y + d2 * t2.y
-          console.log(cx1, cy1)
-
           const cpath = d3.path()
           cpath.moveTo(x1, y1)
           cpath.bezierCurveTo(cx1, cy1, cx2, cy2, x2, y2) //(cx1, cy1, cx2, cy2, x2, y2, 1)
-          console.log({ s1, t1 })
 
           return (
             <>
-              <line x1={s1.x} x2={t1.x} y1={s1.y} y2={t1.y} stroke="black" />
-              <rect x={cx1} y={cy1} width={1} height={1} fill="red" />
-              <rect x={cx2} y={cy2} width={1} height={1} fill="green" />
-              {p.original.paths.map((graphPath, i) => {
-                return (
-                  <path
-                    d={cpath}
-                    strokeWidth={2}
-                    stroke={colors[graphPath]}
-                    fill="none"
-                    onClick={() => onFeatureClick(p.original)}
-                  />
-                )
-              })}
+              <line x1={s1.x} x2={t1.x} y1={s1.y} y2={t1.y} stroke="rgba(0,0,0,0.5)" />
+              <rect x={cx2} y={cy2} width={2} height={2} fill="red" />
+              <rect x={cx2} y={cy2} width={2} height={2} fill="green" />
+              <rect x={x2} y={y2} width={2} height={2} fill="blue" />
+              <rect x={x2} y={y2} width={2} height={2} fill="yellow" />
+              <path
+                d={cpath}
+                strokeWidth={2}
+                stroke="rgba(255,0,255,0.5)"
+                fill="none"
+                onClick={() => onFeatureClick(p.original)}
+              />
             </>
+          )
+        })}
+
+        {paths.map((p, i) => {
+          const line = d3.line().context(null)
+          return (
+            <path
+              d={line(p.links)}
+              title={p.id}
+              strokeWidth={contigThickness}
+              stroke={d3.hsl(d3[`interpolate${color}`](i / paths.length)).darker()}
+              fill="none"
+              onClick={() => onFeatureClick(p)}
+            >
+              <title>{p.id}</title>
+            </path>
           )
         })}
       </g>
@@ -294,21 +317,6 @@ const Graph = React.forwardRef((props, ref) => {
   )
 })
 
-// {paths.map((p, i) => {
-//           const line = d3.line().context(null)
-//           return (
-//             <path
-//               d={line(p.links)}
-//               title={p.id}
-//               strokeWidth={contigThickness}
-//               stroke={d3.hsl(d3[`interpolate${color}`](i / paths.length)).darker()}
-//               fill="none"
-//               onClick={() => onFeatureClick(p)}
-//             >
-//               <title>{p.id}</title>
-//             </path>
-//           )
-//         })}
 // // <path
 //                 key={path.toString()}
 //                 d={path}
