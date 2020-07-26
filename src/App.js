@@ -4,7 +4,6 @@ import { Graph } from './Graph'
 import { Sidebar } from './Sidebar'
 import { Header } from './Header'
 import { parseGFA } from './util'
-import { Form } from 'react-bootstrap'
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './App.css'
