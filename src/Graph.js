@@ -201,7 +201,7 @@ const Graph = React.forwardRef((props, ref) => {
     return <h1>no paths found</h1>
   }
   return (
-    <svg ref={ref} viewBox={[0, 0, width, height].toString()}>
+    <svg width="100%" height="100%" ref={ref} viewBox={[0, 0, width, height].toString()}>
       <g ref={gref}>
         {edges.map(p => {
           const x1 = p.links[0][0]

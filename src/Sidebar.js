@@ -7,6 +7,7 @@ const Sidebar = React.forwardRef(({ onColorChange, onPathDraw, color }, ref) => 
     <div>
       <p>Settings</p>
       <Form.Group>
+        <Form.Label>Color</Form.Label>
         <Form.Control
           value={color}
           onChange={event => onColorChange(event.target.value)}
