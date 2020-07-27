@@ -18,7 +18,11 @@ function AboutDialog({ onHide }) {
         </p>
         <p>
           Thanks to the BCC2020 pangenome team, and{' '}
-          <a href="https://github.com/rrwick/Bandage">Bandage</a> for inspiration
+          <a href="https://github.com/rrwick/Bandage">Bandage</a> for inspiration.
+        </p>
+        <p>
+          Sample data from GFA-spec repo (MT.gfa), Andrea Guarracino (path example), and
+          gfalint (Shaun Jackman)
         </p>
         <a href="https://github.com/cmdcolin/graphgenomeviewer">GitHub</a>
       </Modal.Body>

@@ -7,3 +7,9 @@ Thanks to the entire BCC2020 pangenome team!
 - Lucas van Dijk
 - Arian Jacildo
 - Stephanie Bocs
+
+Sample data sources
+
+- MT.gfa (GFA-spec)
+- toy-pangenome.gfa (Andrea Guarracino)
+- ir1 and big1 (Shaun Jackman, gfalint)
