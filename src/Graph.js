@@ -1,117 +1,19 @@
 import React, { useMemo, useRef, useEffect } from 'react'
 import * as d3 from 'd3'
-
-// Given a GFA graph with sequence nodes ('S' tags), it breaks the S tags into
-// multiple nodes depending on how long the sequence is, which gives the graph
-// an organic look when the layout algorithm is applied
-function reprocessGraph(G, chunkSize) {
-  const Gp = { nodes: [], links: [] }
-
-  const seen = {}
-  for (let i = 0; i < (G.paths || {}).length; i++) {
-    const path = G.paths[i]
-    const pathNodes = path.path.split(',')
-    for (let j = 0; j < pathNodes.length - 1; j++) {
-      const curr = `${pathNodes[j]}_${pathNodes[j + 1]}`
-      if (!seen[curr]) {
-        seen[curr] = [path.name]
-      } else {
-        seen[curr].push(path.name)
-      }
-    }
-  }
-  for (let i = 0; i < G.nodes.length; i++) {
-    const { id, sequence, ...rest } = G.nodes[i]
-    const nodes = []
-    const length = sequence === '*' ? rest.tags.LN : sequence.length
-
-    // break long sequence into multiple nodes, for organic layout
-    nodes.push({ ...rest, id: `${id}-start` })
-    for (let i = chunkSize; i < length - chunkSize; i += chunkSize) {
-      nodes.push({ ...rest, id: `${id}-${i}` })
-    }
-    nodes.push({ ...rest, id: `${id}-end` })
-
-    // recreate links
-    for (let j = 0; j < nodes.length - 1; j++) {
-      const source = nodes[j].id
-      const target = nodes[j + 1].id
-      Gp.links.push({
-        ...rest,
-        source,
-        target,
-        id,
-        length,
-        sequence,
-        linkNum: i,
-      })
-    }
-    Gp.nodes = Gp.nodes.concat(nodes)
-  }
-  for (let i = 0; i < G.links.length; i++) {
-    const { strand1, strand2, source, target, ...rest } = G.links[i]
-    const paths = seen[`${source}${strand1}_${target}${strand2}`] || []
-    const loop = source === target
-
-    // enumerates cases for which end of source connects to
-    // which end of the target
-    const link = {
-      source: `${source}-${strand1 === '+' ? 'end' : 'start'}`,
-      target: `${target}-${strand2 === '+' ? 'start' : 'end'}`,
-      ...rest,
-    }
-    if (loop) {
-      link.loop = true
-    }
-    if (paths.length) {
-      link.paths = paths
-    }
-    Gp.links.push(link)
-  }
-  return Gp
-}
-
-function* generatePaths(links, graph) {
-  let currentLinkId = links[0].linkNum
-  let currentLinkSet = []
-  let original
-  for (let i = 0; i < links.length; i++) {
-    const link = links[i]
-    if (currentLinkId !== link.linkNum) {
-      if (original.id) {
-        yield { links: currentLinkSet, original }
-      }
-      currentLinkSet = []
-      currentLinkId = link.linkNum
-    }
-    original = graph[i]
-    currentLinkSet.push([link.source.x, link.source.y])
-    currentLinkSet.push([link.target.x, link.target.y])
-  }
-}
-
-function* generateEdges(links, graph) {
-  for (let i = 0; i < links.length; i++) {
-    const link = links[i]
-    const original = graph[i]
-    if (!original.id) {
-      yield {
-        links: [
-          [link.source.x, link.source.y],
-          [link.target.x, link.target.y],
-        ],
-        original,
-      }
-    }
-  }
-}
+import { reprocessGraph, generatePaths, generateEdges } from './util'
 
 const Graph = React.forwardRef((props, ref) => {
   const gref = useRef()
   const {
     graph,
     drawPaths = false,
-    settings,
+    settings: {
+      chunkSize = 1000,
+      numSteps = 500,
+      sequenceThickness = 10,
+      linkThickness = 2,
+      strength = -50,
+    },
     color = 'Rainbow',
     width = 2000,
     height = 1000,
@@ -119,32 +21,20 @@ const Graph = React.forwardRef((props, ref) => {
       console.log('no feature click configured')
     },
   } = props
-  const {
-    chunkSize = 1000,
-    numSteps = 500,
-    sequenceThickness = 10,
-    linkThickness = 2,
-    strength = -50,
-  } = settings
-  console.log(chunkSize, numSteps, strength)
+
   const data = useMemo(() => {
     return reprocessGraph(graph, chunkSize)
   }, [chunkSize, graph])
   const colors = useMemo(() => {
-    const colors = {}
-    ;(graph.paths || []).forEach((p, i) => {
-      colors[p.name] = d3.schemeCategory10[i]
-    })
-    return colors
+    return Object.fromEntries(
+      (graph.paths || []).map((p, i) => {
+        return [p.name, d3.schemeCategory10[i]]
+      }),
+    )
   }, [graph.paths])
   const links = useMemo(() => {
     const links = data.links.map(d => Object.create(d))
     const nodes = data.nodes.map(d => Object.create(d))
-    let max = 0
-    for (let i = 0; i < data.links.length; i++) {
-      max = Math.max(max, (data.links[i].sequence || {}).length || 0)
-    }
-
     const simulation = d3
       .forceSimulation(nodes)
       .force(
@@ -226,7 +116,7 @@ const Graph = React.forwardRef((props, ref) => {
             const { source: s2, target: t2 } = map[p.original.target]
             // implements this algorithm to calculate a control point
             // that points "forwards" of a given contig node
-            // https://math.stackexchange.com/questions/175896/finding-a-point-along-a-line-a-certain-distance-away-from-another-point/175906
+            // https://math.stackexchange.com/questions/175896
             const dp1 = Math.sqrt((t1.y - s1.y) ** 2 + (t1.x - s1.x) ** 2)
             const dp2 = Math.sqrt((t2.y - s2.y) ** 2 + (t2.x - s2.x) ** 2)
 
@@ -239,7 +129,7 @@ const Graph = React.forwardRef((props, ref) => {
               const cy2 = (1 - d2) * s2.y + d2 * t2.y
               const cpath = d3.path()
               cpath.moveTo(x1, y1)
-              cpath.bezierCurveTo(cx1, cy1, cx2, cy2, x2, y2) //(cx1, cy1, cx2, cy2, x2, y2, 1)
+              cpath.bezierCurveTo(cx1, cy1, cx2, cy2, x2, y2)
               return (
                 <path
                   key={cpath.toString()}
