@@ -13,6 +13,7 @@ const Graph = React.forwardRef((props, ref) => {
       sequenceThickness = 10,
       linkThickness = 2,
       strength = -50,
+      theta = 0.9,
     },
     color = 'Rainbow',
     width = 2000,
@@ -46,14 +47,14 @@ const Graph = React.forwardRef((props, ref) => {
             return link.sequence ? 1 : 10
           }),
       )
-      .force('charge', d3.forceManyBody().strength(strength))
+      .force('charge', d3.forceManyBody().strength(strength).theta(theta))
       .force('center', d3.forceCenter(width / 2, height / 2))
 
     for (let i = 0; i < numSteps; ++i) {
       simulation.tick()
     }
     return links
-  }, [data.links, data.nodes, height, numSteps, strength, width])
+  }, [data.links, data.nodes, height, numSteps, strength, theta, width])
 
   useEffect(() => {
     // zoom logic, similar to https://observablehq.com/@d3/zoom

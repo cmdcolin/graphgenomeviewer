@@ -21,6 +21,7 @@ function App() {
     numSteps: 1000,
     sequenceThickness: 10,
     linkThickness: 2,
+    theta: 0.9,
   })
   const ref = useRef()
   useEffect(() => {

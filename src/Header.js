@@ -5,6 +5,7 @@ function SettingsDialog({ onHide, settings, onSettings }) {
   const [numSteps, setNumSteps] = useState(settings.numSteps)
   const [chunkSize, setChunkSize] = useState(settings.chunkSize)
   const [strength, setStrength] = useState(settings.strength)
+  const [theta, setTheta] = useState(settings.theta)
   const [sequenceThickness, setSequenceThickness] = useState(settings.sequenceThickness)
   const [linkThickness, setLinkThickness] = useState(settings.linkThickness)
   return (
@@ -22,6 +23,7 @@ function SettingsDialog({ onHide, settings, onSettings }) {
               chunkSize: +chunkSize,
               numSteps: +numSteps,
               strength: +strength,
+              theta: +theta,
               sequenceThickness: +sequenceThickness,
               linkThickness: +linkThickness,
             })
@@ -57,6 +59,20 @@ function SettingsDialog({ onHide, settings, onSettings }) {
                 type="number"
                 value={chunkSize}
                 onChange={event => setChunkSize(event.target.value)}
+              />
+            </Col>
+          </Form.Group>
+          <Form.Group as={Row}>
+            <Form.Label column sm="4">
+              Theta
+              <Form.Text muted>Parameter for the force directed layout</Form.Text>
+            </Form.Label>
+            <Col>
+              <Form.Control
+                column
+                type="number"
+                value={theta}
+                onChange={event => setTheta(event.target.value)}
               />
             </Col>
           </Form.Group>
