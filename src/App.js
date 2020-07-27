@@ -15,6 +15,13 @@ function App() {
   const [error, setError] = useState()
   const [color, setColor] = useState('Rainbow')
   const [pathDraw, setPathDraw] = useState(false)
+  const [settings, setSettings] = useState({
+    strength: -50,
+    chunkSize: 1000,
+    numSteps: 1000,
+    sequenceThickness: 10,
+    linkThickness: 2,
+  })
   const ref = useRef()
   useEffect(() => {
     ;(async () => {
@@ -46,6 +53,10 @@ function App() {
         onGraph={d => {
           setData(d)
         }}
+        onSettings={d => {
+          setSettings(d)
+        }}
+        settings={settings}
       />
       {featureData ? (
         <FeatureDialog
@@ -78,6 +89,7 @@ function App() {
               onFeatureClick={data => {
                 setFeatureData(data)
               }}
+              settings={settings}
             />
           ) : null}
         </div>

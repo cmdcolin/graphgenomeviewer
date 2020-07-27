@@ -4,7 +4,7 @@ import * as d3 from 'd3'
 // Given a GFA graph with sequence nodes ('S' tags), it breaks the S tags into
 // multiple nodes depending on how long the sequence is, which gives the graph
 // an organic look when the layout algorithm is applied
-function reprocessGraph(G, blockSize) {
+function reprocessGraph(G, chunkSize) {
   const Gp = { nodes: [], links: [] }
 
   const seen = {}
@@ -27,7 +27,7 @@ function reprocessGraph(G, blockSize) {
 
     // break long sequence into multiple nodes, for organic layout
     nodes.push({ ...rest, id: `${id}-start` })
-    for (let i = blockSize; i < length - blockSize; i += blockSize) {
+    for (let i = chunkSize; i < length - chunkSize; i += chunkSize) {
       nodes.push({ ...rest, id: `${id}-${i}` })
     }
     nodes.push({ ...rest, id: `${id}-end` })
@@ -111,20 +111,25 @@ const Graph = React.forwardRef((props, ref) => {
   const {
     graph,
     drawPaths = false,
-    blockSize = 1000,
-    contigThickness = 10,
-    edgeThickness = 2,
+    settings,
     color = 'Rainbow',
     width = 2000,
     height = 1000,
-    steps = 500,
     onFeatureClick = () => {
       console.log('no feature click configured')
     },
   } = props
+  const {
+    chunkSize = 1000,
+    numSteps = 500,
+    sequenceThickness = 10,
+    linkThickness = 2,
+    strength = -50,
+  } = settings
+  console.log(chunkSize, numSteps, strength)
   const data = useMemo(() => {
-    return reprocessGraph(graph, blockSize)
-  }, [blockSize, graph])
+    return reprocessGraph(graph, chunkSize)
+  }, [chunkSize, graph])
   const colors = useMemo(() => {
     const colors = {}
     ;(graph.paths || []).forEach((p, i) => {
@@ -147,18 +152,18 @@ const Graph = React.forwardRef((props, ref) => {
         d3
           .forceLink(links)
           .id(d => d.id)
-          .distance((link, index) => {
+          .distance(link => {
             return link.sequence ? 1 : 10
           }),
       )
-      .force('charge', d3.forceManyBody().strength(-50))
+      .force('charge', d3.forceManyBody().strength(strength))
       .force('center', d3.forceCenter(width / 2, height / 2))
 
-    for (let i = 0; i < steps; ++i) {
+    for (let i = 0; i < numSteps; ++i) {
       simulation.tick()
     }
     return links
-  }, [data, height, steps, width])
+  }, [data.links, data.nodes, height, numSteps, strength, width])
 
   useEffect(() => {
     // zoom logic, similar to https://observablehq.com/@d3/zoom
@@ -239,7 +244,7 @@ const Graph = React.forwardRef((props, ref) => {
                 <path
                   key={cpath.toString()}
                   d={cpath}
-                  strokeWidth={edgeThickness}
+                  strokeWidth={linkThickness}
                   stroke={colors[pp]}
                   fill="none"
                   onClick={() => onFeatureClick(p.original)}
@@ -292,7 +297,7 @@ const Graph = React.forwardRef((props, ref) => {
               <path
                 key={path.toString()}
                 d={path}
-                strokeWidth={edgeThickness}
+                strokeWidth={linkThickness}
                 stroke="black"
                 fill="none"
                 onClick={() => onFeatureClick(p.original)}
@@ -309,7 +314,7 @@ const Graph = React.forwardRef((props, ref) => {
               key={path.toString()}
               d={path}
               title={p.id}
-              strokeWidth={contigThickness}
+              strokeWidth={sequenceThickness}
               stroke={
                 color.startsWith('Just')
                   ? color.replace('Just', '').toLowerCase()

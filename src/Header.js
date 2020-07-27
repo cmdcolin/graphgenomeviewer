@@ -1,5 +1,105 @@
 import React, { useRef, useState } from 'react'
-import { Button, Form, Modal, Navbar, Nav, NavDropdown } from 'react-bootstrap'
+import { Button, Col, Form, Modal, Navbar, Nav, NavDropdown, Row } from 'react-bootstrap'
+
+function SettingsDialog({ onHide, settings, onSettings }) {
+  const [numSteps, setNumSteps] = useState(settings.numSteps)
+  const [chunkSize, setChunkSize] = useState(settings.chunkSize)
+  const [strength, setStrength] = useState(settings.strength)
+  const [sequenceThickness, setSequenceThickness] = useState(settings.sequenceThickness)
+  const [linkThickness, setLinkThickness] = useState(settings.linkThickness)
+  return (
+    <Modal show={true} onHide={onHide} size="lg">
+      <Modal.Header closeButton>
+        <Modal.Title>Settings</Modal.Title>
+      </Modal.Header>
+
+      <Modal.Body>
+        <Form
+          onSubmit={event => {
+            event.preventDefault()
+            onSettings({
+              ...settings,
+              chunkSize,
+              numSteps,
+              strength,
+              sequenceThickness,
+              linkThickness,
+            })
+            onHide()
+          }}
+        >
+          <Form.Group as={Row}>
+            <Form.Label column sm="4">
+              Number of simulation steps
+            </Form.Label>
+            <Col>
+              <Form.Control
+                column
+                type="number"
+                value={numSteps}
+                onChange={event => setNumSteps(+event.target.value)}
+              />
+            </Col>
+          </Form.Group>
+          <Form.Group as={Row}>
+            <Form.Label column sm="4">
+              Sequence chunk size
+            </Form.Label>
+            <Col>
+              <Form.Control
+                column
+                type="number"
+                value={chunkSize}
+                onChange={event => setChunkSize(+event.target.value)}
+              />
+            </Col>
+          </Form.Group>
+          <Form.Group as={Row}>
+            <Form.Label column sm="4">
+              Force directed layout strength
+            </Form.Label>
+            <Col>
+              <Form.Control
+                column
+                type="number"
+                value={strength}
+                onChange={event => setStrength(+event.target.value)}
+              />
+            </Col>
+          </Form.Group>
+          <Form.Group as={Row}>
+            <Form.Label column sm="4">
+              Edge thickness
+            </Form.Label>
+            <Col>
+              <Form.Control
+                column
+                type="number"
+                value={sequenceThickness}
+                onChange={event => setSequenceThickness(+event.target.value)}
+              />
+            </Col>
+          </Form.Group>
+          <Form.Group as={Row}>
+            <Form.Label column sm="4">
+              Link thickness
+            </Form.Label>
+            <Col>
+              <Form.Control
+                column
+                type="input"
+                value={linkThickness}
+                onChange={event => setLinkThickness(+event.target.value)}
+              />
+            </Col>
+          </Form.Group>
+
+          <Button type="submit">Submit</Button>
+        </Form>
+      </Modal.Body>
+    </Modal>
+  )
+}
 
 function AboutDialog({ onHide }) {
   return (
@@ -88,8 +188,9 @@ function OpenFileDialog({ onHide, onGraph }) {
   )
 }
 
-export function Header({ onData, onGraph }) {
+export function Header({ onData, settings, onGraph, onSettings }) {
   const [showAbout, setShowAbout] = useState()
+  const [showSettings, setShowSettings] = useState()
   const [showOpenURL, setShowOpenURL] = useState()
   const [showOpenFile, setShowOpenFile] = useState()
   return (
@@ -119,6 +220,13 @@ export function Header({ onData, onGraph }) {
             </NavDropdown>
             <Nav.Link
               onClick={() => {
+                setShowSettings(true)
+              }}
+            >
+              Settings
+            </Nav.Link>
+            <Nav.Link
+              onClick={() => {
                 setShowAbout(true)
               }}
             >
@@ -128,6 +236,13 @@ export function Header({ onData, onGraph }) {
         </Navbar.Collapse>
       </Navbar>
       {showAbout ? <AboutDialog onHide={() => setShowAbout(false)} /> : null}
+      {showSettings ? (
+        <SettingsDialog
+          settings={settings}
+          onHide={() => setShowSettings(false)}
+          onSettings={onSettings}
+        />
+      ) : null}
       {showOpenURL ? (
         <OpenURLDialog onData={onData} onHide={() => setShowOpenURL(false)} />
       ) : null}
