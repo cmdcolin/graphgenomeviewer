@@ -19,11 +19,11 @@ function SettingsDialog({ onHide, settings, onSettings }) {
             event.preventDefault()
             onSettings({
               ...settings,
-              chunkSize,
-              numSteps,
-              strength,
-              sequenceThickness,
-              linkThickness,
+              chunkSize: +chunkSize,
+              numSteps: +numSteps,
+              strength: +strength,
+              sequenceThickness: +sequenceThickness,
+              linkThickness: +linkThickness,
             })
             onHide()
           }}
@@ -38,7 +38,7 @@ function SettingsDialog({ onHide, settings, onSettings }) {
                 column
                 type="number"
                 value={numSteps}
-                onChange={event => setNumSteps(+event.target.value)}
+                onChange={event => setNumSteps(event.target.value)}
               />
             </Col>
           </Form.Group>
@@ -56,7 +56,7 @@ function SettingsDialog({ onHide, settings, onSettings }) {
                 column
                 type="number"
                 value={chunkSize}
-                onChange={event => setChunkSize(+event.target.value)}
+                onChange={event => setChunkSize(event.target.value)}
               />
             </Col>
           </Form.Group>
@@ -73,7 +73,7 @@ function SettingsDialog({ onHide, settings, onSettings }) {
                 column
                 type="number"
                 value={strength}
-                onChange={event => setStrength(+event.target.value)}
+                onChange={event => setStrength(event.target.value)}
               />
             </Col>
           </Form.Group>
@@ -86,7 +86,7 @@ function SettingsDialog({ onHide, settings, onSettings }) {
                 column
                 type="number"
                 value={sequenceThickness}
-                onChange={event => setSequenceThickness(+event.target.value)}
+                onChange={event => setSequenceThickness(event.target.value)}
               />
             </Col>
           </Form.Group>
@@ -99,7 +99,7 @@ function SettingsDialog({ onHide, settings, onSettings }) {
                 column
                 type="input"
                 value={linkThickness}
-                onChange={event => setLinkThickness(+event.target.value)}
+                onChange={event => setLinkThickness(event.target.value)}
               />
             </Col>
           </Form.Group>
