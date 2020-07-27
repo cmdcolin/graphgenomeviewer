@@ -2,11 +2,11 @@ import React from 'react'
 import { Form, Button } from 'react-bootstrap'
 import { serialize } from './util'
 import saveAs from 'file-saver'
-const Sidebar = React.forwardRef(({ onColorChange, onPathDraw, color }, ref) => {
-  return (
-    <div>
-      <p>Settings</p>
-      <Form.Group>
+const Sidebar = React.forwardRef(
+  ({ onColorChange, onPathDraw, onRedraw, color }, ref) => {
+    return (
+      <div>
+        <p>Settings</p>
         <Form.Label>Color</Form.Label>
         <Form.Control
           value={color}
@@ -29,8 +29,9 @@ const Sidebar = React.forwardRef(({ onColorChange, onPathDraw, color }, ref) => 
         >
           <Form.Check type="checkbox" label="Draw paths" />
         </Form.Group>
-      </Form.Group>
-    </div>
-  )
-})
+        <Button onClick={onRedraw}>Redraw</Button>
+      </div>
+    )
+  },
+)
 export { Sidebar }

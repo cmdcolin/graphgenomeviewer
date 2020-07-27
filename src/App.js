@@ -15,6 +15,7 @@ function App() {
   const [error, setError] = useState()
   const [color, setColor] = useState('Rainbow')
   const [pathDraw, setPathDraw] = useState(false)
+  const [redraw, setRedraw] = useState(0)
   const [settings, setSettings] = useState({
     strength: -50,
     chunkSize: 1000,
@@ -78,6 +79,7 @@ function App() {
             color={color}
             onColorChange={c => setColor(c)}
             onPathDraw={d => setPathDraw(d)}
+            onRedraw={() => setRedraw(redraw => redraw + 1)}
           />
         </div>
         <div className="body">
@@ -87,6 +89,7 @@ function App() {
               graph={graph}
               ref={ref}
               color={color}
+              redraw={redraw}
               drawPaths={pathDraw}
               onFeatureClick={data => {
                 setFeatureData(data)

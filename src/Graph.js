@@ -19,6 +19,7 @@ const Graph = React.forwardRef((props, ref) => {
     color = 'Rainbow',
     width = 2000,
     height = 1000,
+    redraw = 0,
     onFeatureClick = () => {
       console.log('no feature click configured')
     },
@@ -55,8 +56,19 @@ const Graph = React.forwardRef((props, ref) => {
     for (let i = 0; i < forceSteps; ++i) {
       simulation.tick()
     }
+    const m = redraw
     return links
-  }, [data.links, data.nodes, forceSteps, height, linkSteps, strength, theta, width])
+  }, [
+    data.links,
+    redraw,
+    data.nodes,
+    forceSteps,
+    height,
+    linkSteps,
+    strength,
+    theta,
+    width,
+  ])
 
   useEffect(() => {
     // zoom logic, similar to https://observablehq.com/@d3/zoom
@@ -194,7 +206,7 @@ const Graph = React.forwardRef((props, ref) => {
                 stroke="black"
                 fill="none"
                 onClick={() => onFeatureClick(p.original)}
-              ></path>
+              />
             )
           }
         })}
@@ -206,7 +218,6 @@ const Graph = React.forwardRef((props, ref) => {
             <path
               key={path.toString()}
               d={path}
-              title={p.id}
               strokeWidth={sequenceThickness}
               stroke={
                 color.startsWith('Just')
@@ -216,7 +227,7 @@ const Graph = React.forwardRef((props, ref) => {
               fill="none"
               onClick={() => onFeatureClick(p.original)}
             >
-              <title>{p.id}</title>
+              <title>{p.original.id}</title>
             </path>
           )
         })}
