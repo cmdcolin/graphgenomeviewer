@@ -31,6 +31,7 @@ function SettingsDialog({ onHide, settings, onSettings }) {
           <Form.Group as={Row}>
             <Form.Label column sm="4">
               Number of simulation steps
+              <Form.Text muted>Used in the force-based layout simulation</Form.Text>
             </Form.Label>
             <Col>
               <Form.Control
@@ -44,6 +45,11 @@ function SettingsDialog({ onHide, settings, onSettings }) {
           <Form.Group as={Row}>
             <Form.Label column sm="4">
               Sequence chunk size
+              <Form.Text muted>
+                If a contig is of length 5000, then chunk length 1000 would become 5
+                segments. Note that contigs smaller than the chunk length may not be
+                proportionally sized
+              </Form.Text>
             </Form.Label>
             <Col>
               <Form.Control
@@ -57,6 +63,10 @@ function SettingsDialog({ onHide, settings, onSettings }) {
           <Form.Group as={Row}>
             <Form.Label column sm="4">
               Force directed layout strength
+              <Form.Text muted>
+                Used in the force-based layout simulation, larger values have more
+                repulsion
+              </Form.Text>
             </Form.Label>
             <Col>
               <Form.Control
@@ -69,7 +79,7 @@ function SettingsDialog({ onHide, settings, onSettings }) {
           </Form.Group>
           <Form.Group as={Row}>
             <Form.Label column sm="4">
-              Edge thickness
+              Sequence thickness
             </Form.Label>
             <Col>
               <Form.Control
