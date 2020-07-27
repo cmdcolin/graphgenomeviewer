@@ -22,13 +22,17 @@ function reprocessGraph(G, blockSize) {
   }
   for (let i = 0; i < G.nodes.length; i++) {
     const { id, sequence, ...rest } = G.nodes[i]
-
     const nodes = []
+    const length = sequence === '*' ? rest.tags.LN : sequence.length
+
+    // break long sequence into multiple nodes, for organic layout
     nodes.push({ ...rest, id: `${id}-start` })
-    for (let i = blockSize; i < sequence.length - blockSize; i += blockSize) {
+    for (let i = blockSize; i < length - blockSize; i += blockSize) {
       nodes.push({ ...rest, id: `${id}-${i}` })
     }
     nodes.push({ ...rest, id: `${id}-end` })
+
+    // recreate links
     for (let j = 0; j < nodes.length - 1; j++) {
       const source = nodes[j].id
       const target = nodes[j + 1].id
@@ -37,9 +41,9 @@ function reprocessGraph(G, blockSize) {
         source,
         target,
         id,
+        length,
+        sequence,
         linkNum: i,
-        length: sequence.length,
-        sequence, // could put actual sequence here if needed
       })
     }
     Gp.nodes = Gp.nodes.concat(nodes)
@@ -56,8 +60,12 @@ function reprocessGraph(G, blockSize) {
       target: `${target}-${strand2 === '+' ? 'start' : 'end'}`,
       ...rest,
     }
-    if (loop) link.loop = true
-    if (paths.length) link.paths = paths
+    if (loop) {
+      link.loop = true
+    }
+    if (paths.length) {
+      link.paths = paths
+    }
     Gp.links.push(link)
   }
   return Gp
@@ -102,7 +110,6 @@ const Graph = React.forwardRef((props, ref) => {
   const gref = useRef()
   const {
     graph,
-    path = 'Edge',
     drawPaths = false,
     blockSize = 1000,
     contigThickness = 10,
@@ -140,11 +147,11 @@ const Graph = React.forwardRef((props, ref) => {
         d3
           .forceLink(links)
           .id(d => d.id)
-          .distance(link => {
+          .distance((link, index) => {
             return link.sequence ? 1 : 10
           }),
       )
-      .force('charge', d3.forceManyBody().strength(-100))
+      .force('charge', d3.forceManyBody().strength(-50))
       .force('center', d3.forceCenter(width / 2, height / 2))
 
     for (let i = 0; i < steps; ++i) {
