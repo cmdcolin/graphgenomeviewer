@@ -186,8 +186,8 @@ function AboutDialog({ onHide }) {
 
       <Modal.Body>
         <p>
-          This is a small demo of browsing a simple graph genomes. The samples are
-          provided via GFA format
+          This is a small demo of browsing simple graph genomes. The app can read GFA
+          format URLs and local files, all processing is done client side currently.
         </p>
         <p>
           Contact <a href="mainto:colin.diesh@gmail.com">Colin Diesh</a>
