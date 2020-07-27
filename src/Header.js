@@ -1,13 +1,17 @@
 import React, { useRef, useState } from 'react'
 import { Button, Col, Form, Modal, Navbar, Nav, NavDropdown, Row } from 'react-bootstrap'
 
-function SettingsDialog({ onHide, settings, onSettings }) {
-  const [numSteps, setNumSteps] = useState(settings.numSteps)
-  const [chunkSize, setChunkSize] = useState(settings.chunkSize)
-  const [strength, setStrength] = useState(settings.strength)
-  const [theta, setTheta] = useState(settings.theta)
-  const [sequenceThickness, setSequenceThickness] = useState(settings.sequenceThickness)
-  const [linkThickness, setLinkThickness] = useState(settings.linkThickness)
+function SettingsDialog({ onHide, settings: paramSettings, onSettings }) {
+  const [settings, setSettings] = useState(paramSettings)
+  const {
+    chunkSize,
+    forceSteps,
+    linkSteps,
+    strength,
+    theta,
+    sequenceThickness,
+    linkThickness,
+  } = settings
   return (
     <Modal show={true} onHide={onHide} size="lg">
       <Modal.Header closeButton>
@@ -21,7 +25,8 @@ function SettingsDialog({ onHide, settings, onSettings }) {
             onSettings({
               ...settings,
               chunkSize: +chunkSize,
-              numSteps: +numSteps,
+              forceSteps: +forceSteps,
+              linkSteps: +linkSteps,
               strength: +strength,
               theta: +theta,
               sequenceThickness: +sequenceThickness,
@@ -32,15 +37,39 @@ function SettingsDialog({ onHide, settings, onSettings }) {
         >
           <Form.Group as={Row}>
             <Form.Label column sm="4">
-              Number of simulation steps
+              Number of simulation steps for the nodes
               <Form.Text muted>Used in the force-based layout simulation</Form.Text>
             </Form.Label>
             <Col>
               <Form.Control
-                column
                 type="number"
-                value={numSteps}
-                onChange={event => setNumSteps(event.target.value)}
+                value={forceSteps}
+                onChange={event => {
+                  const val = event.target.value
+                  setSettings(settings => ({
+                    ...settings,
+                    forceSteps: val,
+                  }))
+                }}
+              />
+            </Col>
+          </Form.Group>
+          <Form.Group as={Row}>
+            <Form.Label column sm="4">
+              Number of simulation steps for the links
+              <Form.Text muted>Used in the force-based layout simulation</Form.Text>
+            </Form.Label>
+            <Col>
+              <Form.Control
+                type="number"
+                value={linkSteps}
+                onChange={event => {
+                  const val = event.target.value
+                  setSettings(settings => ({
+                    ...settings,
+                    linkSteps: val,
+                  }))
+                }}
               />
             </Col>
           </Form.Group>
@@ -55,10 +84,15 @@ function SettingsDialog({ onHide, settings, onSettings }) {
             </Form.Label>
             <Col>
               <Form.Control
-                column
                 type="number"
                 value={chunkSize}
-                onChange={event => setChunkSize(event.target.value)}
+                onChange={event => {
+                  const val = event.target.value
+                  setSettings(settings => ({
+                    ...settings,
+                    chunkSize: val,
+                  }))
+                }}
               />
             </Col>
           </Form.Group>
@@ -69,27 +103,33 @@ function SettingsDialog({ onHide, settings, onSettings }) {
             </Form.Label>
             <Col>
               <Form.Control
-                column
                 type="number"
                 value={theta}
-                onChange={event => setTheta(event.target.value)}
+                onChange={event => {
+                  const val = event.target.value
+                  setSettings(settings => ({
+                    ...settings,
+                    theta: val,
+                  }))
+                }}
               />
             </Col>
           </Form.Group>
           <Form.Group as={Row}>
             <Form.Label column sm="4">
-              Force directed layout strength
-              <Form.Text muted>
-                Used in the force-based layout simulation, larger values have more
-                repulsion
-              </Form.Text>
+              Strength
             </Form.Label>
             <Col>
               <Form.Control
-                column
                 type="number"
                 value={strength}
-                onChange={event => setStrength(event.target.value)}
+                onChange={event => {
+                  const val = event.target.value
+                  setSettings(settings => ({
+                    ...settings,
+                    strength: val,
+                  }))
+                }}
               />
             </Col>
           </Form.Group>
@@ -99,10 +139,15 @@ function SettingsDialog({ onHide, settings, onSettings }) {
             </Form.Label>
             <Col>
               <Form.Control
-                column
                 type="number"
                 value={sequenceThickness}
-                onChange={event => setSequenceThickness(event.target.value)}
+                onChange={event => {
+                  const val = event.target.value
+                  setSettings(settings => ({
+                    ...settings,
+                    sequenceThickness: val,
+                  }))
+                }}
               />
             </Col>
           </Form.Group>
@@ -112,10 +157,15 @@ function SettingsDialog({ onHide, settings, onSettings }) {
             </Form.Label>
             <Col>
               <Form.Control
-                column
                 type="input"
                 value={linkThickness}
-                onChange={event => setLinkThickness(event.target.value)}
+                onChange={event => {
+                  const val = event.target.value
+                  setSettings(settings => ({
+                    ...settings,
+                    linkThickness: val,
+                  }))
+                }}
               />
             </Col>
           </Form.Group>

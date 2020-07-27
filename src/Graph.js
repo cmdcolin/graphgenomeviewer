@@ -9,7 +9,8 @@ const Graph = React.forwardRef((props, ref) => {
     drawPaths = false,
     settings: {
       chunkSize = 1000,
-      numSteps = 500,
+      forceSteps = 500,
+      linkSteps = 3,
       sequenceThickness = 10,
       linkThickness = 2,
       strength = -50,
@@ -45,16 +46,17 @@ const Graph = React.forwardRef((props, ref) => {
           .id(d => d.id)
           .distance(link => {
             return link.sequence ? 1 : 10
-          }),
+          })
+          .iterations(linkSteps),
       )
       .force('charge', d3.forceManyBody().strength(strength).theta(theta))
       .force('center', d3.forceCenter(width / 2, height / 2))
 
-    for (let i = 0; i < numSteps; ++i) {
+    for (let i = 0; i < forceSteps; ++i) {
       simulation.tick()
     }
     return links
-  }, [data.links, data.nodes, height, numSteps, strength, theta, width])
+  }, [data.links, data.nodes, forceSteps, height, linkSteps, strength, theta, width])
 
   useEffect(() => {
     // zoom logic, similar to https://observablehq.com/@d3/zoom

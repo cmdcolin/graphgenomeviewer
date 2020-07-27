@@ -18,7 +18,8 @@ function App() {
   const [settings, setSettings] = useState({
     strength: -50,
     chunkSize: 1000,
-    numSteps: 1000,
+    forceSteps: 200,
+    linkSteps: 3,
     sequenceThickness: 10,
     linkThickness: 2,
     theta: 0.9,
