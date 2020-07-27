@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { FeatureDialog } from './FeatureDialog'
 import { Graph } from './Graph'
 import { Sidebar } from './Sidebar'
@@ -11,7 +11,7 @@ import './App.css'
 function App() {
   const [featureData, setFeatureData] = useState()
   const [dataset, setDataset] = useState('MT.gfa')
-  const [graph, setGraph] = useState()
+  const [data, setData] = useState()
   const [error, setError] = useState()
   const [color, setColor] = useState('Rainbow')
   const [pathDraw, setPathDraw] = useState(false)
@@ -24,8 +24,7 @@ function App() {
           throw new Error(`Failed to fetch ${result.statusText}`)
         }
         const text = await result.text()
-        const d = parseGFA(text)
-        setGraph(d)
+        setData(text)
         setError(undefined)
       } catch (e) {
         console.error(e)
@@ -33,11 +32,19 @@ function App() {
       }
     })()
   }, [dataset])
+
+  const graph = useMemo(() => {
+    return data ? parseGFA(data) : undefined
+  }, [data])
+
   return (
     <div>
       <Header
         onData={d => {
           setDataset(d)
+        }}
+        onGraph={d => {
+          setData(d)
         }}
       />
       {featureData ? (

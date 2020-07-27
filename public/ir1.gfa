@@ -1,0 +1,9 @@
+S	A	AAAAAAACGT
+S	X	ACGTCCACGT
+S	B	ACGTGGGGGG
+L	A	+	X	+	4M
+L	A	+	X	-	4M
+L	X	+	B	+	4M
+L	X	-	B	+	4M
+P	P1	A+,X+,B+	4M,4M
+P	P2	A+,X-,B+	4M,4M
