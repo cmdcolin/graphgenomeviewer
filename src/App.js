@@ -22,7 +22,7 @@ function App() {
     strength: -50,
     chunkSize: 1000,
     forceSteps: 200,
-    linkSteps: 3,
+    linkSteps: 1,
     sequenceThickness: 10,
     linkThickness: 2,
     theta: 0.9,
@@ -61,8 +61,10 @@ function App() {
         onSettings={d => {
           setSettings(d)
         }}
+        onExportSVG={() => {
+          saveAs(serialize(ref.current))
+        }}
         settings={settings}
-        onExportSVG={() => saveAs(serialize(ref.current))}
       />
       {featureData ? (
         <FeatureDialog
@@ -78,7 +80,6 @@ function App() {
       <div className="flexcontainer">
         <div id="sidebar" className="sidebar">
           <Sidebar
-            ref={ref}
             color={color}
             onColorChange={c => setColor(c)}
             onPathDraw={d => setPathDraw(d)}
