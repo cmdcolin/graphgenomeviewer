@@ -36,8 +36,12 @@ const Graph = React.forwardRef((props, ref) => {
     )
   }, [graph.paths])
   const links = useMemo(() => {
-    const links = data.links.map(d => Object.create(d))
-    const nodes = data.nodes.map(d => Object.create(d))
+    const links = data.links.map(d =>
+      Object.create({ ...d, x: Math.random(), y: Math.random() }),
+    )
+    const nodes = data.nodes.map(d =>
+      Object.create({ ...d, x: Math.random(), y: Math.random() }),
+    )
     const simulation = d3
       .forceSimulation(nodes)
       .force(
@@ -56,6 +60,8 @@ const Graph = React.forwardRef((props, ref) => {
     for (let i = 0; i < forceSteps; ++i) {
       simulation.tick()
     }
+    // used for redrawing
+    // eslint-disable-next-line no-unused-vars
     const m = redraw
     return links
   }, [
