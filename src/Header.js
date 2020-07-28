@@ -121,6 +121,14 @@ export function Header({ onData, settings, onGraph, onExportSVG, onSettings }) {
               </NavDropdown.Item>
               <NavDropdown.Item onClick={() => onData('big1.gfa')}>Big1</NavDropdown.Item>
               <NavDropdown.Item onClick={() => onData('ir1.gfa')}>Ir1</NavDropdown.Item>
+              <NavDropdown.Item
+                onClick={() => onData('test_contig_placement_assembly_graph.gfa')}
+              >
+                Unicycler example
+              </NavDropdown.Item>
+              <NavDropdown.Item onClick={() => onData('circle.gfa')}>
+                Simple circle
+              </NavDropdown.Item>
             </NavDropdown>
             <Nav.Link
               onClick={() => {
