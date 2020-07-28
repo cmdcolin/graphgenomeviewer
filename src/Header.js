@@ -264,7 +264,7 @@ function OpenFileDialog({ onHide, onGraph }) {
   )
 }
 
-export function Header({ onData, settings, onGraph, onSettings }) {
+export function Header({ onData, settings, onGraph, onExportSVG, onSettings }) {
   const [showAbout, setShowAbout] = useState()
   const [showSettings, setShowSettings] = useState()
   const [showOpenURL, setShowOpenURL] = useState()
@@ -282,6 +282,9 @@ export function Header({ onData, settings, onGraph, onSettings }) {
               </NavDropdown.Item>
               <NavDropdown.Item onClick={() => setShowOpenFile(true)}>
                 Open file
+              </NavDropdown.Item>
+              <NavDropdown.Item onClick={() => onExportSVG()}>
+                Export SVG
               </NavDropdown.Item>
             </NavDropdown>
             <NavDropdown title="Examples" id="basic-nav-dropdown">

@@ -21,7 +21,6 @@ const Sidebar = React.forwardRef(
           <option>RdYlBu</option>
         </Form.Control>
         <br />
-        <Button onClick={() => saveAs(serialize(ref.current))}>Export SVG</Button>
         <Form.Group
           onChange={event => {
             onPathDraw(event.target.checked)
@@ -29,7 +28,7 @@ const Sidebar = React.forwardRef(
         >
           <Form.Check type="checkbox" label="Draw paths" />
         </Form.Group>
-        <Button onClick={onRedraw}>Redraw</Button>
+        <Button onClick={() => onRedraw()}>Redraw</Button>
       </div>
     )
   },

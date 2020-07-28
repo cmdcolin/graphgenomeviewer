@@ -4,6 +4,8 @@ import { Graph } from './Graph'
 import { Sidebar } from './Sidebar'
 import { Header } from './Header'
 import { parseGFA } from './util'
+import { serialize } from './util'
+import saveAs from 'file-saver'
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './App.css'
@@ -60,6 +62,7 @@ function App() {
           setSettings(d)
         }}
         settings={settings}
+        onExportSVG={() => saveAs(serialize(ref.current))}
       />
       {featureData ? (
         <FeatureDialog
