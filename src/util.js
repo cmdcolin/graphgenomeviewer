@@ -125,26 +125,51 @@ export function reprocessGraph(G, chunkSize) {
     }
     Gp.links.push(link)
   }
+  console.log('reprocessed', Gp)
   return Gp
 }
 
-export function* generatePaths(links, graph) {
-  let currentLinkId = links[0].linkNum
-  let currentLinkSet = []
-  let original
-  for (let i = 0; i < links.length; i++) {
-    const link = links[i]
-    if (currentLinkId !== link.linkNum) {
-      if (original.id) {
-        yield { links: currentLinkSet, original }
+// source https://stackoverflow.com/questions/14446511/most-efficient-method-to-groupby-on-an-array-of-objects
+// returns an array that contains groupings of xs by attribute key
+function groupByArray(xs, key) {
+  return xs.reduce(function (rv, x) {
+    const v = key instanceof Function ? key(x) : x[key]
+    if (v !== undefined) {
+      const el = rv.find(r => r && r.key === v)
+      if (el) {
+        el.values.push(x)
+      } else {
+        rv.push({ key: v, values: [x] })
       }
-      currentLinkSet = []
-      currentLinkId = link.linkNum
     }
-    original = graph[i]
-    currentLinkSet.push([link.source.x, link.source.y])
-    currentLinkSet.push([link.target.x, link.target.y])
+    return rv
+  }, [])
+}
+
+// connects successive start->end to a path
+// param edges: {source:{x,y}, target:{x,y}}[]
+function makePath(edges) {
+  const path = []
+  let i = 0
+  for (; i < edges.length; i++) {
+    const st = edges[i]
+    path.push([st.source.x, st.source.y])
   }
+  const last = edges[i - 1]
+  path.push([last.target.x, last.target.y])
+  return path
+}
+
+// groups the edges data structure by the linkNum attribute
+export function generatePaths(edges, graph) {
+  console.log({ edges, graph })
+  const ret = groupByArray(edges, 'linkNum')
+  return ret.map(entry => {
+    return {
+      links: makePath(entry.values),
+      original: graph[entry.key],
+    }
+  })
 }
 
 export function* generateEdges(links, graph) {

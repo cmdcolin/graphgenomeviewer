@@ -93,12 +93,14 @@ const Graph = React.forwardRef((props, ref) => {
     )
   }, [height, ref, width])
 
-  const paths = [...generatePaths(links, data.links)]
+  const paths = generatePaths(links, data.links)
   const edges = [...generateEdges(links, data.links)]
+  console.log({ paths })
 
   const map = {}
   paths.forEach(path => {
     const { source, target, linkNum } = path.original
+    console.log({ path, source, target, linkNum })
     if (source.endsWith('start')) {
       map[source] = {
         source: links[linkNum].target,
@@ -133,8 +135,14 @@ const Graph = React.forwardRef((props, ref) => {
           const y2 = p.links[1][1]
 
           if (drawPaths) {
-            const { source: s1, target: t1 } = map[p.original.source]
-            const { source: s2, target: t2 } = map[p.original.target]
+            const s = map[p.original.source]
+            const t = map[p.original.target]
+            console.log(t, p.original.target, s, p.original.source)
+            // if (!s || !t) {
+            //   return null
+            // }
+            const { source: s1, target: t1 } = s
+            const { source: s2, target: t2 } = t
             // implements this algorithm to calculate a control point
             // that points "forwards" of a given contig node
             // https://math.stackexchange.com/questions/175896

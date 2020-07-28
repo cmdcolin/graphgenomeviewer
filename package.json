@@ -31,7 +31,8 @@
     "rules": {
       "prefer-template": "error",
       "prefer-const": "error",
-      "no-var": "error"
+      "no-var": "error",
+      "curly": "error"
     }
   },
   "browserslist": {
