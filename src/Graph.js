@@ -134,11 +134,16 @@ const Graph = React.forwardRef((props, ref) => {
           const y2 = p.links[1][1]
 
           if (drawPaths) {
+            if (!p.original.paths) {
+              return null
+            }
+
             const { source: s1, target: t1 } = nodePositionMap[p.original.source]
             const { source: s2, target: t2 } = nodePositionMap[p.original.target]
             const m1 = (y2 - y1) / (x2 - x1)
             const m2 = (s1.y - t1.y) / (s1.x - t1.x)
-            if (Math.abs(m1 - m2) < 0.5) {
+            const m3 = (s2.y - t2.y) / (s2.x - t2.x)
+            if (Math.abs(m1 - m2) < 0.5 || Math.abs(m1 - m3) < 0.5) {
               return p.original.paths.map((pp, index) => {
                 const dx = x2 - x1
                 const dy = y2 - y1
