@@ -1,7 +1,7 @@
 import React from 'react'
 import { Form, Button } from 'react-bootstrap'
 
-export function Sidebar({ onColorChange, onPathDraw, onRedraw, color }) {
+export function Sidebar({ onDrawLabels, onColorChange, onPathDraw, onRedraw, color }) {
   return (
     <div>
       <p>Settings</p>
@@ -25,6 +25,14 @@ export function Sidebar({ onColorChange, onPathDraw, onRedraw, color }) {
         }}
       >
         <Form.Check type="checkbox" label="Draw paths" />
+      </Form.Group>
+      <br />
+      <Form.Group
+        onChange={event => {
+          onDrawLabels(event.target.checked)
+        }}
+      >
+        <Form.Check type="checkbox" label="Draw labels" />
       </Form.Group>
       <br />
       <Button onClick={() => onRedraw()}>Redraw</Button>

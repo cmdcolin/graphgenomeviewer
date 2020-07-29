@@ -18,6 +18,7 @@ function App() {
   const [color, setColor] = useState('Rainbow')
   const [pathDraw, setPathDraw] = useState(false)
   const [redraw, setRedraw] = useState(0)
+  const [drawLabels, setDrawLabels] = useState(false)
   const [settings, setSettings] = useState({
     strength: -50,
     chunkSize: 1000,
@@ -82,6 +83,7 @@ function App() {
           <Sidebar
             color={color}
             onColorChange={c => setColor(c)}
+            onDrawLabels={v => setDrawLabels(v)}
             onPathDraw={d => setPathDraw(d)}
             onRedraw={() => setRedraw(redraw => redraw + 1)}
           />
@@ -94,6 +96,7 @@ function App() {
               ref={ref}
               color={color}
               redraw={redraw}
+              drawLabels={drawLabels}
               drawPaths={pathDraw}
               onFeatureClick={data => {
                 setFeatureData(data)

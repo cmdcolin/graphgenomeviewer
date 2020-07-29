@@ -1,12 +1,13 @@
 import React, { useMemo, useRef, useEffect } from 'react'
 import * as d3 from 'd3'
-import { reprocessGraph, generatePaths, generateEdges } from './util'
+import { projectLine, reprocessGraph, generatePaths, generateEdges } from './util'
 
 const Graph = React.forwardRef((props, ref) => {
   const gref = useRef()
   const {
     graph,
     drawPaths = false,
+    drawLabels = false,
     settings: {
       chunkSize = 1000,
       forceSteps = 500,
@@ -125,7 +126,13 @@ const Graph = React.forwardRef((props, ref) => {
   }
 
   return (
-    <svg width="100%" height="100%" ref={ref} viewBox={[0, 0, width, height].toString()}>
+    <svg
+      width="100%"
+      height="100%"
+      ref={ref}
+      style={{ fontSize: 10 }}
+      viewBox={[0, 0, width, height].toString()}
+    >
       <g ref={gref}>
         {edges.map(p => {
           const x1 = p.links[0][0]
@@ -164,19 +171,10 @@ const Graph = React.forwardRef((props, ref) => {
               })
             }
 
-            // implements this algorithm to calculate a control point
-            // that points "forwards" of a given contig node
-            // https://math.stackexchange.com/questions/175896
-            const dp1 = Math.sqrt((t1.y - s1.y) ** 2 + (t1.x - s1.x) ** 2)
-            const dp2 = Math.sqrt((t2.y - s2.y) ** 2 + (t2.x - s2.x) ** 2)
-
             return p.original.paths.map((pp, index) => {
-              const d1 = (60 + index * 50) / dp1
-              const d2 = (60 + index * 50) / dp2
-              const cx1 = (1 - d1) * s1.x + d1 * t1.x
-              const cy1 = (1 - d1) * s1.y + d1 * t1.y
-              const cx2 = (1 - d2) * s2.x + d2 * t2.x
-              const cy2 = (1 - d2) * s2.y + d2 * t2.y
+              const [cx1, cy1] = projectLine(s1.x, s1.y, t1.x, t1.y, 60 + index * 50)
+              const [cx2, cy2] = projectLine(s2.x, s2.y, t2.x, t2.y, 60 + index * 50)
+
               const cpath = d3.path()
               cpath.moveTo(x1, y1)
               cpath.bezierCurveTo(cx1, cy1, cx2, cy2, x2, y2)
@@ -228,20 +226,47 @@ const Graph = React.forwardRef((props, ref) => {
         {paths.map((p, i) => {
           const line = d3.line().context(null)
           const path = line(p.links)
+          const t1 = p.links[0]
+          const s1 = p.links[1]
+          const t2 = p.links[p.links.length - 1]
+          const s2 = p.links[p.links.length - 2]
+          const [cx1, cy1] = projectLine(s1[0], s1[1], t1[0], t1[1], 100)
+          const [cx2, cy2] = projectLine(s2[0], s2[1], t2[0], t2[1], 100)
+          const invisibleTextPath = line([[cx1, cy1], ...p.links, [cx2, cy2]])
           const stroke = color.startsWith('Just')
             ? color.replace('Just', '').toLowerCase()
             : d3.hsl(d3[`interpolate${color}`](i / paths.length)).darker()
           return (
-            <path
-              key={path.toString()}
-              d={path}
-              strokeWidth={sequenceThickness}
-              stroke={stroke}
-              fill="none"
-              onClick={() => onFeatureClick(p.original)}
-            >
-              <title>{p.original.id}</title>
-            </path>
+            <React.Fragment key={`${path}_${i}`}>
+              <path
+                id={p.original.id}
+                d={path}
+                strokeWidth={sequenceThickness}
+                stroke={stroke}
+                fill="none"
+                onClick={() => onFeatureClick(p.original)}
+              >
+                <title>{p.original.id}</title>
+              </path>
+              {drawLabels ? (
+                <>
+                  <path
+                    id={`${p.original.id}_invisible`}
+                    d={invisibleTextPath}
+                    fill="none"
+                  />
+                  <text dy={12}>
+                    <textPath
+                      startOffset="50%"
+                      textAnchor="middle"
+                      href={`#${p.original.id}_invisible`}
+                    >
+                      {p.original.id}
+                    </textPath>
+                  </text>
+                </>
+              ) : null}
+            </React.Fragment>
           )
         })}
       </g>

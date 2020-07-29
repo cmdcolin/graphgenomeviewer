@@ -186,3 +186,15 @@ export function generateEdges(links, graph) {
   }
   return result
 }
+
+// implements this algorithm to calculate a control point
+// that points "forwards" of a given contig node
+// https://math.stackexchange.com/questions/175896
+
+export function projectLine(x1, y1, x2, y2, units) {
+  const dp = Math.sqrt((y2 - y1) ** 2 + (x2 - x1) ** 2)
+  const d = units / dp
+  const cx = (1 - d) * x1 + d * x2
+  const cy = (1 - d) * y1 + d * y2
+  return [cx, cy]
+}
