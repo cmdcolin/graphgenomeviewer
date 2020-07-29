@@ -77,6 +77,7 @@ export function reprocessGraph(G, chunkSize) {
       }
     }
   }
+
   for (let i = 0; i < G.nodes.length; i++) {
     const { id, sequence, ...rest } = G.nodes[i]
     const nodes = []
@@ -125,7 +126,6 @@ export function reprocessGraph(G, chunkSize) {
     }
     Gp.links.push(link)
   }
-  console.log('reprocessed', Gp)
   return Gp
 }
 
@@ -162,7 +162,6 @@ function makePath(edges) {
 
 // groups the edges data structure by the linkNum attribute
 export function generatePaths(edges, graph) {
-  console.log({ edges, graph })
   const ret = groupByArray(edges, 'linkNum')
   return ret.map(entry => {
     return {
@@ -172,18 +171,20 @@ export function generatePaths(edges, graph) {
   })
 }
 
-export function* generateEdges(links, graph) {
+export function generateEdges(links, graph) {
+  const result = []
   for (let i = 0; i < links.length; i++) {
     const link = links[i]
     const original = graph[i]
     if (!original.id) {
-      yield {
+      result.push({
         links: [
           [link.source.x, link.source.y],
           [link.target.x, link.target.y],
         ],
         original,
-      }
+      })
     }
   }
+  return result
 }

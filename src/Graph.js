@@ -28,6 +28,7 @@ const Graph = React.forwardRef((props, ref) => {
   const data = useMemo(() => {
     return reprocessGraph(graph, chunkSize)
   }, [chunkSize, graph])
+
   const colors = useMemo(() => {
     return Object.fromEntries(
       (graph.paths || []).map((p, i) => {
@@ -93,38 +94,36 @@ const Graph = React.forwardRef((props, ref) => {
     )
   }, [height, ref, width])
 
-  const paths = generatePaths(links, data.links)
-  const edges = [...generateEdges(links, data.links)]
-  console.log({ paths })
+  const paths = generatePaths(links, graph.links)
+  const edges = generateEdges(links, data.links)
 
-  const map = {}
-  paths.forEach(path => {
-    const { source, target, linkNum } = path.original
-    console.log({ path, source, target, linkNum })
-    if (source.endsWith('start')) {
-      map[source] = {
-        source: links[linkNum].target,
-        target: links[linkNum].source,
-      }
-      map[target] = {
-        target: links[linkNum].target,
-        source: links[linkNum].source,
-      }
-    } else {
-      map[source] = {
-        source: links[linkNum].source,
-        target: links[linkNum].target,
-      }
-      map[target] = {
-        target: links[linkNum].source,
-        source: links[linkNum].target,
+  const nodePositionMap = {}
+  for (let i = 0; i < links.length; i++) {
+    const { source, target } = data.links[i]
+    const { linkNum } = links[i]
+    if (linkNum !== undefined) {
+      if (source.endsWith('start')) {
+        nodePositionMap[source] = {
+          source: links[linkNum].target,
+          target: links[linkNum].source,
+        }
+        nodePositionMap[target] = {
+          target: links[linkNum].target,
+          source: links[linkNum].source,
+        }
+      } else {
+        nodePositionMap[source] = {
+          source: links[linkNum].source,
+          target: links[linkNum].target,
+        }
+        nodePositionMap[target] = {
+          target: links[linkNum].source,
+          source: links[linkNum].target,
+        }
       }
     }
-  })
-
-  if (drawPaths && !edges[0].original.paths) {
-    return <h1>no paths found</h1>
   }
+
   return (
     <svg width="100%" height="100%" ref={ref} viewBox={[0, 0, width, height].toString()}>
       <g ref={gref}>
@@ -135,14 +134,9 @@ const Graph = React.forwardRef((props, ref) => {
           const y2 = p.links[1][1]
 
           if (drawPaths) {
-            const s = map[p.original.source]
-            const t = map[p.original.target]
-            console.log(t, p.original.target, s, p.original.source)
-            // if (!s || !t) {
-            //   return null
-            // }
-            const { source: s1, target: t1 } = s
-            const { source: s2, target: t2 } = t
+            const { source: s1, target: t1 } = nodePositionMap[p.original.source]
+            const { source: s2, target: t2 } = nodePositionMap[p.original.target]
+
             // implements this algorithm to calculate a control point
             // that points "forwards" of a given contig node
             // https://math.stackexchange.com/questions/175896
@@ -167,50 +161,21 @@ const Graph = React.forwardRef((props, ref) => {
                   stroke={colors[pp]}
                   fill="none"
                   onClick={() => onFeatureClick(p.original)}
-                />
+                >
+                  <title>{pp}</title>
+                </path>
               )
             })
           } else {
             const line = d3.line().context(null)
-            const x1 = p.links[0][0]
-            const y1 = p.links[0][1]
-            let x2 = p.links[1][0]
-            let y2 = p.links[1][1]
-            const dx = x2 - x1
-            const dy = y2 - y1
-            const dr = Math.sqrt(dx * dx + dy * dy)
-            // Defaults for normal edge.
-            let drx = dr
-            let dry = dr
-            let xRot = 0 // degrees
-            let largeArc = 0 // 1 or 0
+            const xRot = 90
             const sweep = 0 // 1 or 0
-
-            let path
-            // Self edge.
-            if (p.original.loop) {
-              // Fiddle with this angle to get loop oriented.
-              xRot = 90
-
-              // Needs to be 1.
-              largeArc = 1
-
-              // Change sweep to change orientation of loop.
-              //sweep = 0;
-
-              // Make drx and dry different to get an ellipse
-              // instead of a circle.
-              drx = -30
-              dry = -20
-
-              // For whatever reason the arc collapses to a point if the beginning
-              // and ending points of the arc are the same, so kludge it.
-              x2 = x2 + 1
-              y2 = y2 + 1
-              path = `M${x1},${y1}A${drx},${dry} ${xRot},${largeArc},${sweep} ${x2},${y2}`
-            } else {
-              path = line(p.links)
-            }
+            const largeArc = 1
+            const drx = -30
+            const dry = -20
+            const path = p.original.loop
+              ? `M${x1},${y1}A${drx},${dry} ${xRot},${largeArc},${sweep} ${x2},${y2}`
+              : line(p.links)
 
             return (
               <path
