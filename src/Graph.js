@@ -94,7 +94,7 @@ const Graph = React.forwardRef((props, ref) => {
     )
   }, [height, ref, width])
 
-  const paths = generatePaths(links, graph.links)
+  const paths = generatePaths(links, graph.nodes)
   const edges = generateEdges(links, data.links)
 
   const nodePositionMap = {}
@@ -136,6 +136,28 @@ const Graph = React.forwardRef((props, ref) => {
           if (drawPaths) {
             const { source: s1, target: t1 } = nodePositionMap[p.original.source]
             const { source: s2, target: t2 } = nodePositionMap[p.original.target]
+            const m1 = (y2 - y1) / (x2 - x1)
+            const m2 = (s1.y - t1.y) / (s1.x - t1.x)
+            if (Math.abs(m1 - m2) < 0.5) {
+              return p.original.paths.map((pp, index) => {
+                const dx = x2 - x1
+                const dy = y2 - y1
+                const dr = Math.sqrt(dx * dx + dy * dy)
+                const cpath = `M${x1},${y1}A${dr},${dr} 0 0,${index} ${x2},${y2}`
+                return (
+                  <path
+                    key={`${cpath}-${index}`}
+                    d={cpath}
+                    strokeWidth={linkThickness}
+                    stroke={colors[pp]}
+                    fill="none"
+                    onClick={() => onFeatureClick(p.original)}
+                  >
+                    <title>{pp}</title>
+                  </path>
+                )
+              })
+            }
 
             // implements this algorithm to calculate a control point
             // that points "forwards" of a given contig node
@@ -185,7 +207,9 @@ const Graph = React.forwardRef((props, ref) => {
                 stroke="black"
                 fill="none"
                 onClick={() => onFeatureClick(p.original)}
-              />
+              >
+                <title>{p.original.id}</title>
+              </path>
             )
           }
         })}
@@ -193,16 +217,15 @@ const Graph = React.forwardRef((props, ref) => {
         {paths.map((p, i) => {
           const line = d3.line().context(null)
           const path = line(p.links)
+          const stroke = color.startsWith('Just')
+            ? color.replace('Just', '').toLowerCase()
+            : d3.hsl(d3[`interpolate${color}`](i / paths.length)).darker()
           return (
             <path
               key={path.toString()}
               d={path}
               strokeWidth={sequenceThickness}
-              stroke={
-                color.startsWith('Just')
-                  ? color.replace('Just', '').toLowerCase()
-                  : d3.hsl(d3[`interpolate${color}`](i / paths.length)).darker()
-              }
+              stroke={stroke}
               fill="none"
               onClick={() => onFeatureClick(p.original)}
             >

@@ -12,7 +12,7 @@ import './App.css'
 
 function App() {
   const [featureData, setFeatureData] = useState()
-  const [dataset, setDataset] = useState('example1.gfa')
+  const [dataset, setDataset] = useState('MT.gfa')
   const [data, setData] = useState()
   const [error, setError] = useState()
   const [color, setColor] = useState('Rainbow')

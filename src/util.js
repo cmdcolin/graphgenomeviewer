@@ -163,12 +163,10 @@ function makePath(edges) {
 // groups the edges data structure by the linkNum attribute
 export function generatePaths(edges, graph) {
   const ret = groupByArray(edges, 'linkNum')
-  return ret.map(entry => {
-    return {
-      links: makePath(entry.values),
-      original: graph[entry.key],
-    }
-  })
+  return ret.map(entry => ({
+    links: makePath(entry.values),
+    original: graph[entry.key],
+  }))
 }
 
 export function generateEdges(links, graph) {
