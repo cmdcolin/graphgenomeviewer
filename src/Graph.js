@@ -147,8 +147,8 @@ const Graph = React.forwardRef((props, ref) => {
               return p.original.paths.map((pp, index) => {
                 const dx = x2 - x1
                 const dy = y2 - y1
-                const dr = Math.sqrt(dx * dx + dy * dy)
-                const cpath = `M${x1},${y1}A${dr},${dr} 0 0,${index} ${x2},${y2}`
+                const dr = Math.sqrt(dx * dx + dy * dy) + Math.random() * 40
+                const cpath = `M${x1},${y1}A${dr},${dr} 0 0,${index % 2} ${x2},${y2}`
                 return (
                   <path
                     key={`${cpath}-${index}`}
@@ -194,15 +194,21 @@ const Graph = React.forwardRef((props, ref) => {
               )
             })
           } else {
+            const { source: s1, target: t1 } = nodePositionMap[p.original.source]
+            const { source: s2, target: t2 } = nodePositionMap[p.original.target]
+            const m1 = (y2 - y1) / (x2 - x1)
+            const m2 = (s1.y - t1.y) / (s1.x - t1.x)
+            const m3 = (s2.y - t2.y) / (s2.x - t2.x)
             const line = d3.line().context(null)
             const xRot = 90
             const sweep = 0 // 1 or 0
             const largeArc = 1
             const drx = -30
             const dry = -20
-            const path = p.original.loop
-              ? `M${x1},${y1}A${drx},${dry} ${xRot},${largeArc},${sweep} ${x2},${y2}`
-              : line(p.links)
+            const path =
+              p.original.loop && !(m1 - m2 < 0.5 || m1 - m3 < 0.5)
+                ? `M${x1},${y1}A${drx},${dry} ${xRot},${largeArc},${sweep} ${x2},${y2}`
+                : line(p.links)
 
             return (
               <path
