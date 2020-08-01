@@ -6,30 +6,35 @@ import { Header } from './Header'
 import { parseGFA } from './util'
 import { serialize } from './util'
 import saveAs from 'file-saver'
-
+import { useQueryParams, StringParam, NumberParam, withDefault } from 'use-query-params'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './App.css'
 
 function App() {
   const [featureData, setFeatureData] = useState()
-  const [dataset, setDataset] = useState('MT.gfa')
   const [data, setData] = useState()
   const [error, setError] = useState()
   const [color, setColor] = useState('Rainbow')
+  const [, updateState] = useState()
+  const forceUpdate = React.useCallback(() => updateState({}), [])
   const [pathDraw, setPathDraw] = useState(false)
   const [redraw, setRedraw] = useState(0)
   const [drawLabels, setDrawLabels] = useState(false)
-  const [settings, setSettings] = useState({
-    strengthCenter: -50,
-    strengthXY: 0.1,
-    forceType: 'center',
-    chunkSize: 1000,
-    forceSteps: 200,
-    linkSteps: 1,
-    sequenceThickness: 10,
-    linkThickness: 2,
-    theta: 0.9,
+  const [query, setQuery] = useQueryParams({
+    strengthCenter: withDefault(NumberParam, -50),
+    strengthXY: withDefault(NumberParam, 0.1),
+    chunkSize: withDefault(NumberParam, 1000),
+    forceSteps: withDefault(NumberParam, 200),
+    linkSteps: withDefault(NumberParam, 1),
+    sequenceThickness: withDefault(NumberParam, 10),
+    linkThickness: withDefault(NumberParam, 2),
+    theta: withDefault(NumberParam, 0.9),
+    forceType: withDefault(StringParam, 'center'),
+    dataset: withDefault(StringParam, 'MT.gfa'),
   })
+
+  const { dataset, ...settings } = query
+
   const ref = useRef()
   useEffect(() => {
     ;(async () => {
@@ -56,13 +61,15 @@ function App() {
     <div>
       <Header
         onData={d => {
-          setDataset(d)
+          setQuery({ dataset: d, ...settings })
+          forceUpdate()
         }}
         onGraph={d => {
           setData(d)
         }}
         onSettings={d => {
-          setSettings(d)
+          setQuery({ ...d, dataset })
+          forceUpdate()
         }}
         onExportSVG={() => {
           saveAs(serialize(ref.current))
