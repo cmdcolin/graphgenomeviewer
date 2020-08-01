@@ -42,7 +42,6 @@ const Graph = React.forwardRef((props, ref) => {
   const data = useMemo(() => {
     return reprocessGraph(graph, chunkSize)
   }, [chunkSize, graph])
-
   const colors = useMemo(() => {
     return Object.fromEntries(
       (graph.paths || []).map((p, i) => {
@@ -65,7 +64,7 @@ const Graph = React.forwardRef((props, ref) => {
           .forceLink(links)
           .id(d => d.id)
           .distance(link => {
-            return link.sequence ? 1 : 10
+            return link.sequence ? 0.1 : 10
           })
           .iterations(linkSteps),
       )
@@ -112,6 +111,9 @@ const Graph = React.forwardRef((props, ref) => {
     forceSteps,
   ])
 
+  const xex = useMemo(() => d3.extent(links.map(x => x.source.x)), [links])
+  const yex = useMemo(() => d3.extent(links.map(x => x.source.y)), [links])
+
   useEffect(() => {
     // zoom logic, similar to https://observablehq.com/@d3/zoom
     // toggling logic from https://stackoverflow.com/a/29762389/2129219
@@ -138,13 +140,15 @@ const Graph = React.forwardRef((props, ref) => {
     nodePathMap[`${p.original.id}-end`] = [p.links[l - 2], p.links[l - 1]]
   }
 
+  const xs = xex[1] - xex[0]
+  const ys = yex[1] - yex[0]
   return (
     <svg
       width="100%"
       height="100%"
       ref={ref}
       style={{ fontSize: 10 }}
-      viewBox={[0, 0, width, height].toString()}
+      viewBox={[-xs, -ys, xs * 3, ys * 3].toString()}
     >
       <g ref={gref}>
         {edges.map((p, j) => {
