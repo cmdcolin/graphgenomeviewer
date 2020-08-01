@@ -121,31 +121,12 @@ const Graph = React.forwardRef((props, ref) => {
   const paths = generatePaths(links, graph.nodes)
   const edges = generateEdges(links, data.links)
 
-  const nodePositionMap = {}
-  for (let i = 0; i < links.length; i++) {
-    const { source, target } = data.links[i]
-    const { linkNum } = links[i]
-    if (linkNum !== undefined) {
-      if (source.endsWith('start')) {
-        nodePositionMap[source] = {
-          source: links[linkNum].target,
-          target: links[linkNum].source,
-        }
-        nodePositionMap[target] = {
-          target: links[linkNum].target,
-          source: links[linkNum].source,
-        }
-      } else {
-        nodePositionMap[source] = {
-          source: links[linkNum].source,
-          target: links[linkNum].target,
-        }
-        nodePositionMap[target] = {
-          target: links[linkNum].source,
-          source: links[linkNum].target,
-        }
-      }
-    }
+  const nodePathMap = {}
+  for (let i = 0; i < paths.length; i++) {
+    const p = paths[i]
+    const l = p.links.length
+    nodePathMap[`${p.original.id}-start`] = [p.links[1], p.links[0]]
+    nodePathMap[`${p.original.id}-end`] = [p.links[l - 2], p.links[l - 1]]
   }
 
   return (
@@ -164,16 +145,12 @@ const Graph = React.forwardRef((props, ref) => {
           const y2 = p.links[1][1]
 
           if (drawPaths) {
-            if (!p.original.paths) {
-              return null
-            }
-
-            const { source: s1, target: t1 } = nodePositionMap[p.original.source]
-            const { source: s2, target: t2 } = nodePositionMap[p.original.target]
+            const [s1, t1] = nodePathMap[p.original.source]
+            const [s2, t2] = nodePathMap[p.original.target]
             const m1 = (y2 - y1) / (x2 - x1)
-            const m2 = (s1.y - t1.y) / (s1.x - t1.x)
-            const m3 = (s2.y - t2.y) / (s2.x - t2.x)
-            if (Math.abs(m1 - m2) < 0.5 || Math.abs(m1 - m3) < 0.5) {
+            const m2 = (s1[1] - t1[1]) / (s1[0] - t1[0])
+            const m3 = (s2[1] - t2[1]) / (s2[0] - t2[0])
+            if (Math.abs(m1 - m2) < 0.2 || Math.abs(m1 - m3) < 0.2) {
               return p.original.paths.map((pp, index) => {
                 const dx = x2 - x1
                 const dy = y2 - y1
@@ -195,32 +172,65 @@ const Graph = React.forwardRef((props, ref) => {
               })
             }
 
-            return p.original.paths.map((pp, index) => {
-              const [cx1, cy1] = projectLine(s1.x, s1.y, t1.x, t1.y, 60 + index * 50)
-              const [cx2, cy2] = projectLine(s2.x, s2.y, t2.x, t2.y, 60 + index * 50)
+            return p.original.paths
+              ? p.original.paths.map((pp, index) => {
+                  const [cx1, cy1] = projectLine(
+                    s1[0],
+                    s1[1],
+                    t1[0],
+                    t1[1],
+                    70 + index * 30,
+                  )
+                  const [cx2, cy2] = projectLine(
+                    s2[0],
+                    s2[1],
+                    t2[0],
+                    t2[1],
+                    70 + index * 30,
+                  )
 
-              const cpath = d3.path()
-              cpath.moveTo(x1, y1)
-              cpath.bezierCurveTo(cx1, cy1, cx2, cy2, x2, y2)
-              return (
-                <path
-                  key={`${cpath.toString()}-${index}`}
-                  d={cpath}
-                  strokeWidth={linkThickness}
-                  stroke={colors[pp]}
-                  fill="none"
-                  onClick={() => onFeatureClick(p.original)}
-                >
-                  <title>{pp}</title>
-                </path>
-              )
-            })
+                  const cpath = d3.path()
+                  cpath.moveTo(x1, y1)
+                  cpath.bezierCurveTo(cx1, cy1, cx2, cy2, x2, y2)
+                  // debugging
+                  // <line
+                  // x1={cx1}
+                  // y1={cy1}
+                  // x2={t1[0]}
+                  // y2={t1[1]}
+                  // stroke="red"
+                  // strokeWidth={10}
+                  // strokeOpacity={0.1}
+                  // />
+                  // <line
+                  // x1={cx2}
+                  // y1={cy2}
+                  // x2={t2[0]}
+                  // y2={t2[1]}
+                  // stroke="purple"
+                  // strokeWidth={10}
+                  // strokeOpacity={0.1}
+                  // />
+                  return (
+                    <path
+                      key={`${cpath.toString()}-${index}`}
+                      d={cpath}
+                      strokeWidth={linkThickness}
+                      stroke={colors[pp]}
+                      fill="none"
+                      onClick={() => onFeatureClick(p.original)}
+                    >
+                      <title>{pp}</title>
+                    </path>
+                  )
+                })
+              : null
           } else {
-            const { source: s1, target: t1 } = nodePositionMap[p.original.source]
-            const { source: s2, target: t2 } = nodePositionMap[p.original.target]
+            const [s1, t1] = nodePathMap[p.original.source]
+            const [s2, t2] = nodePathMap[p.original.target]
             const m1 = (y2 - y1) / (x2 - x1)
-            const m2 = (s1.y - t1.y) / (s1.x - t1.x)
-            const m3 = (s2.y - t2.y) / (s2.x - t2.x)
+            const m2 = (s1[1] - t1[1]) / (s1[0] - t1[0])
+            const m3 = (s2[1] - t2[1]) / (s2[0] - t2[0])
             const line = d3.line().context(null)
             const xRot = 90
             const sweep = 0 // 1 or 0
