@@ -175,7 +175,7 @@ const Graph = React.forwardRef((props, ref) => {
             }
 
             return p.original.paths
-              ? p.original.paths.map((pp, index) => {
+              ? p.original.paths.slice(0, 1).map((pp, index) => {
                   const [cx1, cy1] = projectLine(
                     s1[0],
                     s1[1],
@@ -195,24 +195,49 @@ const Graph = React.forwardRef((props, ref) => {
                   cpath.moveTo(x1, y1)
                   cpath.bezierCurveTo(cx1, cy1, cx2, cy2, x2, y2)
                   // debugging
-                  // <line
-                  // x1={cx1}
-                  // y1={cy1}
-                  // x2={t1[0]}
-                  // y2={t1[1]}
-                  // stroke="red"
-                  // strokeWidth={10}
-                  // strokeOpacity={0.1}
-                  // />
-                  // <line
-                  // x1={cx2}
-                  // y1={cy2}
-                  // x2={t2[0]}
-                  // y2={t2[1]}
-                  // stroke="purple"
-                  // strokeWidth={10}
-                  // strokeOpacity={0.1}
-                  // />
+                  // return (
+                  //   <React.Fragment key={index}>
+                  //     <line
+                  //       x1={s1[0]}
+                  //       y1={s1[1]}
+                  //       x2={t1[0]}
+                  //       y2={t1[1]}
+                  //       stroke="grey"
+                  //       strokeWidth={10}
+                  //       strokeOpacity={0.8}
+                  //     />
+                  //     <line
+                  //       x1={cx1}
+                  //       y1={cy1}
+                  //       x2={t1[0]}
+                  //       y2={t1[1]}
+                  //       stroke="red"
+                  //       strokeWidth={10}
+                  //       strokeOpacity={0.3}
+                  //     />
+                  //     <line
+                  //       x1={cx2}
+                  //       y1={cy2}
+                  //       x2={t2[0]}
+                  //       y2={t2[1]}
+                  //       stroke="green"
+                  //       strokeWidth={10}
+                  //       strokeOpacity={0.3}
+                  //     />
+
+                  //     <path
+                  //       key={`${cpath.toString()}-${index}`}
+                  //       d={cpath}
+                  //       strokeWidth={linkThickness}
+                  //       stroke={colors[pp]}
+                  //       fill="none"
+                  //       strokeOpacity={0.3}
+                  //       onClick={() => onFeatureClick(p.original)}
+                  //     >
+                  //       <title>{pp}</title>
+                  //     </path>
+                  //   </React.Fragment>
+                  // )
                   return (
                     <path
                       key={`${cpath.toString()}-${index}`}

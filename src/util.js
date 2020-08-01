@@ -41,18 +41,8 @@ export function parseGFA(file) {
       }
       graph.nodes.push({ id: name, length: len, sequence: seq, tags })
     } else if (line.startsWith('E')) {
-      const [
-        ,
-        edgeId,
-        source,
-        target,
-        bed1pos,
-        end1pos,
-        bed2pos,
-        end2pos,
-        cigar,
-        ...rest
-      ] = line.split('\t')
+      // eslint-disable-next-line no-unused-vars
+      const [, edgeId, source, target, s1, e1, b2, e2, cigar, ...rest] = line.split('\t')
       const source1 = source.slice(0, -1)
       const target1 = target.slice(0, -1)
       const strand1 = source.charAt(source.length - 1)
@@ -236,14 +226,13 @@ export function generateEdges(links, graph) {
   return result
 }
 
-// implements this algorithm to calculate a control point
-// that points "forwards" of a given contig node
+// implements this algorithm to project
+// a point "forwards" from a given contig node
+// translation of simple vector math here
 // https://math.stackexchange.com/questions/175896
-
-export function projectLine(x1, y1, x2, y2, units) {
-  const dp = Math.sqrt((y2 - y1) ** 2 + (x2 - x1) ** 2)
-  const d = units / dp
-  const cx = (1 - d) * x1 + d * x2
-  const cy = (1 - d) * y1 + d * y2
-  return [cx, cy]
+export function projectLine(x1, y1, x2, y2, dt) {
+  const d = Math.sqrt((y2 - y1) ** 2 + (x2 - x1) ** 2)
+  const vx = (x2 - x1) / d
+  const vy = (y2 - y1) / d
+  return [x2 + dt * vx, y2 + dt * vy]
 }
