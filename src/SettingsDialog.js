@@ -7,7 +7,9 @@ export function SettingsDialog({ onHide, settings: paramSettings, onSettings }) 
     chunkSize,
     forceSteps,
     linkSteps,
-    strength,
+    strengthCenter,
+    strengthXY,
+    forceType,
     theta,
     sequenceThickness,
     linkThickness,
@@ -25,9 +27,10 @@ export function SettingsDialog({ onHide, settings: paramSettings, onSettings }) 
             onSettings({
               ...settings,
               chunkSize: +chunkSize,
+              forceType: forceType,
               forceSteps: +forceSteps,
               linkSteps: +linkSteps,
-              strength: +strength,
+              strengthCenter: +strengthCenter,
               theta: +theta,
               sequenceThickness: +sequenceThickness,
               linkThickness: +linkThickness,
@@ -57,7 +60,9 @@ export function SettingsDialog({ onHide, settings: paramSettings, onSettings }) 
           <Form.Group as={Row}>
             <Form.Label column sm="4">
               Number of simulation steps for the links
-              <Form.Text muted>Used in the force-based layout simulation</Form.Text>
+              <Form.Text muted>
+                Increases the rigidity of the link based constraints
+              </Form.Text>
             </Form.Label>
             <Col>
               <Form.Control
@@ -117,20 +122,69 @@ export function SettingsDialog({ onHide, settings: paramSettings, onSettings }) 
           </Form.Group>
           <Form.Group as={Row}>
             <Form.Label column sm="4">
-              Strength
+              Strength (force xy)
+              <Form.Text muted>
+                This parameter should be between [0,1], applies to the XY layout
+              </Form.Text>
             </Form.Label>
             <Col>
               <Form.Control
                 type="number"
-                value={strength}
+                value={strengthXY}
                 onChange={event => {
                   const val = event.target.value
                   setSettings(settings => ({
                     ...settings,
-                    strength: val,
+                    strengthXY: val,
                   }))
                 }}
               />
+            </Col>
+          </Form.Group>
+          <Form.Group as={Row}>
+            <Form.Label column sm="4">
+              Strength (particle charge)
+              <Form.Text muted>
+                This value is like a charged particle force, by being negative it keeps
+                things farther apart
+              </Form.Text>
+            </Form.Label>
+            <Col>
+              <Form.Control
+                type="number"
+                value={strengthCenter}
+                onChange={event => {
+                  const val = event.target.value
+                  setSettings(settings => ({
+                    ...settings,
+                    strengthCenter: val,
+                  }))
+                }}
+              />
+            </Col>
+          </Form.Group>
+          <Form.Group as={Row}>
+            <Form.Label column sm="4">
+              Force type
+              <Form.Text muted>
+                Force XY results in a circular style layout that can be helpful for more
+                disjoint graphs, force center is default
+              </Form.Text>
+            </Form.Label>
+            <Col>
+              <Form.Control
+                value={forceType}
+                onChange={event =>
+                  setSettings(settings => ({
+                    ...settings,
+                    forceType: event.target.value,
+                  }))
+                }
+                as="select"
+              >
+                <option>center</option>
+                <option>xy</option>
+              </Form.Control>
             </Col>
           </Form.Group>
           <Form.Group as={Row}>

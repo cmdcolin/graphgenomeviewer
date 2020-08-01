@@ -20,7 +20,9 @@ function App() {
   const [redraw, setRedraw] = useState(0)
   const [drawLabels, setDrawLabels] = useState(false)
   const [settings, setSettings] = useState({
-    strength: -50,
+    strengthCenter: -50,
+    strengthXY: 0.1,
+    forceType: 'center',
     chunkSize: 1000,
     forceSteps: 200,
     linkSteps: 1,

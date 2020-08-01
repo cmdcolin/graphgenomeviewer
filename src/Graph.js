@@ -14,8 +14,10 @@ const Graph = React.forwardRef((props, ref) => {
       linkSteps = 3,
       sequenceThickness = 10,
       linkThickness = 2,
-      strength = -50,
       theta = 0.9,
+      forceType = 'center',
+      strengthCenter = -50,
+      strengthXY = 0.3,
     },
     color = 'Rainbow',
     width = 2000,
@@ -56,8 +58,27 @@ const Graph = React.forwardRef((props, ref) => {
           })
           .iterations(linkSteps),
       )
-      .force('charge', d3.forceManyBody().strength(strength).theta(theta))
-      .force('center', d3.forceCenter(width / 2, height / 2))
+      .force('charge', d3.forceManyBody().strength(strengthCenter).theta(theta))
+
+    if (forceType === 'center') {
+      simulation.force('center', d3.forceCenter(width / 3, height / 3))
+    } else if (forceType === 'xy') {
+      simulation
+        .force(
+          'x',
+          d3
+            .forceX()
+            .x(width / 3)
+            .strength(strengthXY),
+        )
+        .force(
+          'y',
+          d3
+            .forceY()
+            .y(height / 3)
+            .strength(strengthXY),
+        )
+    }
 
     for (let i = 0; i < forceSteps; ++i) {
       simulation.tick()
@@ -68,14 +89,16 @@ const Graph = React.forwardRef((props, ref) => {
     return links
   }, [
     data.links,
-    redraw,
     data.nodes,
-    forceSteps,
-    height,
     linkSteps,
-    strength,
+    strengthCenter,
     theta,
+    forceType,
+    redraw,
     width,
+    height,
+    strengthXY,
+    forceSteps,
   ])
 
   useEffect(() => {
