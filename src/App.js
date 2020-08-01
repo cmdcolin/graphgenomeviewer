@@ -37,9 +37,10 @@ function App() {
     colorScheme: withDefault(StringParam, 'Rainbow'),
     drawLabels: withDefault(BooleanParam, false),
     drawPaths: withDefault(BooleanParam, false),
+    drag: withDefault(BooleanParam, true),
   })
 
-  const { dataset, drawLabels, drawPaths, colorScheme, ...settings } = query
+  const { dataset, drawLabels, drawPaths, colorScheme, drag, ...settings } = query
 
   const ref = useRef()
   useEffect(() => {
@@ -99,12 +100,17 @@ function App() {
             colorScheme={colorScheme}
             drawPaths={drawPaths}
             drawLabels={drawLabels}
+            drag={drag}
             onColorChange={value => {
               setQuery({ colorScheme: value })
               forceUpdate()
             }}
             onDrawLabels={value => {
               setQuery({ drawLabels: value })
+              forceUpdate()
+            }}
+            onDrag={value => {
+              setQuery({ drag: value })
               forceUpdate()
             }}
             onPathDraw={value => {
@@ -121,6 +127,7 @@ function App() {
               graph={graph}
               ref={ref}
               redraw={redraw}
+              drag={drag}
               color={colorScheme}
               drawLabels={drawLabels}
               drawPaths={drawPaths}

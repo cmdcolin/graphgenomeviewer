@@ -5,6 +5,8 @@ export function Sidebar({
   onDrawLabels,
   drawLabels,
   drawPaths,
+  drag,
+  onDrag,
   onColorChange,
   onPathDraw,
   onRedraw,
@@ -37,7 +39,6 @@ export function Sidebar({
           checked={drawPaths}
         />
       </Form.Group>
-      <br />
       <Form.Group>
         <Form.Check
           onChange={event => {
@@ -46,6 +47,16 @@ export function Sidebar({
           type="checkbox"
           label="Draw labels"
           checked={drawLabels}
+        />
+      </Form.Group>
+      <Form.Group>
+        <Form.Check
+          onChange={event => {
+            onDrag(event.target.checked)
+          }}
+          type="checkbox"
+          label="Enable panning/zooming?"
+          checked={drag}
         />
       </Form.Group>
       <br />
