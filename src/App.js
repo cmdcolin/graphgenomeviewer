@@ -6,7 +6,13 @@ import { Header } from './Header'
 import { parseGFA } from './util'
 import { serialize } from './util'
 import saveAs from 'file-saver'
-import { useQueryParams, StringParam, NumberParam, withDefault } from 'use-query-params'
+import {
+  useQueryParams,
+  BooleanParam,
+  StringParam,
+  NumberParam,
+  withDefault,
+} from 'use-query-params'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './App.css'
 
@@ -14,12 +20,9 @@ function App() {
   const [featureData, setFeatureData] = useState()
   const [data, setData] = useState()
   const [error, setError] = useState()
-  const [color, setColor] = useState('Rainbow')
   const [, updateState] = useState()
   const forceUpdate = React.useCallback(() => updateState({}), [])
-  const [pathDraw, setPathDraw] = useState(false)
   const [redraw, setRedraw] = useState(0)
-  const [drawLabels, setDrawLabels] = useState(false)
   const [query, setQuery] = useQueryParams({
     strengthCenter: withDefault(NumberParam, -50),
     strengthXY: withDefault(NumberParam, 0.1),
@@ -31,9 +34,12 @@ function App() {
     theta: withDefault(NumberParam, 0.9),
     forceType: withDefault(StringParam, 'center'),
     dataset: withDefault(StringParam, 'MT.gfa'),
+    colorScheme: withDefault(StringParam, 'Rainbow'),
+    drawLabels: withDefault(BooleanParam, false),
+    drawPaths: withDefault(BooleanParam, false),
   })
 
-  const { dataset, ...settings } = query
+  const { dataset, drawLabels, drawPaths, colorScheme, ...settings } = query
 
   const ref = useRef()
   useEffect(() => {
@@ -60,15 +66,15 @@ function App() {
   return (
     <div>
       <Header
-        onData={d => {
-          setQuery({ dataset: d, ...settings })
+        onData={value => {
+          setQuery({ dataset: value })
           forceUpdate()
         }}
-        onGraph={d => {
-          setData(d)
+        onGraph={graph => {
+          setData(graph)
         }}
-        onSettings={d => {
-          setQuery({ ...d, dataset })
+        onSettings={settings => {
+          setQuery(settings)
           forceUpdate()
         }}
         onExportSVG={() => {
@@ -90,10 +96,21 @@ function App() {
       <div className="flexcontainer">
         <div id="sidebar" className="sidebar">
           <Sidebar
-            color={color}
-            onColorChange={c => setColor(c)}
-            onDrawLabels={v => setDrawLabels(v)}
-            onPathDraw={d => setPathDraw(d)}
+            colorScheme={colorScheme}
+            drawPaths={drawPaths}
+            drawLabels={drawLabels}
+            onColorChange={value => {
+              setQuery({ colorScheme: value })
+              forceUpdate()
+            }}
+            onDrawLabels={value => {
+              setQuery({ drawLabels: value })
+              forceUpdate()
+            }}
+            onPathDraw={value => {
+              setQuery({ drawPaths: value })
+              forceUpdate()
+            }}
             onRedraw={() => setRedraw(redraw => redraw + 1)}
           />
         </div>
@@ -103,10 +120,10 @@ function App() {
             <Graph
               graph={graph}
               ref={ref}
-              color={color}
               redraw={redraw}
+              color={colorScheme}
               drawLabels={drawLabels}
-              drawPaths={pathDraw}
+              drawPaths={drawPaths}
               onFeatureClick={data => {
                 setFeatureData(data)
               }}

@@ -1,13 +1,21 @@
 import React from 'react'
 import { Form, Button } from 'react-bootstrap'
 
-export function Sidebar({ onDrawLabels, onColorChange, onPathDraw, onRedraw, color }) {
+export function Sidebar({
+  onDrawLabels,
+  drawLabels,
+  drawPaths,
+  onColorChange,
+  onPathDraw,
+  onRedraw,
+  colorScheme,
+}) {
   return (
     <div>
       <p>Settings</p>
       <Form.Label>Color</Form.Label>
       <Form.Control
-        value={color}
+        value={colorScheme}
         onChange={event => onColorChange(event.target.value)}
         as="select"
       >
@@ -19,20 +27,26 @@ export function Sidebar({ onDrawLabels, onColorChange, onPathDraw, onRedraw, col
         <option>RdYlBu</option>
       </Form.Control>
       <br />
-      <Form.Group
-        onChange={event => {
-          onPathDraw(event.target.checked)
-        }}
-      >
-        <Form.Check type="checkbox" label="Draw paths" />
+      <Form.Group>
+        <Form.Check
+          onChange={event => {
+            onPathDraw(event.target.checked)
+          }}
+          type="checkbox"
+          label="Draw paths"
+          checked={drawPaths}
+        />
       </Form.Group>
       <br />
-      <Form.Group
-        onChange={event => {
-          onDrawLabels(event.target.checked)
-        }}
-      >
-        <Form.Check type="checkbox" label="Draw labels" />
+      <Form.Group>
+        <Form.Check
+          onChange={event => {
+            onDrawLabels(event.target.checked)
+          }}
+          type="checkbox"
+          label="Draw labels"
+          checked={drawLabels}
+        />
       </Form.Group>
       <br />
       <Button onClick={() => onRedraw()}>Redraw</Button>

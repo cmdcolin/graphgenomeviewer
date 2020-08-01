@@ -151,25 +151,27 @@ const Graph = React.forwardRef((props, ref) => {
             const m2 = (s1[1] - t1[1]) / (s1[0] - t1[0])
             const m3 = (s2[1] - t2[1]) / (s2[0] - t2[0])
             if (Math.abs(m1 - m2) < 0.2 || Math.abs(m1 - m3) < 0.2) {
-              return p.original.paths.map((pp, index) => {
-                const dx = x2 - x1
-                const dy = y2 - y1
-                const dr = Math.sqrt(dx * dx + dy * dy) + Math.random() * 40
-                const sweep = index % 2
-                const cpath = `M${x1},${y1}A${dr},${dr} 0 0,${sweep} ${x2},${y2}`
-                return (
-                  <path
-                    key={`${cpath}-${index}`}
-                    d={cpath}
-                    strokeWidth={linkThickness}
-                    stroke={colors[pp]}
-                    fill="none"
-                    onClick={() => onFeatureClick(p.original)}
-                  >
-                    <title>{pp}</title>
-                  </path>
-                )
-              })
+              return p.original.paths
+                ? p.original.paths.map((pp, index) => {
+                    const dx = x2 - x1
+                    const dy = y2 - y1
+                    const dr = Math.sqrt(dx * dx + dy * dy) + Math.random() * 40
+                    const sweep = index % 2
+                    const cpath = `M${x1},${y1}A${dr},${dr} 0 0,${sweep} ${x2},${y2}`
+                    return (
+                      <path
+                        key={`${cpath}-${index}`}
+                        d={cpath}
+                        strokeWidth={linkThickness}
+                        stroke={colors[pp]}
+                        fill="none"
+                        onClick={() => onFeatureClick(p.original)}
+                      >
+                        <title>{pp}</title>
+                      </path>
+                    )
+                  })
+                : null
             }
 
             return p.original.paths
