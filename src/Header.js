@@ -25,6 +25,10 @@ function AboutDialog({ onHide }) {
           Sample data from GFA-spec repo (MT.gfa), Andrea Guarracino (path example), and
           gfalint (Shaun Jackman)
         </p>
+        <p>
+          This app attempts to support GFA2 but probably does not properly render the
+          intricacies of the edge spec
+        </p>
         <a href="https://github.com/cmdcolin/graphgenomeviewer">GitHub</a>
       </Modal.Body>
     </Modal>
@@ -131,6 +135,9 @@ export function Header({ onData, settings, onGraph, onExportSVG, onSettings }) {
               </NavDropdown.Item>
               <NavDropdown.Item onClick={() => onData('circle.gfa')}>
                 Simple circle
+              </NavDropdown.Item>
+              <NavDropdown.Item onClick={() => onData('example1.gfa2')}>
+                GFA2.0 example
               </NavDropdown.Item>
             </NavDropdown>
             <Nav.Link

@@ -134,7 +134,7 @@ const Graph = React.forwardRef((props, ref) => {
       viewBox={[0, 0, width, height].toString()}
     >
       <g ref={gref}>
-        {edges.map(p => {
+        {edges.map((p, j) => {
           const x1 = p.links[0][0]
           const y1 = p.links[0][1]
           const x2 = p.links[1][0]
@@ -155,7 +155,8 @@ const Graph = React.forwardRef((props, ref) => {
                 const dx = x2 - x1
                 const dy = y2 - y1
                 const dr = Math.sqrt(dx * dx + dy * dy) + Math.random() * 40
-                const cpath = `M${x1},${y1}A${dr},${dr} 0 0,${index % 2} ${x2},${y2}`
+                const sweep = index % 2
+                const cpath = `M${x1},${y1}A${dr},${dr} 0 0,${sweep} ${x2},${y2}`
                 return (
                   <path
                     key={`${cpath}-${index}`}
@@ -180,7 +181,7 @@ const Graph = React.forwardRef((props, ref) => {
               cpath.bezierCurveTo(cx1, cy1, cx2, cy2, x2, y2)
               return (
                 <path
-                  key={cpath.toString()}
+                  key={`${cpath.toString()}-${index}`}
                   d={cpath}
                   strokeWidth={linkThickness}
                   stroke={colors[pp]}
@@ -210,15 +211,13 @@ const Graph = React.forwardRef((props, ref) => {
 
             return (
               <path
-                key={path.toString()}
+                key={`${path.toString()}-${j}`}
                 d={path}
                 strokeWidth={linkThickness}
                 stroke="black"
                 fill="none"
                 onClick={() => onFeatureClick(p.original)}
-              >
-                <title>{p.original.id}</title>
-              </path>
+              />
             )
           }
         })}
