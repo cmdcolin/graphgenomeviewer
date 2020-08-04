@@ -26,8 +26,8 @@ function AboutDialog({ onHide }) {
           gfalint (Shaun Jackman)
         </p>
         <p>
-          This app attempts to support GFA2 but probably does not properly render the
-          intricacies of the edge spec
+          This app attempts to support GFA2 but does not properly render fragments,
+          intricate edge details, or U and O paths
         </p>
         <a href="https://github.com/cmdcolin/graphgenomeviewer">GitHub</a>
       </Modal.Body>
