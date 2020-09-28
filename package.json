@@ -63,5 +63,8 @@
   ],
   "dependencies": {
     "d3": "5"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
