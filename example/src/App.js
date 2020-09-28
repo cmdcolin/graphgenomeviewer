@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { FeatureDialog } from './FeatureDialog'
-import { Graph } from './Graph'
+import Graph from 'graphgenomeviewer'
 import { Sidebar } from './Sidebar'
 import { Header } from './Header'
 import { parseGFA, serialize } from './util'

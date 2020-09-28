@@ -284,7 +284,7 @@ function Path({ path, drawLabels, sequenceThickness, stroke, onFeatureClick }) {
   const invisibleTextPath = line([[cx1, cy1], ...path.links, [cx2, cy2]])
 
   return (
-    <>
+    <React.Fragment>
       <path
         id={path.original.id}
         d={line(path.links)}
@@ -296,7 +296,7 @@ function Path({ path, drawLabels, sequenceThickness, stroke, onFeatureClick }) {
         <title>{path.original.id}</title>
       </path>
       {drawLabels ? (
-        <>
+        <React.Fragment>
           <path
             id={`${path.original.id}_invisible`}
             d={invisibleTextPath}
@@ -311,10 +311,10 @@ function Path({ path, drawLabels, sequenceThickness, stroke, onFeatureClick }) {
               {path.original.id}
             </textPath>
           </text>
-        </>
+        </React.Fragment>
       ) : null}
-    </>
+    </React.Fragment>
   )
 }
 
-export { Graph }
+export default Graph

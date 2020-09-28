@@ -1,24 +1,18 @@
 # graphgenomeviewer
 
-> React component for graph visualization
+To install
 
-## Install
+Run yarn, then yarn start
 
-```bash
-npm install --save graphgenomeviewer
-```
+![](img/1.png)
 
-## Usage
+### File type support
 
-```tsx
-import React, { Component } from 'react'
+This app currently supports GFA1 and a subset of GFA2. It does not fully
+attempt to resolve the GFA2 edge spec with dovetails, but makes a basic attempt
+to at least link the nodes specified by GFA2 edges
 
-import MyComponent from 'graphgenomeviewer'
-import 'graphgenomeviewer/dist/index.css'
+### Notes
 
-class Example extends Component {
-  render() {
-    return <MyComponent />
-  }
-}
-```
+This is a product of the BCC2020 pangenome virtual conference CoFest hackathon
+team. Thanks to everyone! See [CREDITS](CREDITS.md)
