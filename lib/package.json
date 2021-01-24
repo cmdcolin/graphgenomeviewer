@@ -1,0 +1,29 @@
+{
+  "name": "graphgenomeviewer",
+  "version": "1.0.0",
+  "description": "React component for graph visualization",
+  "author": "cmdcolin",
+  "license": "MIT",
+  "repository": "cmdcolin/graphgenomeviewer",
+  "main": "dist/index.js",
+  "engines": {
+    "node": ">=10"
+  },
+  "scripts": {
+    "build": "rm -rf dist && babel src --out-dir dist",
+    "watch": "babel src --out-dir dist --watch"
+  },
+  "peerDependencies": {
+    "react": "*"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.12.10"
+  },
+  "dependencies": {
+    "@babel/preset-react": "^7.12.10",
+    "d3": "^5.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
