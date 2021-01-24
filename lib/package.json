@@ -14,16 +14,17 @@
   },
   "scripts": {
     "build": "rm -rf dist && babel src --out-dir dist",
-    "watch": "babel src --out-dir dist --watch"
+    "watch": "babel src --out-dir dist --watch",
+    "postversion": "git push --follow-tags"
   },
   "peerDependencies": {
     "react": "*"
   },
   "devDependencies": {
-    "@babel/cli": "^7.12.10"
+    "@babel/cli": "^7.12.10",
+    "@babel/preset-react": "^7.12.10"
   },
   "dependencies": {
-    "@babel/preset-react": "^7.12.10",
     "d3": "^5.0.0"
   },
   "publishConfig": {
