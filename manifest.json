@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "graphgenomeviewer",
+  "name": "Visualizer for GFA files/graph genomes",
   "icons": [
     {
       "src": "favicon.ico",
