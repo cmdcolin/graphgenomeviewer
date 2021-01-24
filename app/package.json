@@ -1,5 +1,5 @@
 {
-  "name": "graphgenomeviewer-example",
+  "name": "app",
   "homepage": ".",
   "version": "0.0.0",
   "private": true,
@@ -10,7 +10,7 @@
     "eject": "react-scripts eject"
   },
   "dependencies": {
-    "bootstrap": "^4.5.2",
+    "bootstrap": "^4.6.0",
     "file-saver": "^2.0.2",
     "graphgenomeviewer": "^1.0.0",
     "query-string": "^6.13.3",
