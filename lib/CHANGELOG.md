@@ -1,3 +1,5 @@
+- Use modular d3 imports for smaller bundle size
+
 ## 1.0.3
 
 - Move babel from depedencies to devDependencies
