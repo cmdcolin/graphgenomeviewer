@@ -1,3 +1,7 @@
+## 2.0.2
+
+- Slightly darker arrows
+
 ## 2.0.1
 
 - Re-position arrowhead appearence
