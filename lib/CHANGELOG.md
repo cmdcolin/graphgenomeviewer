@@ -1,3 +1,7 @@
+## 2.0.1
+
+- Re-position arrowhead appearence
+
 ## 2.0.0
 
 - Revert to more d3-driven-drawing so that we can drag and drop and interact
