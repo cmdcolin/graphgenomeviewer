@@ -1,3 +1,9 @@
+## 2.0.0
+
+- Revert to more d3-driven-drawing so that we can drag and drop and interact
+  with force based
+- Remove some settings related to configuring number of iterations, forceXY
+  based settings
 - Use modular d3 imports for smaller bundle size
 
 ## 1.0.3
