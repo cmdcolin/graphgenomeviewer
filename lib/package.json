@@ -21,11 +21,12 @@
     "react": "*"
   },
   "devDependencies": {
-    "@babel/cli": "^7.12.10",
-    "@babel/preset-react": "^7.12.10"
+    "@babel/cli": "^7.13.14",
+    "@babel/preset-react": "^7.13.13"
   },
   "dependencies": {
-    "d3": "^6.4.0"
+    "d3": "^6.6.2",
+    "mathjs": "^9.3.0"
   },
   "publishConfig": {
     "access": "public"
