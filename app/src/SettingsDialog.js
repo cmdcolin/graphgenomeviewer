@@ -41,7 +41,8 @@ export function SettingsDialog({
             <Form.Label column sm='4'>
               Number of simulation steps for the links
               <Form.Text muted>
-                Increases the rigidity of the link based constraints
+                Increases the rigidity of the link based constraints. May be
+                helpful for circular contigs to increase
               </Form.Text>
             </Form.Label>
             <Col>
