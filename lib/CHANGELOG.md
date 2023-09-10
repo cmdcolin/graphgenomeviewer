@@ -9,7 +9,7 @@
 
 ## 2.0.1
 
-- Re-position arrowhead appearence
+- Re-position arrowhead appearance
 
 ## 2.0.0
 
@@ -21,7 +21,7 @@
 
 ## 1.0.3
 
-- Move babel from depedencies to devDependencies
+- Move babel from dependencies to devDependencies
 
 ## 1.0.2
 
