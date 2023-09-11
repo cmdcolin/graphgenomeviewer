@@ -99,24 +99,20 @@ export function reprocessGraph(G: Graph, chunkSize: number) {
   return Gp
 }
 
-// source https://stackoverflow.com/questions/14446511/ returns an array that
-// contains groupings of xs by attribute key
-function groupByArray<T>(xs: T[], key: string | Function) {
-  return xs.reduce(
-    function (rv, x) {
-      const v = key instanceof Function ? key(x) : x[key]
-      if (v !== undefined) {
-        const el = rv.find(r => r && r.key === v)
-        if (el) {
-          el.values.push(x)
-        } else {
-          rv.push({ key: v, values: [x] })
-        }
-      }
-      return rv
-    },
-    [] as { key: string; values: T[] }[],
-  )
+export function groupBy<T>(
+  array: T[],
+  predicate: (v: T) => string | undefined,
+) {
+  const result = {} as Record<string, T[]>
+  for (const value of array) {
+    const p = predicate(value)
+    if (!p) {
+      continue
+    }
+    const entry = (result[p] ||= [])
+    entry.push(value)
+  }
+  return result
 }
 
 export interface Edge {
@@ -140,10 +136,12 @@ function makePath(edges: Edge[]) {
 
 // groups the edges data structure by the linkNum attribute
 export function generatePaths(edges: Edge[], graph: Record<string, unknown>) {
-  const ret = groupByArray(edges, 'linkNum')
-  return ret.map(entry => ({
-    links: makePath(entry.values),
-    original: graph[entry.key],
+  const ret2 = groupBy(edges, e =>
+    e.linkNum === undefined ? undefined : `${e.linkNum}`,
+  )
+  return Object.entries(ret2).map(([key, value]) => ({
+    links: makePath(value),
+    original: graph[key],
   }))
 }
 
