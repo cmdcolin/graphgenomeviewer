@@ -1,4 +1,3 @@
-//@ts-nocheck
 import React, { useRef, useMemo, useEffect } from 'react'
 import { hsl } from 'd3-color'
 import * as d3drag from 'd3-drag'
@@ -101,154 +100,32 @@ const Graph = React.forwardRef<SVGSVGElement, Props>((props, ref) => {
   )
 
   useEffect(() => {
-    if (ref.current) {
-      // clone links+nodes because these contain an x,y coordinate that is
-      // physically modified by animation and so when we redraw/refresh, we
-      // want to put them back to normal
-      const links = data.links.map(d => ({
-        ...d,
-      }))
-      const nodes = data.nodes.map(d => ({
-        ...d,
-      }))
+    if (!ref) {
+      return
+    }
+    if (typeof ref === 'function') {
+      return
+    }
+    if (!ref.current) {
+      return
+    }
+    // clone links+nodes because these contain an x,y coordinate that is
+    // physically modified by animation and so when we redraw/refresh, we
+    // want to put them back to normal
+    const links = data.links.map(d => ({
+      ...d,
+    }))
+    const nodes = data.nodes.map(d => ({
+      ...d,
+    }))
 
-      // clear svg on each run
-      ref.current.innerHTML = ''
+    // clear svg on each run
+    ref.current.innerHTML = ''
 
-      // animation
-      function tickActions() {
-        node.attr('cx', d => d.x).attr('cy', d => d.y)
+    // animation
+    function tickActions() {
+      node.attr('cx', d => d.x).attr('cy', d => d.y)
 
-        const paths = generatePaths(links, graph.nodes)
-
-        const nodePathMap = {}
-        for (let i = 0; i < paths.length; i++) {
-          const p = paths[i]
-          const l = p.links.length
-          nodePathMap[`${p.original.id}-start`] = [p.links[1], p.links[0]]
-          nodePathMap[`${p.original.id}-end`] = [p.links[l - 2], p.links[l - 1]]
-        }
-
-        // from https://stackoverflow.com/questions/16358905/
-        link.attr('d', function (d) {
-          const x1 = d.source.x
-          const y1 = d.source.y
-          const x2 = d.target.x
-          const y2 = d.target.y
-          if (d.pathIndex === undefined) {
-            let drx = 0
-            let dry = 0
-            let xRotation = 0 // degrees
-            let largeArc = 0 // 1 or 0
-            const sweep = 0 // 1 or 0
-
-            const sid = d.source.id.slice(0, d.source.id.lastIndexOf('-'))
-            const tid = d.target.id.slice(0, d.target.id.lastIndexOf('-'))
-            const same = sid === tid && !d.id
-            const [s1 = 0, t1 = 0] = nodePathMap[d.source.id] || []
-            const [s2 = 0, t2 = 0] = nodePathMap[d.target.id] || []
-
-            // this checks the dot product of the direction that the node is
-            // oriented (s1,t1) to where the node is connecting to (t1,t2)
-            // other combinations could be chosen here but it helps to
-            // determine whether to draw the arc or not, a circular layout is a
-            // self-connection but does not need an arc
-            const dotresult = dot(
-              [t1[0] - s1[0], t1[1] - s1[1]],
-              [t1[0] - t2[0], t1[1] - t2[1]],
-            )
-
-            if (same && !Number.isNaN(dotresult) && dotresult > 0) {
-              xRotation = -45
-              largeArc = 1
-              drx = 25
-              dry = 20
-            }
-
-            return `M${x1},${y1}A${drx},${dry},${xRotation},${largeArc},${sweep} ${x2},${y2}`
-          } else {
-            const [s1, t1] = nodePathMap[d.source.id]
-            const [s2, t2] = nodePathMap[d.target.id]
-            const m1 = (y2 - y1) / (x2 - x1)
-            const m2 = (s1[1] - t1[1]) / (s1[0] - t1[0])
-            const m3 = (s2[1] - t2[1]) / (s2[0] - t2[0])
-
-            if (Math.abs(m1 - m2) < 0.2 || Math.abs(m1 - m3) < 0.2) {
-              const dx = x2 - x1
-              const dy = y2 - y1
-              const dr = Math.sqrt(dx * dx + dy * dy) + Math.random() * 40
-              const sweep = d.pathIndex % 2
-              return `M${x1},${y1}A${dr},${dr} 0 0,${sweep} ${x2},${y2}`
-            } else {
-              const [cx1, cy1] = projectLine(
-                s1[0],
-                s1[1],
-                t1[0],
-                t1[1],
-                20 + d.pathIndex * 30,
-              )
-              const [cx2, cy2] = projectLine(
-                s2[0],
-                s2[1],
-                t2[0],
-                t2[1],
-                20 + d.pathIndex * 30,
-              )
-
-              return `M ${x1} ${y1} C ${cx1} ${cy1}, ${cx2} ${cy2}, ${x2}, ${y2}`
-            }
-          }
-        })
-
-        link
-
-        if (edgepaths) {
-          edgepaths.attr(
-            'd',
-            d => `M${d.source.x},${d.source.y}L${d.target.x},${d.target.y}`,
-          )
-        }
-      }
-      const simulation = forceSimulation().nodes(nodes)
-      const charge_force = forceManyBody().strength(strengthCenter).theta(theta)
-      const center_force = forceCenter(width / 3, height / 3)
-      const link_force = forceLink(links)
-        .id(d => d.id)
-        .distance(link => (link.sequence ? 1 : 10))
-        .iterations(linkSteps)
-
-      simulation
-        .force('charge', charge_force)
-        .force('center', center_force)
-        .force('links', link_force)
-
-      simulation.on('tick', tickActions)
-
-      const svg = select(ref.current)
-
-      // create arrowhead marker, from
-      // https://observablehq.com/@xianwu/force-directed-graph-network-graph-with-arrowheads-and-lab
-      svg
-        .append('defs')
-        .append('marker')
-        .attr('id', 'arrowhead')
-        .attr('viewBox', '-0 -5 10 10')
-        //the bound of the SVG viewport for the current SVG fragment. defines a
-        //coordinate system 10 wide and 10 high starting on (0,-5)
-        .attr('refX', 10)
-        // x coordinate for the reference point of the marker. If circle is
-        // bigger, this need to be bigger.
-        .attr('refY', 0)
-        .attr('orient', 'auto')
-        .attr('markerWidth', 4)
-        .attr('markerHeight', 4)
-        .attr('xoverflow', 'visible')
-        .append('svg:path')
-        .attr('d', 'M 0,-5 L 10 ,0 L 0,5')
-        .attr('fill', 'rgba(120,120,120,0.9)')
-        .style('stroke', 'none')
-
-      const g = svg.append('g')
       const paths = generatePaths(links, graph.nodes)
 
       const nodePathMap = {}
@@ -259,110 +136,237 @@ const Graph = React.forwardRef<SVGSVGElement, Props>((props, ref) => {
         nodePathMap[`${p.original.id}-end`] = [p.links[l - 2], p.links[l - 1]]
       }
 
-      const link = g
-        .selectAll('path')
-        .data(drawPaths ? generateLinks(links) : links)
-        .join('path')
-        .attr('marker-end', d => (d.id ? undefined : 'url(#arrowhead)'))
-        .attr('stroke', d => {
-          const same = d.linkNum !== undefined
-          if (same) {
-            const nodeIndex = paths.findIndex(path => {
-              return path.original.id === d.id
-            })
-            return color.startsWith('Just')
-              ? color.replace('Just', '').toLowerCase()
-              : hsl(
-                  d3interpolate[`interpolate${color}`](
-                    nodeIndex / paths.length,
-                  ),
-                ).darker()
-          } else {
-            if (drawPaths) {
-              return colors[d.pathId]
-            } else {
-              return 'rgba(120,120,120,0.8)'
-            }
+      // from https://stackoverflow.com/questions/16358905/
+      link.attr('d', function (d) {
+        const x1 = d.source.x
+        const y1 = d.source.y
+        const x2 = d.target.x
+        const y2 = d.target.y
+        if (d.pathIndex === undefined) {
+          let drx = 0
+          let dry = 0
+          let xRotation = 0 // degrees
+          let largeArc = 0 // 1 or 0
+          const sweep = 0 // 1 or 0
+
+          const sid = d.source.id.slice(0, d.source.id.lastIndexOf('-'))
+          const tid = d.target.id.slice(0, d.target.id.lastIndexOf('-'))
+          const same = sid === tid && !d.id
+          const [s1 = 0, t1 = 0] = nodePathMap[d.source.id] || []
+          const [s2 = 0, t2 = 0] = nodePathMap[d.target.id] || []
+
+          // this checks the dot product of the direction that the node is
+          // oriented (s1,t1) to where the node is connecting to (t1,t2)
+          // other combinations could be chosen here but it helps to
+          // determine whether to draw the arc or not, a circular layout is a
+          // self-connection but does not need an arc
+          const dotresult = dot(
+            [t1[0] - s1[0], t1[1] - s1[1]],
+            [t1[0] - t2[0], t1[1] - t2[1]],
+          )
+
+          if (same && !Number.isNaN(dotresult) && dotresult > 0) {
+            xRotation = -45
+            largeArc = 1
+            drx = 25
+            dry = 20
           }
-        })
-        .attr('fill', 'none')
-        .attr('stroke-width', d => {
-          return d.linkNum !== undefined ? sequenceThickness : linkThickness
-        })
-        .on('click', (_, d) => {
-          onFeatureClick(d)
-        })
 
-      const node = g
-        .selectAll('circle')
-        .data(nodes)
-        .join('circle')
-        .attr('r', 7)
-        .attr('fill', 'rgba(255,255,255,0.0)')
+          return `M${x1},${y1}A${drx},${dry},${xRotation},${largeArc},${sweep} ${x2},${y2}`
+        } else {
+          const [s1, t1] = nodePathMap[d.source.id]
+          const [s2, t2] = nodePathMap[d.target.id]
+          const m1 = (y2 - y1) / (x2 - x1)
+          const m2 = (s1[1] - t1[1]) / (s1[0] - t1[0])
+          const m3 = (s2[1] - t2[1]) / (s2[0] - t2[0])
 
-      const edgepaths = g
-        .selectAll('.edgepath')
-        .data(links)
-        .enter()
-        .append('path')
-        .attr(
+          if (Math.abs(m1 - m2) < 0.2 || Math.abs(m1 - m3) < 0.2) {
+            const dx = x2 - x1
+            const dy = y2 - y1
+            const dr = Math.sqrt(dx * dx + dy * dy) + Math.random() * 40
+            const sweep = d.pathIndex % 2
+            return `M${x1},${y1}A${dr},${dr} 0 0,${sweep} ${x2},${y2}`
+          } else {
+            const [cx1, cy1] = projectLine(
+              s1[0],
+              s1[1],
+              t1[0],
+              t1[1],
+              20 + d.pathIndex * 30,
+            )
+            const [cx2, cy2] = projectLine(
+              s2[0],
+              s2[1],
+              t2[0],
+              t2[1],
+              20 + d.pathIndex * 30,
+            )
+
+            return `M ${x1} ${y1} C ${cx1} ${cy1}, ${cx2} ${cy2}, ${x2}, ${y2}`
+          }
+        }
+      })
+
+      link
+
+      if (edgepaths) {
+        edgepaths.attr(
           'd',
           d => `M${d.source.x},${d.source.y}L${d.target.x},${d.target.y}`,
         )
-        .attr('id', (_, i) => 'edgepath-' + i)
-
-      const edgelabels = g
-        .selectAll('.edgelabel')
-        .data(links)
-        .enter()
-        .append('text')
-        .attr('dy', 12)
-        .attr('id', (_, i) => 'edgelabel-' + i)
-
-      edgelabels
-        .append('textPath')
-        .attr('href', (_, i) => `#edgepath-${i}`)
-        .attr('startOffset', '50%')
-        .attr('text-anchor', 'middle')
-        .text(d => {
-          const sid = d.source.id.slice(0, d.source.id.lastIndexOf('-'))
-          const tid = d.target.id.slice(0, d.target.id.lastIndexOf('-'))
-          const same = sid === tid && d.id
-          return same ? sid : ''
-        })
-
-      function drag_start(event, d) {
-        if (!event.active) {
-          simulation.alphaTarget(0.3).restart()
-        }
-        d.fx = event.x
-        d.fy = event.y
       }
-
-      function drag_drag(event, d) {
-        d.fx = event.x
-        d.fy = event.y
-      }
-
-      function drag_end(event, d) {
-        if (!event.active) simulation.alphaTarget(0)
-        d.fx = null
-        d.fy = null
-      }
-
-      var drag_handler = d3drag
-        .drag()
-        .on('start', drag_start)
-        .on('drag', drag_drag)
-        .on('end', drag_end)
-
-      drag_handler(node)
-      const zoom_handler = d3zoom()
-      zoom_handler.on('zoom', event => {
-        g.attr('transform', event.transform)
-      })
-      zoom_handler(svg)
     }
+    const simulation = forceSimulation().nodes(nodes)
+    const charge_force = forceManyBody().strength(strengthCenter).theta(theta)
+    const center_force = forceCenter(width / 3, height / 3)
+    const link_force = forceLink(links)
+      .id(d => d.id)
+      .distance(link => (link.sequence ? 1 : 10))
+      .iterations(linkSteps)
+
+    simulation
+      .force('charge', charge_force)
+      .force('center', center_force)
+      .force('links', link_force)
+
+    simulation.on('tick', tickActions)
+
+    const svg = select(ref.current)
+
+    // create arrowhead marker, from
+    // https://observablehq.com/@xianwu/force-directed-graph-network-graph-with-arrowheads-and-lab
+    svg
+      .append('defs')
+      .append('marker')
+      .attr('id', 'arrowhead')
+      .attr('viewBox', '-0 -5 10 10')
+      //the bound of the SVG viewport for the current SVG fragment. defines a
+      //coordinate system 10 wide and 10 high starting on (0,-5)
+      .attr('refX', 10)
+      // x coordinate for the reference point of the marker. If circle is
+      // bigger, this need to be bigger.
+      .attr('refY', 0)
+      .attr('orient', 'auto')
+      .attr('markerWidth', 4)
+      .attr('markerHeight', 4)
+      .attr('xoverflow', 'visible')
+      .append('svg:path')
+      .attr('d', 'M 0,-5 L 10 ,0 L 0,5')
+      .attr('fill', 'rgba(120,120,120,0.9)')
+      .style('stroke', 'none')
+
+    const g = svg.append('g')
+    const paths = generatePaths(links, graph.nodes)
+
+    const nodePathMap = {}
+    for (let i = 0; i < paths.length; i++) {
+      const p = paths[i]
+      const l = p.links.length
+      nodePathMap[`${p.original.id}-start`] = [p.links[1], p.links[0]]
+      nodePathMap[`${p.original.id}-end`] = [p.links[l - 2], p.links[l - 1]]
+    }
+
+    const link = g
+      .selectAll('path')
+      .data(drawPaths ? generateLinks(links) : links)
+      .join('path')
+      .attr('marker-end', d => (d.id ? undefined : 'url(#arrowhead)'))
+      .attr('stroke', d => {
+        const same = d.linkNum !== undefined
+        if (same) {
+          const nodeIndex = paths.findIndex(path => {
+            return path.original.id === d.id
+          })
+          return color.startsWith('Just')
+            ? color.replace('Just', '').toLowerCase()
+            : hsl(
+                d3interpolate[`interpolate${color}`](nodeIndex / paths.length),
+              ).darker()
+        } else {
+          if (drawPaths) {
+            return colors[d.pathId]
+          } else {
+            return 'rgba(120,120,120,0.8)'
+          }
+        }
+      })
+      .attr('fill', 'none')
+      .attr('stroke-width', d => {
+        return d.linkNum !== undefined ? sequenceThickness : linkThickness
+      })
+      .on('click', (_, d) => {
+        onFeatureClick(d)
+      })
+
+    const node = g
+      .selectAll('circle')
+      .data(nodes)
+      .join('circle')
+      .attr('r', 7)
+      .attr('fill', 'rgba(255,255,255,0.0)')
+
+    const edgepaths = g
+      .selectAll('.edgepath')
+      .data(links)
+      .enter()
+      .append('path')
+      .attr(
+        'd',
+        d => `M${d.source.x},${d.source.y}L${d.target.x},${d.target.y}`,
+      )
+      .attr('id', (_, i) => 'edgepath-' + i)
+
+    const edgelabels = g
+      .selectAll('.edgelabel')
+      .data(links)
+      .enter()
+      .append('text')
+      .attr('dy', 12)
+      .attr('id', (_, i) => 'edgelabel-' + i)
+
+    edgelabels
+      .append('textPath')
+      .attr('href', (_, i) => `#edgepath-${i}`)
+      .attr('startOffset', '50%')
+      .attr('text-anchor', 'middle')
+      .text(d => {
+        const sid = d.source.id.slice(0, d.source.id.lastIndexOf('-'))
+        const tid = d.target.id.slice(0, d.target.id.lastIndexOf('-'))
+        const same = sid === tid && d.id
+        return same ? sid : ''
+      })
+
+    function drag_start(event, d) {
+      if (!event.active) {
+        simulation.alphaTarget(0.3).restart()
+      }
+      d.fx = event.x
+      d.fy = event.y
+    }
+
+    function drag_drag(event, d) {
+      d.fx = event.x
+      d.fy = event.y
+    }
+
+    function drag_end(event, d) {
+      if (!event.active) simulation.alphaTarget(0)
+      d.fx = null
+      d.fy = null
+    }
+
+    var drag_handler = d3drag
+      .drag()
+      .on('start', drag_start)
+      .on('drag', drag_drag)
+      .on('end', drag_end)
+
+    drag_handler(node)
+    const zoom_handler = d3zoom()
+    zoom_handler.on('zoom', event => {
+      g.attr('transform', event.transform)
+    })
+    zoom_handler(svg)
   }, [
     data.links,
     data.nodes,
