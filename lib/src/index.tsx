@@ -1,3 +1,4 @@
+//@ts-nocheck
 import React, { useRef, useMemo, useEffect } from 'react'
 import { hsl } from 'd3-color'
 import * as d3drag from 'd3-drag'
@@ -11,12 +12,16 @@ import {
 } from 'd3-force'
 import * as d3interpolate from 'd3-scale-chromatic'
 import { zoom as d3zoom } from 'd3-zoom'
-import { projectLine, reprocessGraph, generatePaths } from './util'
+import { projectLine, reprocessGraph, generatePaths, Link, Graph } from './util'
 const { schemeCategory10 } = d3interpolate
 
-function generateLinks(links) {
-  let newlinks = []
-  let pathIds = []
+function generateLinks(links: Link[]) {
+  let newlinks = [] as {
+    pathId?: string
+    pathIndex?: number
+    [key: string]: any
+  }[]
+  let pathIds = [] as string[]
   for (let i = 0; i < links.length; i++) {
     const { paths, ...rest } = links[i]
     if (paths) {
@@ -36,7 +41,27 @@ function generateLinks(links) {
   return newlinks
 }
 
-const Graph = React.forwardRef((props, ref) => {
+interface Props {
+  graph: Graph
+  drawPaths: boolean
+  drawLabels: boolean
+  drag: boolean
+  settings: {
+    chunkSize: number
+    linkSteps: number
+    sequenceThickness: number
+    linkThickness: number
+    theta: number
+    strengthCenter: number
+  }
+  color: string
+  width: number
+  height: number
+  redraw: number
+  onFeatureClick: () => void
+}
+
+const Graph = React.forwardRef<SVGSVGElement, Props>((props, ref) => {
   const {
     graph,
     drawPaths = false,
@@ -62,17 +87,18 @@ const Graph = React.forwardRef((props, ref) => {
   const dragRef = useRef()
   dragRef.current = drag
 
-  const data = useMemo(() => {
-    return reprocessGraph(graph, chunkSize)
-  }, [chunkSize, graph])
+  const data = useMemo(
+    () => reprocessGraph(graph, chunkSize),
+    [chunkSize, graph],
+  )
 
-  const colors = useMemo(() => {
-    return Object.fromEntries(
-      (graph.paths || []).map((p, i) => {
-        return [p.name, schemeCategory10[i]]
-      }),
-    )
-  }, [graph.paths])
+  const colors = useMemo(
+    () =>
+      Object.fromEntries(
+        (graph.paths || []).map((p, i) => [p.name, schemeCategory10[i]]),
+      ),
+    [graph.paths],
+  )
 
   useEffect(() => {
     if (ref.current) {
