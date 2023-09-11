@@ -1,33 +1,68 @@
 // Given a GFA graph with sequence nodes ('S' tags), it breaks the S tags into
 // multiple nodes depending on how long the sequence is, which gives the graph
 // an organic look when the layout algorithm is applied
-export function reprocessGraph(G, chunkSize) {
-  const Gp = { nodes: [], links: [] }
+export interface Path {
+  name: string
+  path: string
+}
+export interface Node {
+  id: string
+  sequence?: string
+  length?: number
+}
+export interface Graph {
+  nodes: Node[]
+  links: Link[]
+  paths?: Path[]
+  id: string
+}
+export interface Coord {
+  x: number
+  y: number
+}
 
-  const seen = {}
-  for (let i = 0; i < (G.paths || {}).length; i++) {
-    const path = G.paths[i]
-    const pathNodes = path.path.split(',')
-    for (let j = 0; j < pathNodes.length - 1; j++) {
-      const curr = `${pathNodes[j]}_${pathNodes[j + 1]}`
-      if (!seen[curr]) {
-        seen[curr] = [path.name]
-      } else {
-        seen[curr].push(path.name)
+export interface Link {
+  strand1?: string
+  strand2?: string
+  linkNum: number
+  length?: number
+  source: string
+  loop?: boolean
+  sequence?: string
+  paths?: string[]
+  id: string
+  target: string
+}
+export function reprocessGraph(G: Graph, chunkSize: number) {
+  const Gp = { nodes: [] as Node[], links: [] as Link[] }
+
+  const seen = {} as Record<string, string[]>
+  if (G.paths) {
+    for (const path of G.paths) {
+      const pathNodes = path.path.split(',')
+      for (let j = 0; j < pathNodes.length - 1; j++) {
+        const curr = `${pathNodes[j]}_${pathNodes[j + 1]}`
+        if (!seen[curr]) {
+          seen[curr] = [path.name]
+        } else {
+          seen[curr].push(path.name)
+        }
       }
     }
   }
 
   for (let i = 0; i < G.nodes.length; i++) {
     const { id, sequence, length, ...rest } = G.nodes[i]
-    const nodes = []
+    const nodes = [] as Node[]
 
     // break long sequence into multiple nodes, for organic layout
-    nodes.push({ ...rest, id: `${id}-start` })
-    for (let i = chunkSize; i < length - chunkSize; i += chunkSize) {
-      nodes.push({ ...rest, id: `${id}-${i}` })
+    if (length) {
+      nodes.push({ ...rest, id: `${id}-start` })
+      for (let i = chunkSize; i < length - chunkSize; i += chunkSize) {
+        nodes.push({ ...rest, id: `${id}-${i}` })
+      }
+      nodes.push({ ...rest, id: `${id}-end` })
     }
-    nodes.push({ ...rest, id: `${id}-end` })
 
     // recreate links
     for (let j = 0; j < nodes.length - 1; j++) {
@@ -45,25 +80,20 @@ export function reprocessGraph(G, chunkSize) {
     }
     Gp.nodes = Gp.nodes.concat(nodes)
   }
-  for (let i = 0; i < G.links.length; i++) {
-    const { strand1, strand2, source, target, ...rest } = G.links[i]
+
+  for (const { strand1, strand2, source, target, ...rest } of G.links) {
     const paths = seen[`${source}${strand1}_${target}${strand2}`] || []
     const loop = source === target
 
     // enumerates cases for which end of source connects to
     // which end of the target
-    const link = {
+    Gp.links.push({
       source: `${source}-${strand1 === '+' ? 'end' : 'start'}`,
       target: `${target}-${strand2 === '+' ? 'start' : 'end'}`,
+      loop,
+      paths: paths.length ? paths : undefined,
       ...rest,
-    }
-    if (loop) {
-      link.loop = true
-    }
-    if (paths.length) {
-      link.paths = paths
-    }
-    Gp.links.push(link)
+    })
   }
 
   return Gp
@@ -86,10 +116,15 @@ function groupByArray(xs, key) {
   }, [])
 }
 
+export interface Edge {
+  linkNum: number
+  source: Coord
+  target: Coord
+}
 // connects successive start->end to a path
 // param edges: {source:{x,y}, target:{x,y}}[]
-function makePath(edges) {
-  const path = []
+function makePath(edges: Edge[]) {
+  const path = [] as [number, number][]
   let i = 0
   for (; i < edges.length; i++) {
     const st = edges[i]
@@ -101,7 +136,7 @@ function makePath(edges) {
 }
 
 // groups the edges data structure by the linkNum attribute
-export function generatePaths(edges, graph) {
+export function generatePaths(edges: Edge[], graph: Record<string, unknown>) {
   const ret = groupByArray(edges, 'linkNum')
   return ret.map(entry => ({
     links: makePath(entry.values),
@@ -109,8 +144,13 @@ export function generatePaths(edges, graph) {
   }))
 }
 
-export function generateEdges(links, graph) {
-  const result = []
+type Coord2 = [number, number]
+
+export function generateLinks(links: Edge[], graph: Graph[]) {
+  const result = [] as {
+    links: [Coord2, Coord2]
+    original: { id: string }
+  }[]
   for (let i = 0; i < links.length; i++) {
     const link = links[i]
     const original = graph[i]
@@ -130,7 +170,13 @@ export function generateEdges(links, graph) {
 // implements this algorithm to project a point "forwards" from a given contig
 // node translation of simple vector math here
 // https://math.stackexchange.com/questions/175896
-export function projectLine(x1, y1, x2, y2, dt) {
+export function projectLine(
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+  dt: number,
+) {
   const d = Math.sqrt((y2 - y1) ** 2 + (x2 - x1) ** 2)
   const vx = (x2 - x1) / d
   const vy = (y2 - y1) / d
