@@ -10,7 +10,7 @@ import {
   BooleanParam,
   StringParam,
   NumberParam,
-  withDefault
+  withDefault,
 } from 'use-query-params'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './App.css'
@@ -36,17 +36,11 @@ function App() {
     colorScheme: withDefault(StringParam, 'Rainbow'),
     drawLabels: withDefault(BooleanParam, false),
     drawPaths: withDefault(BooleanParam, false),
-    drag: withDefault(BooleanParam, true)
+    drag: withDefault(BooleanParam, true),
   })
 
-  const {
-    dataset,
-    drawLabels,
-    drawPaths,
-    colorScheme,
-    drag,
-    ...settings
-  } = query
+  const { dataset, drawLabels, drawPaths, colorScheme, drag, ...settings } =
+    query
 
   const ref = useRef()
   useEffect(() => {
@@ -73,14 +67,14 @@ function App() {
   return (
     <div>
       <Header
-        onData={(value) => {
+        onData={value => {
           setQuery({ dataset: value })
           forceUpdate()
         }}
-        onGraph={(graph) => {
+        onGraph={graph => {
           setData(graph)
         }}
-        onSettings={(settings) => {
+        onSettings={settings => {
           setQuery(settings)
           forceUpdate()
         }}
@@ -92,7 +86,7 @@ function App() {
       {featureData ? (
         <FeatureDialog
           data={featureData}
-          onModal={(data) => {
+          onModal={data => {
             setFeatureData(data)
           }}
           onHide={() => {
@@ -100,33 +94,33 @@ function App() {
           }}
         />
       ) : null}
-      <div className='flexcontainer'>
-        <div id='sidebar' className='sidebar'>
+      <div className="flexcontainer">
+        <div id="sidebar" className="sidebar">
           <Sidebar
             colorScheme={colorScheme}
             drawPaths={drawPaths}
             drawLabels={drawLabels}
             drag={drag}
-            onColorChange={(value) => {
+            onColorChange={value => {
               setQuery({ colorScheme: value })
               forceUpdate()
             }}
-            onDrawLabels={(value) => {
+            onDrawLabels={value => {
               setQuery({ drawLabels: value })
               forceUpdate()
             }}
-            onDrag={(value) => {
+            onDrag={value => {
               setQuery({ drag: value })
               forceUpdate()
             }}
-            onPathDraw={(value) => {
+            onPathDraw={value => {
               setQuery({ drawPaths: value })
               forceUpdate()
             }}
-            onRedraw={() => setRedraw((redraw) => redraw + 1)}
+            onRedraw={() => setRedraw(redraw => redraw + 1)}
           />
         </div>
-        <div className='body'>
+        <div className="body">
           {error ? <div style={{ color: 'red' }}>{error}</div> : null}
           {graph ? (
             <Graph
@@ -137,7 +131,7 @@ function App() {
               color={colorScheme}
               drawLabels={drawLabels}
               drawPaths={drawPaths}
-              onFeatureClick={(data) => {
+              onFeatureClick={data => {
                 setFeatureData(data)
               }}
               settings={settings}

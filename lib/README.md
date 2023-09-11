@@ -2,8 +2,8 @@
 
 ## Install
 
-The graphgenomeviewer NPM module is a React component that can be installed
-with yarn or npm
+The graphgenomeviewer NPM module is a React component that can be installed with
+yarn or npm
 
     yarn add graphgenomeviewer
 
@@ -17,7 +17,7 @@ function App() {
     <Graph
       graph={{
         nodes: [{ id: 'id1' }, { id: 'id2' }],
-        links: [{ source: 'id1', target: 'id2' }]
+        links: [{ source: 'id1', target: 'id2' }],
       }}
     />
   )

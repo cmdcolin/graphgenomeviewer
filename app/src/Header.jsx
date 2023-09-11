@@ -17,11 +17,11 @@ function AboutDialog({ onHide }) {
           side currently.
         </p>
         <p>
-          Contact <a href='mainto:colin.diesh@gmail.com'>Colin Diesh</a>
+          Contact <a href="mainto:colin.diesh@gmail.com">Colin Diesh</a>
         </p>
         <p>
           Thanks to the BCC2020 pangenome team, and{' '}
-          <a href='https://github.com/rrwick/Bandage'>Bandage</a> for
+          <a href="https://github.com/rrwick/Bandage">Bandage</a> for
           inspiration.
         </p>
         <p>
@@ -32,7 +32,7 @@ function AboutDialog({ onHide }) {
           This app attempts to support GFA2 but does not properly render
           fragments, intricate edge details, or U and O paths
         </p>
-        <a href='https://github.com/cmdcolin/graphgenomeviewer'>GitHub</a>
+        <a href="https://github.com/cmdcolin/graphgenomeviewer">GitHub</a>
       </Modal.Body>
     </Modal>
   )
@@ -56,12 +56,12 @@ function OpenURLDialog({ onHide, onData }) {
           <Form.Group>
             <Form.Label>Enter URL</Form.Label>
             <Form.Control
-              type='input'
+              type="input"
               value={value}
-              onChange={(event) => setValue(event.target.value)}
+              onChange={event => setValue(event.target.value)}
             />
           </Form.Group>
-          <Button type='submit'>Submit</Button>
+          <Button type="submit">Submit</Button>
         </Form>
       </Modal.Body>
     </Modal>
@@ -78,7 +78,7 @@ function OpenFileDialog({ onHide, onGraph }) {
 
       <Modal.Body>
         <Form
-          onSubmit={async (event) => {
+          onSubmit={async event => {
             event.preventDefault()
             const data = await ref.current.files[0].text()
             onGraph(data)
@@ -87,9 +87,9 @@ function OpenFileDialog({ onHide, onGraph }) {
         >
           <Form.Group>
             <Form.Label>Open file</Form.Label>
-            <Form.Control ref={ref} type='file' />
+            <Form.Control ref={ref} type="file" />
           </Form.Group>
-          <Button type='submit'>Submit</Button>
+          <Button type="submit">Submit</Button>
         </Form>
       </Modal.Body>
     </Modal>
@@ -103,12 +103,12 @@ export function Header({ onData, settings, onGraph, onExportSVG, onSettings }) {
   const [showOpenFile, setShowOpenFile] = useState()
   return (
     <>
-      <Navbar bg='light' expand='lg'>
-        <Navbar.Brand href='#home'>graphgenome browser</Navbar.Brand>
-        <Navbar.Toggle aria-controls='basic-navbar-nav' />
-        <Navbar.Collapse id='basic-navbar-nav'>
-          <Nav className='mr-auto'>
-            <NavDropdown title='File' id='basic-nav-dropdown'>
+      <Navbar bg="light" expand="lg">
+        <Navbar.Brand href="#home">graphgenome browser</Navbar.Brand>
+        <Navbar.Toggle aria-controls="basic-navbar-nav" />
+        <Navbar.Collapse id="basic-navbar-nav">
+          <Nav className="mr-auto">
+            <NavDropdown title="File" id="basic-nav-dropdown">
               <NavDropdown.Item onClick={() => setShowOpenURL(true)}>
                 Open URL
               </NavDropdown.Item>
@@ -119,7 +119,7 @@ export function Header({ onData, settings, onGraph, onExportSVG, onSettings }) {
                 Export SVG
               </NavDropdown.Item>
             </NavDropdown>
-            <NavDropdown title='Examples' id='basic-nav-dropdown'>
+            <NavDropdown title="Examples" id="basic-nav-dropdown">
               <NavDropdown.Item onClick={() => onData('MT.gfa')}>
                 MT GFA-spec example
               </NavDropdown.Item>

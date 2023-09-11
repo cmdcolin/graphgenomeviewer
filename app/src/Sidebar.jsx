@@ -10,7 +10,7 @@ export function Sidebar({
   onColorChange,
   onPathDraw,
   onRedraw,
-  colorScheme
+  colorScheme,
 }) {
   return (
     <div>
@@ -18,8 +18,8 @@ export function Sidebar({
       <Form.Label>Color</Form.Label>
       <Form.Control
         value={colorScheme}
-        onChange={(event) => onColorChange(event.target.value)}
-        as='select'
+        onChange={event => onColorChange(event.target.value)}
+        as="select"
       >
         <option>JustGrey</option>
         <option>Turbo</option>
@@ -31,21 +31,21 @@ export function Sidebar({
       <br />
       <Form.Group>
         <Form.Check
-          onChange={(event) => {
+          onChange={event => {
             onPathDraw(event.target.checked)
           }}
-          type='checkbox'
-          label='Draw paths'
+          type="checkbox"
+          label="Draw paths"
           checked={drawPaths}
         />
       </Form.Group>
       <Form.Group>
         <Form.Check
-          onChange={(event) => {
+          onChange={event => {
             onDrawLabels(event.target.checked)
           }}
-          type='checkbox'
-          label='Draw labels'
+          type="checkbox"
+          label="Draw labels"
           checked={drawLabels}
         />
       </Form.Group>

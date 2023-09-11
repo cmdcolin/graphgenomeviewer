@@ -10,7 +10,7 @@ export function serialize(svg) {
     svg,
     NodeFilter.SHOW_ELEMENT,
     null,
-    false
+    false,
   )
   while (walker.nextNode()) {
     for (const attr of walker.currentNode.attributes) {
@@ -41,7 +41,7 @@ export function parseGFA(file) {
     if (line.startsWith('H')) {
       const headerLine = {}
       const [, ...rest] = line.split('\t')
-      rest.forEach((tag) => parseTag(tag, headerLine))
+      rest.forEach(tag => parseTag(tag, headerLine))
       graph.header.push(headerLine)
     }
     if (line.startsWith('S')) {
@@ -86,12 +86,11 @@ export function parseGFA(file) {
         strand1,
         strand2,
         cigar,
-        tags
+        tags,
       })
     } else if (line.startsWith('L')) {
-      const [, source, strand1, target, strand2, cigar, ...rest] = line.split(
-        '\t'
-      )
+      const [, source, strand1, target, strand2, cigar, ...rest] =
+        line.split('\t')
       const tags = {}
       for (let i = 0; i < rest.length; i++) {
         parseTag(rest[i], tags)

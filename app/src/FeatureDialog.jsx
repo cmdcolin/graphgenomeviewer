@@ -11,13 +11,18 @@ export function FeatureDialog({ data, onHide }) {
       <Modal.Body>
         <div>Attributes</div>
         {Object.entries(data)
-          .filter(entry => !['source', 'target', 'linkNum', 'tags'].includes(entry[0]))
+          .filter(
+            entry =>
+              !['source', 'target', 'linkNum', 'tags'].includes(entry[0]),
+          )
           .map(([key, value]) => (
             <div
               key={`${key}_${value}`}
               style={{ display: 'flex', maxHeight: 150, margin: 3 }}
             >
-              <div style={{ backgroundColor: '#dda', minWidth: 100 }}>{key}</div>
+              <div style={{ backgroundColor: '#dda', minWidth: 100 }}>
+                {key}
+              </div>
               <div style={{ wordBreak: 'break-word', overflow: 'auto' }}>
                 {String(value)}
               </div>
@@ -32,7 +37,9 @@ export function FeatureDialog({ data, onHide }) {
                 key={`${key}_${value}`}
                 style={{ display: 'flex', maxHeight: 150, margin: 3 }}
               >
-                <div style={{ backgroundColor: '#dda', minWidth: 100 }}>{key}</div>
+                <div style={{ backgroundColor: '#dda', minWidth: 100 }}>
+                  {key}
+                </div>
                 <div style={{ wordBreak: 'break-word', overflow: 'auto' }}>
                   {String(value)}
                 </div>

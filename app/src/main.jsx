@@ -12,4 +12,3 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     </QueryParamProvider>
   </React.StrictMode>,
 )
-

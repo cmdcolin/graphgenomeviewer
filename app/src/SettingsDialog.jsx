@@ -4,7 +4,7 @@ import { Button, Col, Form, Modal, Row } from 'react-bootstrap'
 export function SettingsDialog({
   onHide,
   settings: paramSettings,
-  onSettings
+  onSettings,
 }) {
   const [settings, setSettings] = useState(paramSettings)
   const {
@@ -13,17 +13,17 @@ export function SettingsDialog({
     strengthCenter,
     theta,
     sequenceThickness,
-    linkThickness
+    linkThickness,
   } = settings
   return (
-    <Modal show={true} onHide={onHide} size='lg'>
+    <Modal show={true} onHide={onHide} size="lg">
       <Modal.Header closeButton>
         <Modal.Title>Settings</Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
         <Form
-          onSubmit={(event) => {
+          onSubmit={event => {
             event.preventDefault()
             onSettings({
               ...settings,
@@ -32,13 +32,13 @@ export function SettingsDialog({
               strengthCenter: +strengthCenter,
               theta: +theta,
               sequenceThickness: +sequenceThickness,
-              linkThickness: +linkThickness
+              linkThickness: +linkThickness,
             })
             onHide()
           }}
         >
           <Form.Group as={Row}>
-            <Form.Label column sm='4'>
+            <Form.Label column sm="4">
               Number of simulation steps for the links
               <Form.Text muted>
                 Increases the rigidity of the link based constraints. May be
@@ -47,20 +47,20 @@ export function SettingsDialog({
             </Form.Label>
             <Col>
               <Form.Control
-                type='number'
+                type="number"
                 value={linkSteps}
-                onChange={(event) => {
+                onChange={event => {
                   const val = event.target.value
-                  setSettings((settings) => ({
+                  setSettings(settings => ({
                     ...settings,
-                    linkSteps: val
+                    linkSteps: val,
                   }))
                 }}
               />
             </Col>
           </Form.Group>
           <Form.Group as={Row}>
-            <Form.Label column sm='4'>
+            <Form.Label column sm="4">
               Sequence chunk size
               <Form.Text muted>
                 If a contig is of length 5000, then chunk length 1000 would
@@ -70,20 +70,20 @@ export function SettingsDialog({
             </Form.Label>
             <Col>
               <Form.Control
-                type='number'
+                type="number"
                 value={chunkSize}
-                onChange={(event) => {
+                onChange={event => {
                   const val = event.target.value
-                  setSettings((settings) => ({
+                  setSettings(settings => ({
                     ...settings,
-                    chunkSize: val
+                    chunkSize: val,
                   }))
                 }}
               />
             </Col>
           </Form.Group>
           <Form.Group as={Row}>
-            <Form.Label column sm='4'>
+            <Form.Label column sm="4">
               Theta
               <Form.Text muted>
                 Parameter for the force directed layout
@@ -91,20 +91,20 @@ export function SettingsDialog({
             </Form.Label>
             <Col>
               <Form.Control
-                type='number'
+                type="number"
                 value={theta}
-                onChange={(event) => {
+                onChange={event => {
                   const val = event.target.value
-                  setSettings((settings) => ({
+                  setSettings(settings => ({
                     ...settings,
-                    theta: val
+                    theta: val,
                   }))
                 }}
               />
             </Col>
           </Form.Group>
           <Form.Group as={Row}>
-            <Form.Label column sm='4'>
+            <Form.Label column sm="4">
               Strength (particle charge)
               <Form.Text muted>
                 This value is like a charged particle force, by being negative
@@ -113,62 +113,62 @@ export function SettingsDialog({
             </Form.Label>
             <Col>
               <Form.Control
-                type='number'
+                type="number"
                 value={strengthCenter}
-                onChange={(event) => {
+                onChange={event => {
                   const val = event.target.value
-                  setSettings((settings) => ({
+                  setSettings(settings => ({
                     ...settings,
-                    strengthCenter: val
+                    strengthCenter: val,
                   }))
                 }}
               />
             </Col>
           </Form.Group>
           <Form.Group as={Row}>
-            <Form.Label column sm='4'>
+            <Form.Label column sm="4">
               Sequence thickness
             </Form.Label>
             <Col>
               <input
-                type='range'
+                type="range"
                 min={1}
                 max={100}
                 style={{ width: '100%' }}
                 value={sequenceThickness}
-                onChange={(event) => {
+                onChange={event => {
                   const val = event.target.value
-                  setSettings((settings) => ({
+                  setSettings(settings => ({
                     ...settings,
-                    sequenceThickness: val
+                    sequenceThickness: val,
                   }))
                 }}
               />
             </Col>
           </Form.Group>
           <Form.Group as={Row}>
-            <Form.Label column sm='4'>
+            <Form.Label column sm="4">
               Link thickness
             </Form.Label>
             <Col>
               <input
-                type='range'
+                type="range"
                 min={1}
                 max={100}
                 style={{ width: '100%' }}
                 value={linkThickness}
-                onChange={(event) => {
+                onChange={event => {
                   const val = event.target.value
-                  setSettings((settings) => ({
+                  setSettings(settings => ({
                     ...settings,
-                    linkThickness: val
+                    linkThickness: val,
                   }))
                 }}
               />
             </Col>
           </Form.Group>
 
-          <Button type='submit'>Submit</Button>
+          <Button type="submit">Submit</Button>
         </Form>
       </Modal.Body>
     </Modal>
