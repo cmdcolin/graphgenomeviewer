@@ -1,4 +1,4 @@
-import React, { useRef, useMemo, useEffect } from 'react'
+import React, { useMemo, useEffect } from 'react'
 import { hsl } from 'd3-color'
 import * as d3drag from 'd3-drag'
 import { select } from 'd3-selection'
@@ -57,7 +57,7 @@ interface Props {
   width: number
   height: number
   redraw: number
-  onFeatureClick: () => void
+  onFeatureClick: (arg?: unknown) => void
 }
 
 const Graph = React.forwardRef<SVGSVGElement, Props>((props, ref) => {
@@ -82,9 +82,6 @@ const Graph = React.forwardRef<SVGSVGElement, Props>((props, ref) => {
       console.log('no feature click configured')
     },
   } = props
-
-  const dragRef = useRef()
-  dragRef.current = drag
 
   const data = useMemo(
     () => reprocessGraph(graph, chunkSize),
@@ -124,15 +121,19 @@ const Graph = React.forwardRef<SVGSVGElement, Props>((props, ref) => {
 
     // animation
     function tickActions() {
+      // @ts-expect-error
       node.attr('cx', d => d.x).attr('cy', d => d.y)
 
+      // @ts-expect-error
       const paths = generatePaths(links, graph.nodes)
 
       const nodePathMap = {}
       for (let i = 0; i < paths.length; i++) {
         const p = paths[i]
         const l = p.links.length
+        // @ts-expect-error
         nodePathMap[`${p.original.id}-start`] = [p.links[1], p.links[0]]
+        // @ts-expect-error
         nodePathMap[`${p.original.id}-end`] = [p.links[l - 2], p.links[l - 1]]
       }
 
@@ -212,14 +213,17 @@ const Graph = React.forwardRef<SVGSVGElement, Props>((props, ref) => {
       if (edgepaths) {
         edgepaths.attr(
           'd',
+          // @ts-expect-error
           d => `M${d.source.x},${d.source.y}L${d.target.x},${d.target.y}`,
         )
       }
     }
+    // @ts-expect-error
     const simulation = forceSimulation().nodes(nodes)
     const charge_force = forceManyBody().strength(strengthCenter).theta(theta)
     const center_force = forceCenter(width / 3, height / 3)
     const link_force = forceLink(links)
+      // @ts-expect-error
       .id(d => d.id)
       .distance(link => (link.sequence ? 1 : 10))
       .iterations(linkSteps)
@@ -256,13 +260,16 @@ const Graph = React.forwardRef<SVGSVGElement, Props>((props, ref) => {
       .style('stroke', 'none')
 
     const g = svg.append('g')
+    // @ts-expect-error
     const paths = generatePaths(links, graph.nodes)
 
     const nodePathMap = {}
     for (let i = 0; i < paths.length; i++) {
       const p = paths[i]
       const l = p.links.length
+      // @ts-expect-error
       nodePathMap[`${p.original.id}-start`] = [p.links[1], p.links[0]]
+      // @ts-expect-error
       nodePathMap[`${p.original.id}-end`] = [p.links[l - 2], p.links[l - 1]]
     }
 
@@ -270,24 +277,19 @@ const Graph = React.forwardRef<SVGSVGElement, Props>((props, ref) => {
       .selectAll('path')
       .data(drawPaths ? generateLinks(links) : links)
       .join('path')
-      .attr('marker-end', d => (d.id ? undefined : 'url(#arrowhead)'))
+      .attr('marker-end', d => (d.id ? '' : 'url(#arrowhead)'))
       .attr('stroke', d => {
         const same = d.linkNum !== undefined
         if (same) {
-          const nodeIndex = paths.findIndex(path => {
-            return path.original.id === d.id
-          })
+          // @ts-expect-error
+          const idx = paths.findIndex(path => path.original.id === d.id)
           return color.startsWith('Just')
             ? color.replace('Just', '').toLowerCase()
-            : hsl(
-                d3interpolate[`interpolate${color}`](nodeIndex / paths.length),
-              ).darker()
+            : hsl(d3interpolate[`interpolate${color}`](idx / paths.length))
+                .darker()
+                .toString()
         } else {
-          if (drawPaths) {
-            return colors[d.pathId]
-          } else {
-            return 'rgba(120,120,120,0.8)'
-          }
+          return drawPaths ? colors[d.pathId || ''] : 'rgba(120,120,120,0.8)'
         }
       })
       .attr('fill', 'none')
@@ -312,6 +314,7 @@ const Graph = React.forwardRef<SVGSVGElement, Props>((props, ref) => {
       .append('path')
       .attr(
         'd',
+        // @ts-expect-error
         d => `M${d.source.x},${d.source.y}L${d.target.x},${d.target.y}`,
       )
       .attr('id', (_, i) => 'edgepath-' + i)
@@ -330,43 +333,38 @@ const Graph = React.forwardRef<SVGSVGElement, Props>((props, ref) => {
       .attr('startOffset', '50%')
       .attr('text-anchor', 'middle')
       .text(d => {
+        // @ts-expect-error
         const sid = d.source.id.slice(0, d.source.id.lastIndexOf('-'))
+        // @ts-expect-error
         const tid = d.target.id.slice(0, d.target.id.lastIndexOf('-'))
         const same = sid === tid && d.id
         return same ? sid : ''
       })
 
-    function drag_start(event, d) {
-      if (!event.active) {
-        simulation.alphaTarget(0.3).restart()
-      }
-      d.fx = event.x
-      d.fy = event.y
-    }
-
-    function drag_drag(event, d) {
-      d.fx = event.x
-      d.fy = event.y
-    }
-
-    function drag_end(event, d) {
-      if (!event.active) simulation.alphaTarget(0)
-      d.fx = null
-      d.fy = null
-    }
-
-    var drag_handler = d3drag
+    d3drag
       .drag()
-      .on('start', drag_start)
-      .on('drag', drag_drag)
-      .on('end', drag_end)
+      .on('start', (event, d: any) => {
+        if (!event.active) {
+          simulation.alphaTarget(0.3).restart()
+        }
+        d.fx = event.x
+        d.fy = event.y
+      })
+      .on('drag', (event, d: any) => {
+        d.fx = event.x
+        d.fy = event.y
+      })
+      .on('end', (event, d: any) => {
+        if (!event.active) simulation.alphaTarget(0)
+        d.fx = null
+        d.fy = null
+        // @ts-expect-error
+      })(node)
 
-    drag_handler(node)
-    const zoom_handler = d3zoom()
-    zoom_handler.on('zoom', event => {
+    d3zoom().on('zoom', event => {
       g.attr('transform', event.transform)
-    })
-    zoom_handler(svg)
+      // @ts-expect-error
+    })(svg)
   }, [
     data.links,
     data.nodes,

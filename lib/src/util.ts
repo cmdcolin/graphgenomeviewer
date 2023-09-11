@@ -101,19 +101,22 @@ export function reprocessGraph(G: Graph, chunkSize: number) {
 
 // source https://stackoverflow.com/questions/14446511/ returns an array that
 // contains groupings of xs by attribute key
-function groupByArray(xs, key) {
-  return xs.reduce(function (rv, x) {
-    const v = key instanceof Function ? key(x) : x[key]
-    if (v !== undefined) {
-      const el = rv.find(r => r && r.key === v)
-      if (el) {
-        el.values.push(x)
-      } else {
-        rv.push({ key: v, values: [x] })
+function groupByArray<T>(xs: T[], key: string | Function) {
+  return xs.reduce(
+    function (rv, x) {
+      const v = key instanceof Function ? key(x) : x[key]
+      if (v !== undefined) {
+        const el = rv.find(r => r && r.key === v)
+        if (el) {
+          el.values.push(x)
+        } else {
+          rv.push({ key: v, values: [x] })
+        }
       }
-    }
-    return rv
-  }, [])
+      return rv
+    },
+    [] as { key: string; values: T[] }[],
+  )
 }
 
 export interface Edge {
