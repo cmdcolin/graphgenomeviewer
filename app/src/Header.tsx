@@ -26,7 +26,7 @@ export default function Header({
   return (
     <>
       <Navbar bg="light" expand="lg">
-        <Navbar.Brand href="#home">graphgenome browser</Navbar.Brand>
+        <Navbar.Brand href="#home">graphgenomeviewer</Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="mr-auto">

@@ -6,7 +6,7 @@ export default function AboutDialog({ onHide }: { onHide: () => void }) {
   return (
     <Modal show={true} onHide={onHide}>
       <Modal.Header closeButton>
-        <Modal.Title>graphgenome browser {pkg.version}</Modal.Title>
+        <Modal.Title>graphgenomeviewer {pkg.version}</Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
