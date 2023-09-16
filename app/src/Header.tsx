@@ -13,9 +13,10 @@ export default function Header({
   onSettings,
 }: {
   onData: (arg: string) => void
-  onGraph: () => void
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onGraph: (arg: any) => void
   onExportSVG: () => void
-  onSettings: () => void
+  onSettings: (arg: Settings) => void
   settings: Settings
 }) {
   const [showAbout, setShowAbout] = useState(false)

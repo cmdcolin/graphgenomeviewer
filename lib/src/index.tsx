@@ -53,8 +53,8 @@ interface Props {
     strengthCenter: number
   }
   color: string
-  width: number
-  height: number
+  width?: number
+  height?: number
   redraw: number
   onFeatureClick: (arg?: unknown) => void
 }

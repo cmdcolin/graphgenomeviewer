@@ -86,8 +86,7 @@ function App() {
       {featureData ? (
         <FeatureDialog
           data={featureData}
-          onModal={data => setFeatureData(data)}
-          onHide={() => setFeatureData()}
+          onHide={() => setFeatureData(undefined)}
         />
       ) : null}
       <div className="flexcontainer">
@@ -122,7 +121,8 @@ function App() {
               color={colorScheme}
               drawLabels={drawLabels}
               drawPaths={drawPaths}
-              onFeatureClick={data => setFeatureData(data)}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              onFeatureClick={(data: any) => setFeatureData(data)}
               settings={settings}
             />
           ) : null}

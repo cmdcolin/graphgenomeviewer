@@ -1,7 +1,7 @@
 {
   "name": "graphgenomeviewer",
   "version": "2.0.3",
-  "description": "React component for graph visualization",
+  "description": "React component for graph genome visualization",
   "author": "cmdcolin",
   "license": "MIT",
   "repository": "cmdcolin/graphgenomeviewer",
