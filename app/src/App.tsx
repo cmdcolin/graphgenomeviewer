@@ -1,9 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { FeatureDialog } from './FeatureDialog'
 import Graph from 'graphgenomeviewer'
-import { Sidebar } from './Sidebar'
-import { Header } from './Header'
-import { parseGFA, serialize } from './util'
 import saveAs from 'file-saver'
 import {
   useQueryParams,
@@ -12,14 +8,21 @@ import {
   NumberParam,
   withDefault,
 } from 'use-query-params'
+
+import FeatureDialog from './FeatureDialog'
+import Sidebar from './Sidebar'
+import Header from './Header'
+import { parseGFA, serialize } from './util'
+
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './App.css'
 
 function App() {
-  const [featureData, setFeatureData] = useState()
-  const [data, setData] = useState()
-  const [error, setError] = useState()
-  const [, updateState] = useState()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [featureData, setFeatureData] = useState<any>()
+  const [data, setData] = useState<string>()
+  const [error, setError] = useState<unknown>()
+  const [, updateState] = useState<unknown>()
   const forceUpdate = React.useCallback(() => updateState({}), [])
   const [redraw, setRedraw] = useState(0)
   const [query, setQuery] = useQueryParams({
@@ -42,12 +45,12 @@ function App() {
   const { dataset, drawLabels, drawPaths, colorScheme, drag, ...settings } =
     query
 
-  const ref = useRef()
+  const ref = useRef<SVGSVGElement>(null)
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     ;(async () => {
       try {
-        setError()
+        setError(undefined)
         const result = await fetch(dataset)
         if (!result.ok) {
           throw new Error(`Failed to fetch ${result.statusText}`)
@@ -56,7 +59,7 @@ function App() {
         setData(text)
       } catch (error) {
         console.error(error)
-        setError(error.message)
+        setError(error)
       }
     })()
   }, [dataset])
@@ -72,27 +75,19 @@ function App() {
           setQuery({ dataset: value })
           forceUpdate()
         }}
-        onGraph={graph => {
-          setData(graph)
-        }}
+        onGraph={graph => setData(graph)}
         onSettings={settings => {
           setQuery(settings)
           forceUpdate()
         }}
-        onExportSVG={() => {
-          saveAs(serialize(ref.current))
-        }}
+        onExportSVG={() => saveAs(serialize(ref.current))}
         settings={settings}
       />
       {featureData ? (
         <FeatureDialog
           data={featureData}
-          onModal={data => {
-            setFeatureData(data)
-          }}
-          onHide={() => {
-            setFeatureData()
-          }}
+          onModal={data => setFeatureData(data)}
+          onHide={() => setFeatureData()}
         />
       ) : null}
       <div className="flexcontainer">
@@ -101,17 +96,12 @@ function App() {
             colorScheme={colorScheme}
             drawPaths={drawPaths}
             drawLabels={drawLabels}
-            drag={drag}
             onColorChange={value => {
               setQuery({ colorScheme: value })
               forceUpdate()
             }}
             onDrawLabels={value => {
               setQuery({ drawLabels: value })
-              forceUpdate()
-            }}
-            onDrag={value => {
-              setQuery({ drag: value })
               forceUpdate()
             }}
             onPathDraw={value => {
@@ -122,7 +112,7 @@ function App() {
           />
         </div>
         <div className="body">
-          {error ? <div style={{ color: 'red' }}>{error}</div> : null}
+          {error ? <div style={{ color: 'red' }}>{`${error}`}</div> : null}
           {graph ? (
             <Graph
               graph={graph}
@@ -132,9 +122,7 @@ function App() {
               color={colorScheme}
               drawLabels={drawLabels}
               drawPaths={drawPaths}
-              onFeatureClick={data => {
-                setFeatureData(data)
-              }}
+              onFeatureClick={data => setFeatureData(data)}
               settings={settings}
             />
           ) : null}

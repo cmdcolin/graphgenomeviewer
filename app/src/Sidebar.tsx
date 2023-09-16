@@ -1,14 +1,22 @@
 import React from 'react'
 import { Form, Button } from 'react-bootstrap'
 
-export function Sidebar({
-  onDrawLabels,
+export default function Sidebar({
+  colorScheme,
   drawLabels,
   drawPaths,
+  onDrawLabels,
   onColorChange,
   onPathDraw,
   onRedraw,
-  colorScheme,
+}: {
+  drawLabels: boolean
+  drawPaths: boolean
+  colorScheme: string
+  onDrawLabels: (arg: boolean) => void
+  onColorChange: (arg: string) => void
+  onPathDraw: (arg: boolean) => void
+  onRedraw: () => void
 }) {
   return (
     <div>
@@ -29,9 +37,7 @@ export function Sidebar({
       <br />
       <Form.Group>
         <Form.Check
-          onChange={event => {
-            onPathDraw(event.target.checked)
-          }}
+          onChange={event => onPathDraw(event.target.checked)}
           type="checkbox"
           label="Draw paths"
           checked={drawPaths}
@@ -39,9 +45,7 @@ export function Sidebar({
       </Form.Group>
       <Form.Group>
         <Form.Check
-          onChange={event => {
-            onDrawLabels(event.target.checked)
-          }}
+          onChange={event => onDrawLabels(event.target.checked)}
           type="checkbox"
           label="Draw labels"
           checked={drawLabels}

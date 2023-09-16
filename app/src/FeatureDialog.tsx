@@ -1,7 +1,13 @@
 import React from 'react'
 import { Button, Modal } from 'react-bootstrap'
 
-export function FeatureDialog({ data, onHide }) {
+export default function FeatureDialog({
+  data,
+  onHide,
+}: {
+  data: Record<string, string>
+  onHide: () => void
+}) {
   return (
     <Modal show={true} onHide={onHide}>
       <Modal.Header closeButton>

@@ -28,15 +28,18 @@ module.exports = {
     'unicorn/prevent-abbreviations': 'off',
     'unicorn/no-null': 'off',
     'unicorn/filename-case': 'off',
+    'unicorn/no-useless-undefined': 'off',
 
     'react/prop-types': 'off',
     'react-refresh/only-export-components': 'warn',
 
+    '@typescript-eslint/no-base-to-string': 'off',
     '@typescript-eslint/no-unsafe-member-access': 'off',
     '@typescript-eslint/no-unsafe-argument': 'off',
     '@typescript-eslint/no-unsafe-assignment': 'off',
     '@typescript-eslint/no-unsafe-call': 'off',
     '@typescript-eslint/no-unsafe-return': 'off',
+    '@typescript-eslint/restrict-template-expressions': 'off',
     '@typescript-eslint/ban-ts-comment': 'off',
     '@typescript-eslint/no-unused-vars': [
       'warn',

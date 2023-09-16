@@ -1,10 +1,23 @@
 import React, { useState } from 'react'
 import { Button, Col, Form, Modal, Row } from 'react-bootstrap'
 
-export function SettingsDialog({
+export interface Settings {
+  chunkSize: number
+  linkSteps: number
+  strengthCenter: number
+  theta: number
+  sequenceThickness: number
+  linkThickness: number
+}
+
+export default function SettingsDialog({
   onHide,
   settings: paramSettings,
   onSettings,
+}: {
+  onHide: () => void
+  settings: Settings
+  onSettings: (arg: Settings) => void
 }) {
   const [settings, setSettings] = useState(paramSettings)
   const {
@@ -50,7 +63,7 @@ export function SettingsDialog({
                 type="number"
                 value={linkSteps}
                 onChange={event => {
-                  const val = event.target.value
+                  const val = +event.target.value
                   setSettings(settings => ({
                     ...settings,
                     linkSteps: val,
@@ -73,7 +86,7 @@ export function SettingsDialog({
                 type="number"
                 value={chunkSize}
                 onChange={event => {
-                  const val = event.target.value
+                  const val = +event.target.value
                   setSettings(settings => ({
                     ...settings,
                     chunkSize: val,
@@ -94,7 +107,7 @@ export function SettingsDialog({
                 type="number"
                 value={theta}
                 onChange={event => {
-                  const val = event.target.value
+                  const val = +event.target.value
                   setSettings(settings => ({
                     ...settings,
                     theta: val,
@@ -116,7 +129,7 @@ export function SettingsDialog({
                 type="number"
                 value={strengthCenter}
                 onChange={event => {
-                  const val = event.target.value
+                  const val = +event.target.value
                   setSettings(settings => ({
                     ...settings,
                     strengthCenter: val,
@@ -137,7 +150,7 @@ export function SettingsDialog({
                 style={{ width: '100%' }}
                 value={sequenceThickness}
                 onChange={event => {
-                  const val = event.target.value
+                  const val = +event.target.value
                   setSettings(settings => ({
                     ...settings,
                     sequenceThickness: val,
@@ -158,7 +171,7 @@ export function SettingsDialog({
                 style={{ width: '100%' }}
                 value={linkThickness}
                 onChange={event => {
-                  const val = event.target.value
+                  const val = +event.target.value
                   setSettings(settings => ({
                     ...settings,
                     linkThickness: val,
