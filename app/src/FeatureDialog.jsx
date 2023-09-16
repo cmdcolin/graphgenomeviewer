@@ -29,7 +29,7 @@ export function FeatureDialog({ data, onHide }) {
             </div>
           ))}
         <hr />
-        {data.tags && Object.keys(data.tags).length ? (
+        {data.tags && Object.keys(data.tags).length > 0 ? (
           <>
             <div>Tags</div>
             {Object.entries(data.tags).map(([key, value]) => (

@@ -5,7 +5,7 @@ import App from './App'
 import { QueryParamProvider } from 'use-query-params'
 import { WindowHistoryAdapter } from 'use-query-params/adapters/window'
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+ReactDOM.createRoot(document.querySelector('#root')).render(
   <React.StrictMode>
     <QueryParamProvider adapter={WindowHistoryAdapter}>
       <App />

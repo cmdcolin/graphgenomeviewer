@@ -41,7 +41,7 @@ export function parseGFA(file) {
     if (line.startsWith('H')) {
       const headerLine = {}
       const [, ...rest] = line.split('\t')
-      rest.forEach(tag => parseTag(tag, headerLine))
+      for (const tag of rest) {parseTag(tag, headerLine)}
       graph.header.push(headerLine)
     }
     if (line.startsWith('S')) {
@@ -69,15 +69,15 @@ export function parseGFA(file) {
       }
       graph.nodes.push({ id: name, length: len, sequence: seq, tags })
     } else if (line.startsWith('E')) {
-      // eslint-disable-next-line no-unused-vars
+      // eslint-disable-next-line no-unused-vars,unicorn/no-unreadable-array-destructuring
       const [, , source, target, , , , , cigar, ...rest] = line.split('\t')
       const source1 = source.slice(0, -1)
       const target1 = target.slice(0, -1)
-      const strand1 = source.charAt(source.length - 1)
-      const strand2 = source.charAt(target.length - 1)
+      const strand1 = source.at(-1)
+      const strand2 = source.at(-1)
       const tags = {}
-      for (let i = 0; i < rest.length; i++) {
-        parseTag(rest[i], tags)
+      for (const element of rest) {
+        parseTag(element, tags)
       }
 
       graph.links.push({
@@ -92,8 +92,8 @@ export function parseGFA(file) {
       const [, source, strand1, target, strand2, cigar, ...rest] =
         line.split('\t')
       const tags = {}
-      for (let i = 0; i < rest.length; i++) {
-        parseTag(rest[i], tags)
+      for (const element of rest) {
+        parseTag(element, tags)
       }
       graph.links.push({ source, target, strand1, strand2, cigar, tags })
     } else if (line.startsWith('P')) {

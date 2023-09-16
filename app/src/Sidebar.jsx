@@ -5,8 +5,6 @@ export function Sidebar({
   onDrawLabels,
   drawLabels,
   drawPaths,
-  drag,
-  onDrag,
   onColorChange,
   onPathDraw,
   onRedraw,

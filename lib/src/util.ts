@@ -42,10 +42,10 @@ export function reprocessGraph(G: Graph, chunkSize: number) {
       const pathNodes = path.path.split(',')
       for (let j = 0; j < pathNodes.length - 1; j++) {
         const curr = `${pathNodes[j]}_${pathNodes[j + 1]}`
-        if (!seen[curr]) {
-          seen[curr] = [path.name]
-        } else {
+        if (seen[curr]) {
           seen[curr].push(path.name)
+        } else {
+          seen[curr] = [path.name]
         }
       }
     }
@@ -78,7 +78,7 @@ export function reprocessGraph(G: Graph, chunkSize: number) {
         linkNum: i,
       })
     }
-    Gp.nodes = Gp.nodes.concat(nodes)
+    Gp.nodes = [...Gp.nodes, ...nodes]
   }
 
   for (const { strand1, strand2, source, target, ...rest } of G.links) {
@@ -91,7 +91,7 @@ export function reprocessGraph(G: Graph, chunkSize: number) {
       source: `${source}-${strand1 === '+' ? 'end' : 'start'}`,
       target: `${target}-${strand2 === '+' ? 'start' : 'end'}`,
       loop,
-      paths: paths.length ? paths : undefined,
+      paths: paths.length > 0 ? paths : undefined,
       ...rest,
     })
   }
@@ -152,8 +152,7 @@ export function generateLinks(links: Edge[], graph: Graph[]) {
     links: [Coord2, Coord2]
     original: { id: string }
   }[]
-  for (let i = 0; i < links.length; i++) {
-    const link = links[i]
+  for (const [i, link] of links.entries()) {
     const original = graph[i]
     if (!original.id) {
       result.push({
@@ -178,7 +177,7 @@ export function projectLine(
   y2: number,
   dt: number,
 ) {
-  const d = Math.sqrt((y2 - y1) ** 2 + (x2 - x1) ** 2)
+  const d = Math.hypot(y2 - y1, x2 - x1)
   const vx = (x2 - x1) / d
   const vy = (y2 - y1) / d
   return [x2 + dt * vx, y2 + dt * vy]

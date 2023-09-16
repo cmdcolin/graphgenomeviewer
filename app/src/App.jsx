@@ -44,18 +44,19 @@ function App() {
 
   const ref = useRef()
   useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     ;(async () => {
       try {
+        setError()
         const result = await fetch(dataset)
         if (!result.ok) {
           throw new Error(`Failed to fetch ${result.statusText}`)
         }
         const text = await result.text()
         setData(text)
-        setError(undefined)
-      } catch (e) {
-        console.error(e)
-        setError(e.message)
+      } catch (error) {
+        console.error(error)
+        setError(error.message)
       }
     })()
   }, [dataset])
@@ -90,7 +91,7 @@ function App() {
             setFeatureData(data)
           }}
           onHide={() => {
-            setFeatureData(undefined)
+            setFeatureData()
           }}
         />
       ) : null}

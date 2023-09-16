@@ -70,6 +70,7 @@ function OpenURLDialog({ onHide, onData }) {
 
 function OpenFileDialog({ onHide, onGraph }) {
   const ref = useRef()
+  const [error, setError] = useState('')
   return (
     <Modal show={true} onHide={onHide}>
       <Modal.Header closeButton>
@@ -77,12 +78,21 @@ function OpenFileDialog({ onHide, onGraph }) {
       </Modal.Header>
 
       <Modal.Body>
+        {error ? <div style={{ color: 'red' }}>{`${error}`}</div> : null}
         <Form
-          onSubmit={async event => {
+          onSubmit={event => {
             event.preventDefault()
-            const data = await ref.current.files[0].text()
-            onGraph(data)
-            onHide()
+            // eslint-disable-next-line @typescript-eslint/no-floating-promises
+            ;(async () => {
+              try {
+                setError('')
+                const data = await ref.current.files[0].text()
+                onGraph(data)
+                onHide()
+              } catch (error) {
+                setError(error)
+              }
+            })()
           }}
         >
           <Form.Group>
