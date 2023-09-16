@@ -24,13 +24,13 @@ export interface Coord {
 export interface Link {
   strand1?: string
   strand2?: string
-  linkNum: number
+  linkNum?: number
   length?: number
   source: string
   loop?: boolean
   sequence?: string
   paths?: string[]
-  id: string
+  id?: string
   target: string
 }
 export function reprocessGraph(G: Graph, chunkSize: number) {

@@ -1,18 +1,14 @@
 // adapted from https://observablehq.com/@mbostock/saving-svg
-export function serialize(svg) {
+export function serialize(svgPre: SVGSVGElement) {
   const xmlns = 'http://www.w3.org/2000/xmlns/'
   const xlinkns = 'http://www.w3.org/1999/xlink'
   const svgns = 'http://www.w3.org/2000/svg'
 
-  svg = svg.cloneNode(true)
+  const svg = svgPre.cloneNode(true) as SVGSVGElement
   const fragment = `${window.location.href}#`
-  const walker = document.createTreeWalker(
-    svg,
-    NodeFilter.SHOW_ELEMENT,
-    null,
-    false,
-  )
+  const walker = document.createTreeWalker(svg, NodeFilter.SHOW_ELEMENT, null)
   while (walker.nextNode()) {
+    // @ts-expect-error
     for (const attr of walker.currentNode.attributes) {
       if (attr.value.includes(fragment)) {
         attr.value = attr.value.replace(fragment, '#')
@@ -26,7 +22,7 @@ export function serialize(svg) {
   return new Blob([string], { type: 'image/svg+xml' })
 }
 
-function parseTag(tag, tags) {
+function parseTag(tag: string, tags: Record<string, string | number>) {
   const [name, type, val] = tag.split(':')
   if (type === 'i') {
     tags[name] = +val
@@ -35,13 +31,37 @@ function parseTag(tag, tags) {
   }
 }
 
-export function parseGFA(file) {
-  const graph = { nodes: [], links: [], paths: [], header: [] }
+export function parseGFA(file: string) {
+  const graph = {
+    nodes: [] as {
+      id: string
+      length: number
+      sequence: string
+      tags: Record<string, string | number>
+    }[],
+    links: [] as {
+      source: string
+      target: string
+      strand1?: string
+      strand2?: string
+      cigar: string
+      tags: Record<string, string>
+    }[],
+    paths: [] as {
+      name: string
+      path: string
+      rest: string[]
+    }[],
+    header: [] as Record<string, string | number>[],
+    id: '',
+  }
   for (const line of file.split('\n')) {
     if (line.startsWith('H')) {
-      const headerLine = {}
+      const headerLine = {} as Record<string, string | number>
       const [, ...rest] = line.split('\t')
-      for (const tag of rest) {parseTag(tag, headerLine)}
+      for (const tag of rest) {
+        parseTag(tag, headerLine)
+      }
       graph.header.push(headerLine)
     }
     if (line.startsWith('S')) {
@@ -60,12 +80,12 @@ export function parseGFA(file) {
         len = seq.length
         tagfields = rest.slice(1)
       }
-      const tags = {}
+      const tags = {} as Record<string, string | number>
       for (let i = 0; i < tagfields.length; i++) {
         parseTag(rest[i], tags)
       }
       if (gfa1 && tags.LN) {
-        len = tags.LN
+        len = +tags.LN
       }
       graph.nodes.push({ id: name, length: len, sequence: seq, tags })
     } else if (line.startsWith('E')) {

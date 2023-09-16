@@ -80,7 +80,13 @@ function App() {
           setQuery(settings)
           forceUpdate()
         }}
-        onExportSVG={() => saveAs(serialize(ref.current))}
+        onExportSVG={() => {
+          if (!ref.current) {
+            return
+          }
+          const ret = serialize(ref.current)
+          saveAs(ret)
+        }}
         settings={settings}
       />
       {featureData ? (
