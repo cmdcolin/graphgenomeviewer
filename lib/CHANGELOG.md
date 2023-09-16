@@ -1,3 +1,7 @@
+## 2.1.0
+
+Add typescripting
+
 ## 2.0.3
 
 - Add a better heuristic for when to draw self-arcs using dot product of source

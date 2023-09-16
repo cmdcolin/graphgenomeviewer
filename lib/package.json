@@ -6,7 +6,8 @@
   "license": "MIT",
   "repository": "cmdcolin/graphgenomeviewer",
   "files": [
-    "dist"
+    "dist",
+    "src"
   ],
   "main": "dist/index.js",
   "engines": {
@@ -16,7 +17,6 @@
     "lint": "eslint src",
     "prebuild": "rimraf dist",
     "build": "tsc",
-    "watch": "babel src --out-dir dist --watch",
     "postversion": "git push --follow-tags"
   },
   "peerDependencies": {
