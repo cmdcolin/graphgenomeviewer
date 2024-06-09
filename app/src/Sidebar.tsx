@@ -9,7 +9,6 @@ export default function Sidebar({
     colorScheme: string
     drawPaths: boolean
     drawLabels: boolean
-    runSimulation: boolean
   }
   onExportSVG: () => void
 }) {

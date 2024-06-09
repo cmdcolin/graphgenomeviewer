@@ -50,7 +50,6 @@ function Graph({
   linkThickness = 2,
   theta = 0.9,
   strengthCenter = -50,
-  runSimulation = true,
   width = 2000,
   height = 1000,
   onFeatureClick = () => {},
@@ -60,7 +59,6 @@ function Graph({
   drawLabels?: boolean
   colorScheme?: string
   width?: number
-  runSimulation?: boolean
   height?: number
   chunkSize?: number
   linkSteps?: number
@@ -95,7 +93,6 @@ function Graph({
       return
     }
 
-    console.log('re-running main draw', { drawLabels })
     const g = select('#wow')
 
     const link = g

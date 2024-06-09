@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import queryString from 'querystring'
 import Graph from 'graphgenomeviewer'
-import saveAs from 'file-saver'
-import { proxy, useSnapshot } from 'valtio'
+import { proxy, subscribe, useSnapshot } from 'valtio'
+import { saveAs } from 'file-saver'
 
 // locals
 import FeatureDialog from './FeatureDialog'
@@ -21,7 +22,6 @@ interface StoreProps {
   sequenceThickness: number
   linkThickness: number
   theta: number
-  runSimulation: boolean
   dataset: string
   colorScheme: string
   drawLabels: boolean
@@ -34,7 +34,6 @@ const coerceB = (a: unknown) => (a ? Boolean(JSON.parse(`${a}`)) : undefined)
 function ParamAdapter() {
   const params = new URLSearchParams(window.location.search)
   const store = proxy({
-    runSimulation: true,
     strengthCenter: coerceN(params.get('strengthCenter')) ?? -50,
     strengthXY: coerceN(params.get('strengthXY')) ?? 0.1,
     chunkSize: coerceN(params.get('chunkSize')) ?? 1000,
@@ -49,6 +48,11 @@ function ParamAdapter() {
     drawLabels: coerceB(params.get('drawLabels')) ?? false,
     drawPaths: coerceB(params.get('drawPaths')) ?? false,
   })
+  useEffect(() => {
+    return subscribe(store, () => {
+      window.history.pushState(null, '', '?' + queryString.stringify(store))
+    })
+  }, [store])
   return <App store={store} />
 }
 
