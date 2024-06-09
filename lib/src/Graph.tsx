@@ -57,7 +57,7 @@ interface Props {
   width?: number
   height?: number
   redraw?: number
-  onFeatureClick?: (arg?: unknown) => void
+  onFeatureClick?: (arg?: Record<string, unknown>) => void
 }
 
 function Graph(props: Props) {
@@ -81,6 +81,7 @@ function Graph(props: Props) {
     strengthCenter = -50,
   } = settings || {}
   const ref = useRef<SVGSVGElement>(null)
+
   const data = useMemo(
     () => reprocessGraph(graph, chunkSize),
     [chunkSize, graph],
@@ -99,8 +100,8 @@ function Graph(props: Props) {
       return
     }
     // clone links+nodes because these contain an x,y coordinate that is
-    // physically modified by animation and so when we redraw/refresh, we
-    // want to put them back to normal
+    // physically modified by animation and so when we redraw/refresh, we want
+    // to put them back to normal
     const links = data.links.map(d => ({
       ...d,
     }))
@@ -111,8 +112,22 @@ function Graph(props: Props) {
     // clear svg on each run
     ref.current.innerHTML = ''
 
-    // animation
-    function tickActions() {
+    // @ts-expect-error
+    const sim = forceSimulation().nodes(nodes)
+    const chargeForce = forceManyBody().strength(strengthCenter).theta(theta)
+    const centerForce = forceCenter(width / 3, height / 3)
+    const linkForce = forceLink(links)
+      // @ts-expect-error
+      .id(d => d.id)
+      .distance(link => (link.sequence ? 1 : 10))
+      .iterations(linkSteps)
+
+    sim
+      .force('charge', chargeForce)
+      .force('center', centerForce)
+      .force('links', linkForce)
+
+    sim.on('tick', () => {
       // @ts-expect-error
       node.attr('cx', d => d.x).attr('cy', d => d.y)
 
@@ -148,9 +163,9 @@ function Graph(props: Props) {
           const [s2 = 0, t2 = 0] = nodePathMap[d.target.id] || []
 
           // this checks the dot product of the direction that the node is
-          // oriented (s1,t1) to where the node is connecting to (t1,t2)
-          // other combinations could be chosen here but it helps to
-          // determine whether to draw the arc or not, a circular layout is a
+          // oriented (s1,t1) to where the node is connecting to (t1,t2) other
+          // combinations could be chosen here but it helps to determine
+          // whether to draw the arc or not, a circular layout is a
           // self-connection but does not need an arc
           const dotresult = dot(
             [t1[0] - s1[0], t1[1] - s1[1]],
@@ -208,23 +223,7 @@ function Graph(props: Props) {
           d => `M${d.source.x},${d.source.y}L${d.target.x},${d.target.y}`,
         )
       }
-    }
-    // @ts-expect-error
-    const simulation = forceSimulation().nodes(nodes)
-    const charge_force = forceManyBody().strength(strengthCenter).theta(theta)
-    const center_force = forceCenter(width / 3, height / 3)
-    const link_force = forceLink(links)
-      // @ts-expect-error
-      .id(d => d.id)
-      .distance(link => (link.sequence ? 1 : 10))
-      .iterations(linkSteps)
-
-    simulation
-      .force('charge', charge_force)
-      .force('center', center_force)
-      .force('links', link_force)
-
-    simulation.on('tick', tickActions)
+    })
 
     const svg = select(ref.current)
 
@@ -283,12 +282,10 @@ function Graph(props: Props) {
         }
       })
       .attr('fill', 'none')
-      .attr('stroke-width', d => {
-        return d.linkNum === undefined ? linkThickness : sequenceThickness
-      })
-      .on('click', (_, d) => {
-        onFeatureClick(d)
-      })
+      .attr('stroke-width', d =>
+        d.linkNum === undefined ? linkThickness : sequenceThickness,
+      )
+      .on('click', (_, d) => onFeatureClick(d))
 
     const node = g
       .selectAll('circle')
@@ -336,7 +333,7 @@ function Graph(props: Props) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .on('start', (event, d: any) => {
         if (!event.active) {
-          simulation.alphaTarget(0.3).restart()
+          sim.alphaTarget(0.3).restart()
         }
         d.fx = event.x
         d.fy = event.y
@@ -349,7 +346,7 @@ function Graph(props: Props) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .on('end', (event, d: any) => {
         if (!event.active) {
-          simulation.alphaTarget(0)
+          sim.alphaTarget(0)
         }
         d.fx = null
         d.fy = null

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Graph from 'graphgenomeviewer'
 import saveAs from 'file-saver'
 import {
@@ -18,8 +18,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import './App.css'
 
 function App() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [featureData, setFeatureData] = useState<any>()
+  const [featureData, setFeatureData] = useState<Record<string, unknown>>()
   const [data, setData] = useState<string>()
   const [error, setError] = useState<unknown>()
   const [, updateState] = useState<unknown>()
@@ -75,6 +74,10 @@ function App() {
       'out.svg',
     )
   }
+  const onFeatureClick = useCallback(
+    (data: Record<string, unknown>) => setFeatureData(data),
+    [],
+  )
 
   return (
     <div>
@@ -129,7 +132,7 @@ function App() {
               color={colorScheme}
               drawLabels={drawLabels}
               drawPaths={drawPaths}
-              onFeatureClick={data => setFeatureData(data)}
+              onFeatureClick={onFeatureClick}
               settings={settings}
             />
           ) : null}

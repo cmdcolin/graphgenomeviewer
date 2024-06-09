@@ -5,7 +5,7 @@ export default function FeatureDialog({
   data,
   onHide,
 }: {
-  data: Record<string, string>
+  data: Record<string, unknown>
   onHide: () => void
 }) {
   return (
