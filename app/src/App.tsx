@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Graph from 'graphgenomeviewer'
 import saveAs from 'file-saver'
+import { proxy, useSnapshot } from 'valtio'
 
 // locals
 import FeatureDialog from './FeatureDialog'
@@ -10,7 +11,6 @@ import { parseGFA } from './util'
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './App.css'
-import { proxy, useSnapshot } from 'valtio'
 
 interface StoreProps {
   strengthCenter: number
@@ -21,19 +21,17 @@ interface StoreProps {
   sequenceThickness: number
   linkThickness: number
   theta: number
+  runSimulation: boolean
   dataset: string
   colorScheme: string
   drawLabels: boolean
   drawPaths: boolean
-  drag: boolean
 }
 const coerceN = (a: unknown) => (a ? Number(a) : undefined)
 const coerceS = (a: unknown) => (a ? String(a) : undefined)
 const coerceB = (a: unknown) => (a ? Boolean(JSON.parse(`${a}`)) : undefined)
 
-function App() {
-  const [data, setData] = useState<string>()
-  const [error, setError] = useState<unknown>()
+function ParamAdapter() {
   const params = new URLSearchParams(window.location.search)
   const store = proxy({
     runSimulation: true,
@@ -51,70 +49,40 @@ function App() {
     drawLabels: coerceB(params.get('drawLabels')) ?? false,
     drawPaths: coerceB(params.get('drawPaths')) ?? false,
   })
+  return <App store={store} />
+}
+
+function App({ store }: { store: StoreProps }) {
   const [exportSVG, setExportSVG] = useState(0)
-
-  const { dataset } = store
-
-  useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    ;(async () => {
-      try {
-        setError(undefined)
-        const result = await fetch(dataset)
-        if (!result.ok) {
-          throw new Error(`Failed to fetch ${result.statusText}`)
-        }
-        const text = await result.text()
-        setData(text)
-      } catch (error) {
-        console.error(error)
-        setError(error)
-      }
-    })()
-  }, [dataset])
-
-  const graph = useMemo(() => (data ? parseGFA(data) : undefined), [data])
 
   return (
     <div>
       <Header store={store} onExportSVG={() => setExportSVG(exportSVG + 1)} />
 
       <div className="flexcontainer">
-        <div id="sidebar" className="sidebar">
-          <Sidebar
-            store={store}
-            onExportSVG={() => setExportSVG(exportSVG + 1)}
-          />
-        </div>
-        <div>
-          {error ? (
-            <ErrorMessage error={error} />
-          ) : (
-            <GraphArea exportSVG={exportSVG} graph={graph} store={store} />
-          )}
-        </div>
+        <Sidebar
+          store={store}
+          onExportSVG={() => setExportSVG(exportSVG + 1)}
+        />
+        <GraphArea store={store} exportSVG={exportSVG} />
       </div>
     </div>
   )
 }
 
 function GraphArea({
-  graph,
   exportSVG,
   store,
 }: {
-  graph: Graph
   exportSVG: number
-  store: { colorScheme: string; drawLabels: boolean; drawPaths: boolean }
+  store: StoreProps
 }) {
   const [featureData, setFeatureData] = useState<Record<string, unknown>>()
   const ref = useRef<HTMLDivElement>(null)
   const snap = useSnapshot(store)
+  const [data, setData] = useState<string>()
+  const [error, setError] = useState<unknown>()
 
-  const onFeatureClick = useCallback(
-    (data?: Record<string, unknown>) => setFeatureData(data),
-    [],
-  )
   useEffect(() => {
     if (!ref.current) {
       return
@@ -126,6 +94,26 @@ function GraphArea({
       )
     }
   }, [exportSVG])
+
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    ;(async () => {
+      try {
+        setError(undefined)
+        const result = await fetch(snap.dataset)
+        if (!result.ok) {
+          throw new Error(`Failed to fetch ${result.statusText}`)
+        }
+        const text = await result.text()
+        setData(text)
+      } catch (error) {
+        console.error(error)
+        setError(error)
+      }
+    })()
+  }, [snap.dataset])
+
+  const graph = useMemo(() => (data ? parseGFA(data) : undefined), [data])
   return (
     <div className="body" ref={ref}>
       {featureData ? (
@@ -134,9 +122,19 @@ function GraphArea({
           onHide={() => setFeatureData(undefined)}
         />
       ) : null}
-      {graph ? (
-        <Graph graph={graph} onFeatureClick={onFeatureClick} {...snap} />
-      ) : null}
+
+      {error ? (
+        <ErrorMessage error={error} />
+      ) : graph ? (
+        <Graph
+          key={JSON.stringify(graph)}
+          graph={graph}
+          onFeatureClick={data => setFeatureData(data)}
+          {...snap}
+        />
+      ) : (
+        <div>Loading...</div>
+      )}
     </div>
   )
 }
@@ -145,4 +143,4 @@ function ErrorMessage({ error }: { error: unknown }) {
   return <div style={{ color: 'red' }}>{`${error}`}</div>
 }
 
-export default App
+export default ParamAdapter

@@ -15,7 +15,7 @@ export default function Sidebar({
 }) {
   const snap = useSnapshot(store)
   return (
-    <div>
+    <div id="sidebar" className="sidebar">
       <Form.Label>Color</Form.Label>
       <Form.Control
         value={snap.colorScheme}
@@ -45,14 +45,6 @@ export default function Sidebar({
           type="checkbox"
           label="Draw labels"
           checked={snap.drawLabels}
-        />
-      </Form.Group>
-      <Form.Group>
-        <Form.Check
-          onChange={event => (store.runSimulation = event.target.checked)}
-          type="checkbox"
-          label="Run simulation"
-          checked={snap.runSimulation}
         />
       </Form.Group>
       <Button onClick={() => onExportSVG()}>Export SVG</Button>

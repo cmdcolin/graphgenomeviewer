@@ -43,7 +43,7 @@ function Graph({
   graph,
   drawPaths = false,
   drawLabels = false,
-  color = 'Rainbow',
+  colorScheme = 'Rainbow',
   chunkSize = 1000,
   linkSteps = 10,
   sequenceThickness = 10,
@@ -58,7 +58,7 @@ function Graph({
   graph: Graph
   drawPaths?: boolean
   drawLabels?: boolean
-  color?: string
+  colorScheme?: string
   width?: number
   runSimulation?: boolean
   height?: number
@@ -71,38 +71,21 @@ function Graph({
   onFeatureClick?: (arg?: Record<string, unknown>) => void
 }) {
   const ref = useRef<SVGSVGElement>(null)
-  const data = useMemo(
-    () => reprocessGraph(graph, chunkSize),
-    [chunkSize, graph],
-  )
-  console.log('wtf', graph)
+  const { colors, links, nodes } = useMemo(() => {
+    const data = reprocessGraph(graph, chunkSize)
+    const links = data.links.map(d => ({
+      ...d,
+    }))
+    const nodes = data.nodes.map(d => ({
+      ...d,
+    }))
+    const colors = Object.fromEntries(
+      graph.paths?.map((p, i) => [p.name, schemeCategory10[i]]) ?? [],
+    )
+    return { data, links, nodes, colors }
+  }, [chunkSize, graph])
 
   const d3Link = useRef<any>()
-  // clone links+nodes because these contain an x,y coordinate that is
-  // physically modified by animation and so when we redraw/refresh, we want
-  // to put them back to normal
-  const links = useMemo(
-    () =>
-      data.links.map(d => ({
-        ...d,
-      })),
-    [data.links],
-  )
-  const nodes = useMemo(
-    () =>
-      data.nodes.map(d => ({
-        ...d,
-      })),
-    [data.nodes],
-  )
-
-  const colors = useMemo(
-    () =>
-      Object.fromEntries(
-        graph.paths?.map((p, i) => [p.name, schemeCategory10[i]]) ?? [],
-      ),
-    [graph.paths],
-  )
 
   // @ts-expect-error
   const paths = useMemo(() => generatePaths(links, graph.nodes), [])
@@ -112,6 +95,7 @@ function Graph({
       return
     }
 
+    console.log('re-running main draw', { drawLabels })
     const g = select('#wow')
 
     const link = g
@@ -124,9 +108,11 @@ function Graph({
         if (same) {
           // @ts-expect-error
           const idx = paths.findIndex(path => path.original.id === d.id)
-          return color.startsWith('Just')
-            ? color.replace('Just', '').toLowerCase()
-            : hsl(d3interpolate[`interpolate${color}`](idx / paths.length))
+          return colorScheme.startsWith('Just')
+            ? colorScheme.replace('Just', '').toLowerCase()
+            : hsl(
+                d3interpolate[`interpolate${colorScheme}`](idx / paths.length),
+              )
                 .darker()
                 .toString()
         } else {
@@ -140,7 +126,7 @@ function Graph({
       .on('click', (_, d) => onFeatureClick(d))
 
     d3Link.current = link
-  }, [colors, color, drawPaths])
+  }, [colors, colorScheme, drawPaths, sequenceThickness, linkThickness])
 
   useEffect(() => {
     if (!ref.current) {
@@ -365,7 +351,7 @@ function Graph({
       g.attr('transform', event.transform)
       // @ts-expect-error
     })(svg)
-  }, [])
+  }, [drawLabels, drawPaths])
 
   return (
     <svg
@@ -374,7 +360,7 @@ function Graph({
       ref={ref}
       xmlns="http://www.w3.org/2000/svg"
       xmlnsXlink="http://www.w3.org/1999/xlink"
-      style={{ fontSize: drawLabels ? 10 : 0 }}
+      style={{ fontSize: drawLabels ? 8 : 0 }}
       viewBox={[0, 0, width, height].toString()}
     >
       <g id="wow"></g>
