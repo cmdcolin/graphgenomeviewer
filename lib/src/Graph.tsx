@@ -381,13 +381,13 @@ function Graph(props: Props) {
 
   return (
     <svg
-      width={2000}
-      height={1000}
+      width={width}
+      height={height}
       ref={ref}
       xmlns="http://www.w3.org/2000/svg"
       xmlnsXlink="http://www.w3.org/1999/xlink"
       style={{ fontSize: drawLabels ? 10 : 0 }}
-      viewBox={[0, 0, 2000, 1000].toString()}
+      viewBox={[0, 0, width, height].toString()}
     />
   )
 }

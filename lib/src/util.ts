@@ -8,13 +8,14 @@ export interface Path {
 export interface Node {
   id: string
   sequence?: string
+  tags?: Record<string, unknown>
+  cigar?: string
   length?: number
 }
 export interface Graph {
   nodes: Node[]
   links: Link[]
   paths?: Path[]
-  id: string
 }
 export interface Coord {
   x: number
