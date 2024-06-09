@@ -1,23 +1,26 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Navbar, Nav, NavDropdown } from 'react-bootstrap'
-import SettingsDialog, { Settings } from './SettingsDialog'
+
+// locals
+import SettingsDialog from './SettingsDialog'
 import AboutDialog from './AboutDialog'
 import OpenURLDialog from './OpenURLDialog'
 import OpenFileDialog from './OpenFileDialog'
 
 export default function Header({
-  onData,
-  settings,
-  onGraph,
+  store,
   onExportSVG,
-  onSettings,
 }: {
-  onData: (arg: string) => void
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onGraph: (arg: any) => void
   onExportSVG: () => void
-  onSettings: (arg: Settings) => void
-  settings: Settings
+  store: {
+    dataset: string
+    chunkSize: number
+    linkSteps: number
+    strengthCenter: number
+    theta: number
+    sequenceThickness: number
+    linkThickness: number
+  }
 }) {
   const [showAbout, setShowAbout] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
@@ -42,32 +45,38 @@ export default function Header({
               </NavDropdown.Item>
             </NavDropdown>
             <NavDropdown title="Examples" id="basic-nav-dropdown">
-              <NavDropdown.Item onClick={() => onData('MT.gfa')}>
+              <NavDropdown.Item onClick={() => (store.dataset = 'MT.gfa')}>
                 MT GFA-spec example
               </NavDropdown.Item>
-              <NavDropdown.Item onClick={() => onData('toy_pangenome.gfa')}>
+              <NavDropdown.Item
+                onClick={() => (store.dataset = 'toy_pangenome.gfa')}
+              >
                 Paths example
               </NavDropdown.Item>
-              <NavDropdown.Item onClick={() => onData('example1.gfa')}>
+              <NavDropdown.Item
+                onClick={() => (store.dataset = 'example1.gfa')}
+              >
                 Paths example 2
               </NavDropdown.Item>
-              <NavDropdown.Item onClick={() => onData('big1.gfa')}>
+              <NavDropdown.Item onClick={() => (store.dataset = 'big1.gfa')}>
                 Big1
               </NavDropdown.Item>
-              <NavDropdown.Item onClick={() => onData('ir1.gfa')}>
+              <NavDropdown.Item onClick={() => (store.dataset = 'ir1.gfa')}>
                 Ir1
               </NavDropdown.Item>
               <NavDropdown.Item
                 onClick={() =>
-                  onData('test_contig_placement_assembly_graph.gfa')
+                  (store.dataset = 'test_contig_placement_assembly_graph.gfa')
                 }
               >
                 Unicycler example
               </NavDropdown.Item>
-              <NavDropdown.Item onClick={() => onData('circle.gfa')}>
+              <NavDropdown.Item onClick={() => (store.dataset = 'circle.gfa')}>
                 Simple circle
               </NavDropdown.Item>
-              <NavDropdown.Item onClick={() => onData('example1.gfa2')}>
+              <NavDropdown.Item
+                onClick={() => (store.dataset = 'example1.gfa2')}
+              >
                 GFA2.0 example
               </NavDropdown.Item>
             </NavDropdown>
@@ -78,18 +87,14 @@ export default function Header({
       </Navbar>
       {showAbout ? <AboutDialog onHide={() => setShowAbout(false)} /> : null}
       {showSettings ? (
-        <SettingsDialog
-          settings={settings}
-          onHide={() => setShowSettings(false)}
-          onSettings={onSettings}
-        />
+        <SettingsDialog store={store} onHide={() => setShowSettings(false)} />
       ) : null}
       {showOpenURL ? (
-        <OpenURLDialog onData={onData} onHide={() => setShowOpenURL(false)} />
+        <OpenURLDialog onData={() => {}} onHide={() => setShowOpenURL(false)} />
       ) : null}
       {showOpenFile ? (
         <OpenFileDialog
-          onGraph={onGraph}
+          onGraph={() => {}}
           onHide={() => setShowOpenFile(false)}
         />
       ) : null}

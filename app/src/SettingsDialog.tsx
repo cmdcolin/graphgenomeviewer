@@ -1,33 +1,22 @@
-import React, { useState } from 'react'
 import { Button, Col, Form, Modal, Row } from 'react-bootstrap'
-
-export interface Settings {
-  chunkSize: number
-  linkSteps: number
-  strengthCenter: number
-  theta: number
-  sequenceThickness: number
-  linkThickness: number
-}
+import { useSnapshot } from 'valtio'
 
 export default function SettingsDialog({
+  store,
   onHide,
-  settings: paramSettings,
-  onSettings,
 }: {
+  store: {
+    chunkSize: number
+    linkSteps: number
+    strengthCenter: number
+    dataset: string
+    theta: number
+    linkThickness: number
+    sequenceThickness: number
+  }
   onHide: () => void
-  settings: Settings
-  onSettings: (arg: Settings) => void
 }) {
-  const [settings, setSettings] = useState(paramSettings)
-  const {
-    chunkSize,
-    linkSteps,
-    strengthCenter,
-    theta,
-    sequenceThickness,
-    linkThickness,
-  } = settings
+  const snap = useSnapshot(store)
   return (
     <Modal show={true} onHide={onHide} size="lg">
       <Modal.Header closeButton>
@@ -38,15 +27,6 @@ export default function SettingsDialog({
         <Form
           onSubmit={event => {
             event.preventDefault()
-            onSettings({
-              ...settings,
-              chunkSize: +chunkSize,
-              linkSteps: +linkSteps,
-              strengthCenter: +strengthCenter,
-              theta: +theta,
-              sequenceThickness: +sequenceThickness,
-              linkThickness: +linkThickness,
-            })
             onHide()
           }}
         >
@@ -61,14 +41,8 @@ export default function SettingsDialog({
             <Col>
               <Form.Control
                 type="number"
-                value={linkSteps}
-                onChange={event => {
-                  const val = +event.target.value
-                  setSettings(settings => ({
-                    ...settings,
-                    linkSteps: val,
-                  }))
-                }}
+                value={snap.linkSteps}
+                onChange={event => (store.linkSteps = +event.target.value)}
               />
             </Col>
           </Form.Group>
@@ -84,14 +58,8 @@ export default function SettingsDialog({
             <Col>
               <Form.Control
                 type="number"
-                value={chunkSize}
-                onChange={event => {
-                  const val = +event.target.value
-                  setSettings(settings => ({
-                    ...settings,
-                    chunkSize: val,
-                  }))
-                }}
+                value={snap.chunkSize}
+                onChange={event => (store.chunkSize = +event.target.value)}
               />
             </Col>
           </Form.Group>
@@ -105,14 +73,8 @@ export default function SettingsDialog({
             <Col>
               <Form.Control
                 type="number"
-                value={theta}
-                onChange={event => {
-                  const val = +event.target.value
-                  setSettings(settings => ({
-                    ...settings,
-                    theta: val,
-                  }))
-                }}
+                value={snap.theta}
+                onChange={event => (store.theta = +event.target.value)}
               />
             </Col>
           </Form.Group>
@@ -127,14 +89,8 @@ export default function SettingsDialog({
             <Col>
               <Form.Control
                 type="number"
-                value={strengthCenter}
-                onChange={event => {
-                  const val = +event.target.value
-                  setSettings(settings => ({
-                    ...settings,
-                    strengthCenter: val,
-                  }))
-                }}
+                value={snap.strengthCenter}
+                onChange={event => (store.strengthCenter = +event.target.value)}
               />
             </Col>
           </Form.Group>
@@ -148,14 +104,10 @@ export default function SettingsDialog({
                 min={1}
                 max={100}
                 style={{ width: '100%' }}
-                value={sequenceThickness}
-                onChange={event => {
-                  const val = +event.target.value
-                  setSettings(settings => ({
-                    ...settings,
-                    sequenceThickness: val,
-                  }))
-                }}
+                value={snap.sequenceThickness}
+                onChange={event =>
+                  (store.sequenceThickness = +event.target.value)
+                }
               />
             </Col>
           </Form.Group>
@@ -169,14 +121,8 @@ export default function SettingsDialog({
                 min={1}
                 max={100}
                 style={{ width: '100%' }}
-                value={linkThickness}
-                onChange={event => {
-                  const val = +event.target.value
-                  setSettings(settings => ({
-                    ...settings,
-                    linkThickness: val,
-                  }))
-                }}
+                value={snap.linkThickness}
+                onChange={event => (store.linkThickness = +event.target.value)}
               />
             </Col>
           </Form.Group>

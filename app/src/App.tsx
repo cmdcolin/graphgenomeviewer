@@ -1,14 +1,8 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Graph from 'graphgenomeviewer'
 import saveAs from 'file-saver'
-import {
-  useQueryParams,
-  BooleanParam,
-  StringParam,
-  NumberParam,
-  withDefault,
-} from 'use-query-params'
 
+// locals
 import FeatureDialog from './FeatureDialog'
 import Sidebar from './Sidebar'
 import Header from './Header'
@@ -16,35 +10,51 @@ import { parseGFA } from './util'
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './App.css'
+import { proxy, useSnapshot } from 'valtio'
+
+interface StoreProps {
+  strengthCenter: number
+  strengthXY: number
+  chunkSize: number
+  forceSteps: number
+  linkSteps: number
+  sequenceThickness: number
+  linkThickness: number
+  theta: number
+  dataset: string
+  colorScheme: string
+  drawLabels: boolean
+  drawPaths: boolean
+  drag: boolean
+}
+const coerceN = (a: unknown) => (a ? Number(a) : undefined)
+const coerceS = (a: unknown) => (a ? String(a) : undefined)
+const coerceB = (a: unknown) => (a ? Boolean(JSON.parse(`${a}`)) : undefined)
 
 function App() {
-  const [featureData, setFeatureData] = useState<Record<string, unknown>>()
   const [data, setData] = useState<string>()
   const [error, setError] = useState<unknown>()
-  const [, updateState] = useState<unknown>()
-  const forceUpdate = React.useCallback(() => updateState({}), [])
-  const [redraw, setRedraw] = useState(0)
-  const [query, setQuery] = useQueryParams({
-    strengthCenter: withDefault(NumberParam, -50),
-    strengthXY: withDefault(NumberParam, 0.1),
-    chunkSize: withDefault(NumberParam, 1000),
-    forceSteps: withDefault(NumberParam, 200),
-    linkSteps: withDefault(NumberParam, 1),
-    sequenceThickness: withDefault(NumberParam, 10),
-    linkThickness: withDefault(NumberParam, 2),
-    theta: withDefault(NumberParam, 0.9),
-    forceType: withDefault(StringParam, 'center'),
-    dataset: withDefault(StringParam, 'MT.gfa'),
-    colorScheme: withDefault(StringParam, 'Rainbow'),
-    drawLabels: withDefault(BooleanParam, false),
-    drawPaths: withDefault(BooleanParam, false),
-    drag: withDefault(BooleanParam, true),
+  const params = new URLSearchParams(window.location.search)
+  const store = proxy({
+    runSimulation: true,
+    strengthCenter: coerceN(params.get('strengthCenter')) ?? -50,
+    strengthXY: coerceN(params.get('strengthXY')) ?? 0.1,
+    chunkSize: coerceN(params.get('chunkSize')) ?? 1000,
+    linkSteps: coerceN(params.get('linkSteps')) ?? 3,
+    forceSteps: coerceN(params.get('forceSteps')) ?? 200,
+    sequenceThickness: coerceN(params.get('sequenceThickness')) ?? 10,
+    linkThickness: coerceN(params.get('linkThickness')) ?? 2,
+    theta: coerceN(params.get('theta')) ?? 0.9,
+    forceType: coerceS(params.get('forceType')) ?? 'center',
+    dataset: coerceS(params.get('dataset')) ?? 'MT.gfa',
+    colorScheme: coerceS(params.get('colorScheme')) ?? 'Rainbow',
+    drawLabels: coerceB(params.get('drawLabels')) ?? false,
+    drawPaths: coerceB(params.get('drawPaths')) ?? false,
   })
+  const [exportSVG, setExportSVG] = useState(0)
 
-  const { dataset, drawLabels, drawPaths, colorScheme, drag, ...settings } =
-    query
+  const { dataset } = store
 
-  const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     ;(async () => {
@@ -65,81 +75,74 @@ function App() {
 
   const graph = useMemo(() => (data ? parseGFA(data) : undefined), [data])
 
-  function onExportSVG() {
+  return (
+    <div>
+      <Header store={store} onExportSVG={() => setExportSVG(exportSVG + 1)} />
+
+      <div className="flexcontainer">
+        <div id="sidebar" className="sidebar">
+          <Sidebar
+            store={store}
+            onExportSVG={() => setExportSVG(exportSVG + 1)}
+          />
+        </div>
+        <div>
+          {error ? (
+            <ErrorMessage error={error} />
+          ) : (
+            <GraphArea exportSVG={exportSVG} graph={graph} store={store} />
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function GraphArea({
+  graph,
+  exportSVG,
+  store,
+}: {
+  graph: Graph
+  exportSVG: number
+  store: { colorScheme: string; drawLabels: boolean; drawPaths: boolean }
+}) {
+  const [featureData, setFeatureData] = useState<Record<string, unknown>>()
+  const ref = useRef<HTMLDivElement>(null)
+  const snap = useSnapshot(store)
+
+  const onFeatureClick = useCallback(
+    (data?: Record<string, unknown>) => setFeatureData(data),
+    [],
+  )
+  useEffect(() => {
     if (!ref.current) {
       return
     }
-    saveAs(
-      new Blob([ref.current.innerHTML || ''], { type: 'image/svg+xml' }),
-      'out.svg',
-    )
-  }
-  const onFeatureClick = useCallback(
-    (data: Record<string, unknown>) => setFeatureData(data),
-    [],
-  )
-
+    if (exportSVG) {
+      saveAs(
+        new Blob([ref.current.innerHTML || ''], { type: 'image/svg+xml' }),
+        'out.svg',
+      )
+    }
+  }, [exportSVG])
   return (
-    <div>
-      <Header
-        onData={value => {
-          setQuery({ dataset: value })
-          forceUpdate()
-        }}
-        onGraph={graph => setData(graph)}
-        onSettings={settings => {
-          setQuery(settings)
-          forceUpdate()
-        }}
-        onExportSVG={onExportSVG}
-        settings={settings}
-      />
+    <div className="body" ref={ref}>
       {featureData ? (
         <FeatureDialog
           data={featureData}
           onHide={() => setFeatureData(undefined)}
         />
       ) : null}
-      <div className="flexcontainer">
-        <div id="sidebar" className="sidebar">
-          <Sidebar
-            onExportSVG={onExportSVG}
-            colorScheme={colorScheme}
-            drawPaths={drawPaths}
-            drawLabels={drawLabels}
-            onColorChange={value => {
-              setQuery({ colorScheme: value })
-              forceUpdate()
-            }}
-            onDrawLabels={value => {
-              setQuery({ drawLabels: value })
-              forceUpdate()
-            }}
-            onPathDraw={value => {
-              setQuery({ drawPaths: value })
-              forceUpdate()
-            }}
-            onRedraw={() => setRedraw(redraw => redraw + 1)}
-          />
-        </div>
-        <div className="body" ref={ref}>
-          {error ? <div style={{ color: 'red' }}>{`${error}`}</div> : null}
-          {graph ? (
-            <Graph
-              graph={graph}
-              redraw={redraw}
-              drag={drag}
-              color={colorScheme}
-              drawLabels={drawLabels}
-              drawPaths={drawPaths}
-              onFeatureClick={onFeatureClick}
-              settings={settings}
-            />
-          ) : null}
-        </div>
-      </div>
+      {graph ? (
+        <Graph graph={graph} onFeatureClick={onFeatureClick} {...snap} />
+      ) : null}
     </div>
   )
+}
+
+function ErrorMessage({ error }: { error: unknown }) {
+  return <div style={{ color: 'red' }}>{`${error}`}</div>
 }
 
 export default App

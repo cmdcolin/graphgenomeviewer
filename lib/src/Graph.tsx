@@ -39,53 +39,43 @@ function generateLinks(links: Link[]) {
   return newlinks
 }
 
-interface Settings {
-  chunkSize: number
-  linkSteps: number
-  sequenceThickness: number
-  linkThickness: number
-  theta: number
-  strengthCenter: number
-}
-interface Props {
+function Graph({
+  graph,
+  drawPaths = false,
+  drawLabels = false,
+  color = 'Rainbow',
+  chunkSize = 1000,
+  linkSteps = 10,
+  sequenceThickness = 10,
+  linkThickness = 2,
+  theta = 0.9,
+  strengthCenter = -50,
+  runSimulation = true,
+  width = 2000,
+  height = 1000,
+  onFeatureClick = () => {},
+}: {
   graph: Graph
   drawPaths?: boolean
   drawLabels?: boolean
-  drag?: boolean
-  settings?: Settings
   color?: string
   width?: number
+  runSimulation?: boolean
   height?: number
-  redraw?: number
+  chunkSize?: number
+  linkSteps?: number
+  sequenceThickness?: number
+  linkThickness?: number
+  theta?: number
+  strengthCenter?: number
   onFeatureClick?: (arg?: Record<string, unknown>) => void
-}
-
-function Graph(props: Props) {
-  const {
-    graph,
-    drawPaths = false,
-    drawLabels = false,
-    color = 'Rainbow',
-    settings,
-    width = 2000,
-    height = 1000,
-    redraw = 0,
-    onFeatureClick = () => {},
-  } = props
-  const {
-    chunkSize = 1000,
-    linkSteps = 10,
-    sequenceThickness = 10,
-    linkThickness = 2,
-    theta = 0.9,
-    strengthCenter = -50,
-  } = settings ?? {}
+}) {
   const ref = useRef<SVGSVGElement>(null)
-
   const data = useMemo(
     () => reprocessGraph(graph, chunkSize),
     [chunkSize, graph],
   )
+  console.log('wtf', graph)
 
   const d3Link = useRef<any>()
   // clone links+nodes because these contain an x,y coordinate that is
@@ -96,14 +86,14 @@ function Graph(props: Props) {
       data.links.map(d => ({
         ...d,
       })),
-    [],
+    [data.links],
   )
   const nodes = useMemo(
     () =>
       data.nodes.map(d => ({
         ...d,
       })),
-    [],
+    [data.nodes],
   )
 
   const colors = useMemo(
@@ -150,7 +140,7 @@ function Graph(props: Props) {
       .on('click', (_, d) => onFeatureClick(d))
 
     d3Link.current = link
-  }, [colors, color])
+  }, [colors, color, drawPaths])
 
   useEffect(() => {
     if (!ref.current) {

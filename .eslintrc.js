@@ -12,6 +12,7 @@ module.exports = {
     'plugin:react-hooks/recommended',
     'plugin:unicorn/recommended',
     'plugin:storybook/recommended',
+    'plugin:valtio/recommended',
   ],
   settings: {
     react: {
@@ -24,7 +25,6 @@ module.exports = {
     sourceType: 'module',
     project: './tsconfig.json',
   },
-  plugins: ['@typescript-eslint', 'react', 'react-refresh'],
   rules: {
     'unicorn/prevent-abbreviations': 0,
     'unicorn/no-null': 0,

@@ -1,31 +1,25 @@
-import React from 'react'
 import { Form, Button } from 'react-bootstrap'
+import { useSnapshot } from 'valtio'
 
 export default function Sidebar({
-  colorScheme,
-  drawLabels,
-  drawPaths,
-  onDrawLabels,
-  onColorChange,
-  onPathDraw,
-  onRedraw,
+  store,
   onExportSVG,
 }: {
-  drawLabels: boolean
-  drawPaths: boolean
-  colorScheme: string
-  onDrawLabels: (arg: boolean) => void
-  onColorChange: (arg: string) => void
-  onPathDraw: (arg: boolean) => void
-  onRedraw: () => void
+  store: {
+    colorScheme: string
+    drawPaths: boolean
+    drawLabels: boolean
+    runSimulation: boolean
+  }
   onExportSVG: () => void
 }) {
+  const snap = useSnapshot(store)
   return (
     <div>
       <Form.Label>Color</Form.Label>
       <Form.Control
-        value={colorScheme}
-        onChange={event => onColorChange(event.target.value)}
+        value={snap.colorScheme}
+        onChange={event => (store.colorScheme = event.target.value)}
         as="select"
       >
         <option>JustGrey</option>
@@ -38,21 +32,29 @@ export default function Sidebar({
       <br />
       <Form.Group>
         <Form.Check
-          onChange={event => onPathDraw(event.target.checked)}
+          onChange={event => (store.drawPaths = event.target.checked)}
           type="checkbox"
           label="Draw paths"
-          checked={drawPaths}
+          checked={snap.drawPaths}
+        />
+      </Form.Group>
+
+      <Form.Group>
+        <Form.Check
+          onChange={event => (store.drawLabels = event.target.checked)}
+          type="checkbox"
+          label="Draw labels"
+          checked={snap.drawLabels}
         />
       </Form.Group>
       <Form.Group>
         <Form.Check
-          onChange={event => onDrawLabels(event.target.checked)}
+          onChange={event => (store.runSimulation = event.target.checked)}
           type="checkbox"
-          label="Draw labels"
-          checked={drawLabels}
+          label="Run simulation"
+          checked={snap.runSimulation}
         />
       </Form.Group>
-      <Button onClick={() => onRedraw()}>Redraw</Button>
       <Button onClick={() => onExportSVG()}>Export SVG</Button>
     </div>
   )
