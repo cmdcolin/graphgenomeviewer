@@ -87,6 +87,25 @@ function Graph(props: Props) {
     [chunkSize, graph],
   )
 
+  const d3Link = useRef<any>()
+  // clone links+nodes because these contain an x,y coordinate that is
+  // physically modified by animation and so when we redraw/refresh, we want
+  // to put them back to normal
+  const links = useMemo(
+    () =>
+      data.links.map(d => ({
+        ...d,
+      })),
+    [],
+  )
+  const nodes = useMemo(
+    () =>
+      data.nodes.map(d => ({
+        ...d,
+      })),
+    [],
+  )
+
   const colors = useMemo(
     () =>
       Object.fromEntries(
@@ -95,22 +114,51 @@ function Graph(props: Props) {
     [graph.paths],
   )
 
+  // @ts-expect-error
+  const paths = useMemo(() => generatePaths(links, graph.nodes), [])
+
   useEffect(() => {
     if (!ref.current) {
       return
     }
-    // clone links+nodes because these contain an x,y coordinate that is
-    // physically modified by animation and so when we redraw/refresh, we want
-    // to put them back to normal
-    const links = data.links.map(d => ({
-      ...d,
-    }))
-    const nodes = data.nodes.map(d => ({
-      ...d,
-    }))
 
-    // clear svg on each run
-    ref.current.innerHTML = ''
+    const g = select('#wow')
+
+    const link = g
+      .selectAll('path')
+      .data(drawPaths ? generateLinks(links) : links)
+      .join('path')
+      .attr('marker-end', d => (d.id ? '' : 'url(#arrowhead)'))
+      .attr('stroke', d => {
+        const same = d.linkNum !== undefined
+        if (same) {
+          // @ts-expect-error
+          const idx = paths.findIndex(path => path.original.id === d.id)
+          return color.startsWith('Just')
+            ? color.replace('Just', '').toLowerCase()
+            : hsl(d3interpolate[`interpolate${color}`](idx / paths.length))
+                .darker()
+                .toString()
+        } else {
+          return drawPaths ? colors[d.pathId ?? ''] : 'rgba(120,120,120,0.8)'
+        }
+      })
+      .attr('fill', 'none')
+      .attr('stroke-width', d =>
+        d.linkNum === undefined ? linkThickness : sequenceThickness,
+      )
+      .on('click', (_, d) => onFeatureClick(d))
+
+    d3Link.current = link
+  }, [colors, color])
+
+  useEffect(() => {
+    if (!ref.current) {
+      return
+    }
+    if (!d3Link.current) {
+      return
+    }
 
     // @ts-expect-error
     const sim = forceSimulation().nodes(nodes)
@@ -131,9 +179,6 @@ function Graph(props: Props) {
       // @ts-expect-error
       node.attr('cx', d => d.x).attr('cy', d => d.y)
 
-      // @ts-expect-error
-      const paths = generatePaths(links, graph.nodes)
-
       const nodePathMap = {}
       for (const p of paths) {
         const l = p.links.length
@@ -144,7 +189,7 @@ function Graph(props: Props) {
       }
 
       // from https://stackoverflow.com/questions/16358905/
-      link.attr('d', function (d) {
+      d3Link.current.attr('d', function (d) {
         const x1 = d.source.x
         const y1 = d.source.y
         const x2 = d.target.x
@@ -214,8 +259,6 @@ function Graph(props: Props) {
         }
       })
 
-      link
-
       if (edgepaths) {
         edgepaths.attr(
           'd',
@@ -249,7 +292,7 @@ function Graph(props: Props) {
       .attr('fill', 'rgba(120,120,120,0.9)')
       .style('stroke', 'none')
 
-    const g = svg.append('g')
+    const g = select('#wow')
     // @ts-expect-error
     const paths = generatePaths(links, graph.nodes)
 
@@ -261,31 +304,6 @@ function Graph(props: Props) {
       // @ts-expect-error
       nodePathMap[`${p.original.id}-end`] = [p.links[l - 2], p.links[l - 1]]
     }
-
-    const link = g
-      .selectAll('path')
-      .data(drawPaths ? generateLinks(links) : links)
-      .join('path')
-      .attr('marker-end', d => (d.id ? '' : 'url(#arrowhead)'))
-      .attr('stroke', d => {
-        const same = d.linkNum !== undefined
-        if (same) {
-          // @ts-expect-error
-          const idx = paths.findIndex(path => path.original.id === d.id)
-          return color.startsWith('Just')
-            ? color.replace('Just', '').toLowerCase()
-            : hsl(d3interpolate[`interpolate${color}`](idx / paths.length))
-                .darker()
-                .toString()
-        } else {
-          return drawPaths ? colors[d.pathId ?? ''] : 'rgba(120,120,120,0.8)'
-        }
-      })
-      .attr('fill', 'none')
-      .attr('stroke-width', d =>
-        d.linkNum === undefined ? linkThickness : sequenceThickness,
-      )
-      .on('click', (_, d) => onFeatureClick(d))
 
     const node = g
       .selectAll('circle')
@@ -357,24 +375,7 @@ function Graph(props: Props) {
       g.attr('transform', event.transform)
       // @ts-expect-error
     })(svg)
-  }, [
-    colors,
-    graph.nodes,
-    onFeatureClick,
-    ref,
-    data.links,
-    data.nodes,
-    color,
-    linkSteps,
-    drawPaths,
-    strengthCenter,
-    sequenceThickness,
-    linkThickness,
-    theta,
-    width,
-    redraw,
-    height,
-  ])
+  }, [])
 
   return (
     <svg
@@ -385,7 +386,9 @@ function Graph(props: Props) {
       xmlnsXlink="http://www.w3.org/1999/xlink"
       style={{ fontSize: drawLabels ? 10 : 0 }}
       viewBox={[0, 0, width, height].toString()}
-    />
+    >
+      <g id="wow"></g>
+    </svg>
   )
 }
 
