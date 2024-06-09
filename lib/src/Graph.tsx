@@ -74,12 +74,12 @@ function Graph(props: Props) {
   } = props
   const {
     chunkSize = 1000,
-    linkSteps = 3,
+    linkSteps = 10,
     sequenceThickness = 10,
     linkThickness = 2,
     theta = 0.9,
     strengthCenter = -50,
-  } = settings || {}
+  } = settings ?? {}
   const ref = useRef<SVGSVGElement>(null)
 
   const data = useMemo(
@@ -167,7 +167,7 @@ function Graph(props: Props) {
     const linkForce = forceLink(links)
       // @ts-expect-error
       .id(d => d.id)
-      .distance(link => (link.sequence ? 1 : 10))
+      .distance(link => (link.sequence ? 10 : 10))
       .iterations(linkSteps)
 
     sim

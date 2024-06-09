@@ -29,7 +29,7 @@ module.exports = {
     'unicorn/prevent-abbreviations': 0,
     'unicorn/no-null': 0,
     'unicorn/filename-case': 0,
-
+    'unicorn/numeric-separators-style': 0,
     'react/prop-types': 0,
     'react-refresh/only-export-components': 'warn',
 

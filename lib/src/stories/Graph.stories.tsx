@@ -1,3 +1,4 @@
+import React from 'react'
 import Graph from '../../dist/Graph'
 
 function BasicExample() {
