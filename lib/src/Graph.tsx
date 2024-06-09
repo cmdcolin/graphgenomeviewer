@@ -68,6 +68,7 @@ function Graph({
   strengthCenter?: number
   onFeatureClick?: (arg?: Record<string, unknown>) => void
 }) {
+  console.log({ onFeatureClick })
   const ref = useRef<SVGSVGElement>(null)
   const { colors, links, nodes } = useMemo(() => {
     const data = reprocessGraph(graph, chunkSize)
@@ -87,15 +88,44 @@ function Graph({
 
   // @ts-expect-error
   const paths = useMemo(() => generatePaths(links, graph.nodes), [])
+  useEffect(() => {
+    if (!ref.current) {
+      return
+    }
+
+    const svg = select(ref.current)
+    // create arrowhead marker, from
+    // https://observablehq.com/@xianwu/force-directed-graph-network-graph-with-arrowheads-and-lab
+    svg
+      .append('defs')
+      .append('marker')
+      .attr('id', 'arrowhead')
+      .attr('viewBox', '-0 -5 10 10')
+      //the bound of the SVG viewport for the current SVG fragment. defines a
+      //coordinate system 10 wide and 10 high starting on (0,-5)
+      .attr('refX', 10)
+      // x coordinate for the reference point of the marker. If circle is
+      // bigger, this need to be bigger.
+      .attr('refY', 0)
+      .attr('orient', 'auto')
+      .attr('markerWidth', 4)
+      .attr('markerHeight', 4)
+      .attr('xoverflow', 'visible')
+      .append('svg:path')
+      .attr('d', 'M 0,-5 L 10 ,0 L 0,5')
+      .attr('fill', 'rgba(120,120,120,0.9)')
+      .style('stroke', 'none')
+  })
 
   useEffect(() => {
     if (!ref.current) {
       return
     }
 
-    const g = select('#wow')
-
-    const link = g
+    const c = d3interpolate[`interpolate${colorScheme}`] as (
+      n: number,
+    ) => string
+    const link = select('#nodearea')
       .selectAll('path')
       .data(drawPaths ? generateLinks(links) : links)
       .join('path')
@@ -107,9 +137,7 @@ function Graph({
           const idx = paths.findIndex(path => path.original.id === d.id)
           return colorScheme.startsWith('Just')
             ? colorScheme.replace('Just', '').toLowerCase()
-            : hsl(
-                d3interpolate[`interpolate${colorScheme}`](idx / paths.length),
-              )
+            : hsl(c(idx / paths.length))
                 .darker()
                 .toString()
         } else {
@@ -123,7 +151,14 @@ function Graph({
       .on('click', (_, d) => onFeatureClick(d))
 
     d3Link.current = link
-  }, [colors, colorScheme, drawPaths, sequenceThickness, linkThickness])
+  }, [
+    colors,
+    colorScheme,
+    drawPaths,
+    sequenceThickness,
+    linkThickness,
+    onFeatureClick,
+  ])
 
   useEffect(() => {
     if (!ref.current) {
@@ -154,6 +189,7 @@ function Graph({
 
       const nodePathMap = {}
       for (const p of paths) {
+        console.log('wtf', p.links)
         const l = p.links.length
         // @ts-expect-error
         nodePathMap[`${p.original.id}-start`] = [p.links[1], p.links[0]]
@@ -162,7 +198,8 @@ function Graph({
       }
 
       // from https://stackoverflow.com/questions/16358905/
-      d3Link.current.attr('d', function (d) {
+      d3Link.current.attr('d', (d: any) => {
+        console.log({ d }, d.source)
         const x1 = d.source.x
         const y1 = d.source.y
         const x2 = d.target.x
@@ -174,11 +211,13 @@ function Graph({
           let largeArc = 0 // 1 or 0
           const sweep = 0 // 1 or 0
 
-          const sid = d.source.id.slice(0, d.source.id.lastIndexOf('-'))
-          const tid = d.target.id.slice(0, d.target.id.lastIndexOf('-'))
+          const dsource = d.source.id || ''
+          const dtarget = d.target.id || ''
+          const sid = dsource.slice(0, dsource.lastIndexOf('-'))
+          const tid = dtarget.slice(0, dtarget.lastIndexOf('-'))
           const same = sid === tid && !d.id
-          const [s1 = 0, t1 = 0] = nodePathMap[d.source.id] || []
-          const [s2 = 0, t2 = 0] = nodePathMap[d.target.id] || []
+          const [s1 = 0, t1 = 0] = nodePathMap[dsource] || []
+          const [s2 = 0, t2 = 0] = nodePathMap[dtarget] || []
 
           // this checks the dot product of the direction that the node is
           // oriented (s1,t1) to where the node is connecting to (t1,t2) other
@@ -199,8 +238,10 @@ function Graph({
 
           return `M${x1},${y1}A${drx},${dry},${xRotation},${largeArc},${sweep} ${x2},${y2}`
         } else {
-          const [s1, t1] = nodePathMap[d.source.id]
-          const [s2, t2] = nodePathMap[d.target.id]
+          const dsource = d.source.id || ''
+          const dtarget = d.target.id || ''
+          const [s1, t1] = nodePathMap[dsource]
+          const [s2, t2] = nodePathMap[dtarget]
           const m1 = (y2 - y1) / (x2 - x1)
           const m2 = (s1[1] - t1[1]) / (s1[0] - t1[0])
           const m3 = (s2[1] - t2[1]) / (s2[0] - t2[0])
@@ -212,21 +253,9 @@ function Graph({
             const sweep = d.pathIndex % 2
             return `M${x1},${y1}A${dr},${dr} 0 0,${sweep} ${x2},${y2}`
           } else {
-            const [cx1, cy1] = projectLine(
-              s1[0],
-              s1[1],
-              t1[0],
-              t1[1],
-              20 + d.pathIndex * 30,
-            )
-            const [cx2, cy2] = projectLine(
-              s2[0],
-              s2[1],
-              t2[0],
-              t2[1],
-              20 + d.pathIndex * 30,
-            )
-
+            const p = 20 + d.pathIndex * 30
+            const [cx1, cy1] = projectLine(s1[0], s1[1], t1[0], t1[1], p)
+            const [cx2, cy2] = projectLine(s2[0], s2[1], t2[0], t2[1], p)
             return `M ${x1} ${y1} C ${cx1} ${cy1}, ${cx2} ${cy2}, ${x2}, ${y2}`
           }
         }
@@ -243,29 +272,7 @@ function Graph({
 
     const svg = select(ref.current)
 
-    // create arrowhead marker, from
-    // https://observablehq.com/@xianwu/force-directed-graph-network-graph-with-arrowheads-and-lab
-    svg
-      .append('defs')
-      .append('marker')
-      .attr('id', 'arrowhead')
-      .attr('viewBox', '-0 -5 10 10')
-      //the bound of the SVG viewport for the current SVG fragment. defines a
-      //coordinate system 10 wide and 10 high starting on (0,-5)
-      .attr('refX', 10)
-      // x coordinate for the reference point of the marker. If circle is
-      // bigger, this need to be bigger.
-      .attr('refY', 0)
-      .attr('orient', 'auto')
-      .attr('markerWidth', 4)
-      .attr('markerHeight', 4)
-      .attr('xoverflow', 'visible')
-      .append('svg:path')
-      .attr('d', 'M 0,-5 L 10 ,0 L 0,5')
-      .attr('fill', 'rgba(120,120,120,0.9)')
-      .style('stroke', 'none')
-
-    const g = select('#wow')
+    const g = select('#nodearea')
     // @ts-expect-error
     const paths = generatePaths(links, graph.nodes)
 
@@ -348,8 +355,9 @@ function Graph({
       g.attr('transform', event.transform)
       // @ts-expect-error
     })(svg)
-  }, [drawLabels, drawPaths, linkSteps, theta, links])
+  }, [drawPaths, drawLabels, linkSteps, theta, links])
 
+  console.log({ drawLabels })
   return (
     <svg
       width={width}
@@ -360,7 +368,7 @@ function Graph({
       style={{ fontSize: drawLabels ? 8 : 0 }}
       viewBox={[0, 0, width, height].toString()}
     >
-      <g id="wow"></g>
+      <g id="nodearea"></g>
     </svg>
   )
 }

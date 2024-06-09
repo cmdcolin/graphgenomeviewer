@@ -86,6 +86,7 @@ function GraphArea({
   const snap = useSnapshot(store)
   const [data, setData] = useState<string>()
   const [error, setError] = useState<unknown>()
+  console.log({ featureData })
 
   useEffect(() => {
     if (!ref.current) {
@@ -106,7 +107,9 @@ function GraphArea({
         setError(undefined)
         const result = await fetch(snap.dataset)
         if (!result.ok) {
-          throw new Error(`Failed to fetch ${result.statusText}`)
+          throw new Error(
+            `HTTP ${result.status} fetching ${snap.dataset} (${await result.text()})`,
+          )
         }
         const text = await result.text()
         setData(text)
