@@ -12,7 +12,7 @@ import {
 import FeatureDialog from './FeatureDialog'
 import Sidebar from './Sidebar'
 import Header from './Header'
-import { parseGFA, serialize } from './util'
+import { parseGFA } from './util'
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './App.css'
@@ -66,6 +66,16 @@ function App() {
 
   const graph = useMemo(() => (data ? parseGFA(data) : undefined), [data])
 
+  function onExportSVG() {
+    if (!ref.current) {
+      return
+    }
+    saveAs(
+      new Blob([ref.current.innerHTML || ''], { type: 'image/svg+xml' }),
+      'out.svg',
+    )
+  }
+
   return (
     <div>
       <Header
@@ -78,15 +88,7 @@ function App() {
           setQuery(settings)
           forceUpdate()
         }}
-        onExportSVG={() => {
-          if (!ref.current) {
-            return
-          }
-          saveAs(
-            new Blob([ref.current.innerHTML || ''], { type: 'image/svg+xml' }),
-            'out.svg',
-          )
-        }}
+        onExportSVG={onExportSVG}
         settings={settings}
       />
       {featureData ? (
@@ -98,6 +100,7 @@ function App() {
       <div className="flexcontainer">
         <div id="sidebar" className="sidebar">
           <Sidebar
+            onExportSVG={onExportSVG}
             colorScheme={colorScheme}
             drawPaths={drawPaths}
             drawLabels={drawLabels}
@@ -116,21 +119,19 @@ function App() {
             onRedraw={() => setRedraw(redraw => redraw + 1)}
           />
         </div>
-        <div className="body">
+        <div className="body" ref={ref}>
           {error ? <div style={{ color: 'red' }}>{`${error}`}</div> : null}
           {graph ? (
-            <div ref={ref}>
-              <Graph
-                graph={graph}
-                redraw={redraw}
-                drag={drag}
-                color={colorScheme}
-                drawLabels={drawLabels}
-                drawPaths={drawPaths}
-                onFeatureClick={data => setFeatureData(data)}
-                settings={settings}
-              />
-            </div>
+            <Graph
+              graph={graph}
+              redraw={redraw}
+              drag={drag}
+              color={colorScheme}
+              drawLabels={drawLabels}
+              drawPaths={drawPaths}
+              onFeatureClick={data => setFeatureData(data)}
+              settings={settings}
+            />
           ) : null}
         </div>
       </div>

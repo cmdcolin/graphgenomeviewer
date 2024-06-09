@@ -9,6 +9,7 @@ export default function Sidebar({
   onColorChange,
   onPathDraw,
   onRedraw,
+  onExportSVG,
 }: {
   drawLabels: boolean
   drawPaths: boolean
@@ -17,10 +18,10 @@ export default function Sidebar({
   onColorChange: (arg: string) => void
   onPathDraw: (arg: boolean) => void
   onRedraw: () => void
+  onExportSVG: () => void
 }) {
   return (
     <div>
-      <p>Settings</p>
       <Form.Label>Color</Form.Label>
       <Form.Control
         value={colorScheme}
@@ -52,6 +53,7 @@ export default function Sidebar({
         />
       </Form.Group>
       <Button onClick={() => onRedraw()}>Redraw</Button>
+      <Button onClick={() => onExportSVG()}>Export SVG</Button>
     </div>
   )
 }
