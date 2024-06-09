@@ -25,6 +25,7 @@ module.exports = {
     sourceType: 'module',
     project: './tsconfig.json',
   },
+  plugins: ['react-refresh'],
   rules: {
     'unicorn/prevent-abbreviations': 0,
     'unicorn/no-null': 0,

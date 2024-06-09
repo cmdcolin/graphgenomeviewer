@@ -351,7 +351,7 @@ function Graph({
       g.attr('transform', event.transform)
       // @ts-expect-error
     })(svg)
-  }, [drawLabels, drawPaths])
+  }, [drawLabels, drawPaths, linkSteps, theta, links])
 
   return (
     <svg
