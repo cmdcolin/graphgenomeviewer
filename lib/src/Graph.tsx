@@ -11,13 +11,7 @@ import {
 } from 'd3-force'
 import * as d3interpolate from 'd3-scale-chromatic'
 import { zoom as d3zoom } from 'd3-zoom'
-import {
-  projectLine,
-  reprocessGraph,
-  generatePaths,
-  Link,
-  Graph,
-} from './stories/util'
+import { projectLine, reprocessGraph, generatePaths, Link, Graph } from './util'
 const { schemeCategory10 } = d3interpolate
 
 function generateLinks(links: Link[]) {
@@ -387,10 +381,13 @@ function Graph(props: Props) {
 
   return (
     <svg
-      width="100%"
-      height="100%"
+      width={2000}
+      height={1000}
       ref={ref}
+      xmlns="http://www.w3.org/2000/svg"
+      xmlnsXlink="http://www.w3.org/1999/xlink"
       style={{ fontSize: drawLabels ? 10 : 0 }}
+      viewBox={[0, 0, 2000, 1000].toString()}
     />
   )
 }

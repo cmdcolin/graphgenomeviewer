@@ -6,7 +6,10 @@ function BasicExample() {
     <Graph
       graph={{
         id: 'wow',
-        nodes: [{ id: 'id1' }, { id: 'id2' }],
+        nodes: [
+          { id: 'id1', length: 5000 },
+          { id: 'id2', length: 10000 },
+        ],
         links: [{ source: 'id1', target: 'id2', id: 'edge1' }],
       }}
     />

@@ -45,7 +45,7 @@ function App() {
   const { dataset, drawLabels, drawPaths, colorScheme, drag, ...settings } =
     query
 
-  const ref = useRef<SVGSVGElement>(null)
+  const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     ;(async () => {
@@ -64,9 +64,7 @@ function App() {
     })()
   }, [dataset])
 
-  const graph = useMemo(() => {
-    return data ? parseGFA(data) : undefined
-  }, [data])
+  const graph = useMemo(() => (data ? parseGFA(data) : undefined), [data])
 
   return (
     <div>
@@ -84,8 +82,10 @@ function App() {
           if (!ref.current) {
             return
           }
-          const ret = serialize(ref.current)
-          saveAs(ret)
+          saveAs(
+            new Blob([ref.current.innerHTML || ''], { type: 'image/svg+xml' }),
+            'out.svg',
+          )
         }}
         settings={settings}
       />
@@ -119,18 +119,18 @@ function App() {
         <div className="body">
           {error ? <div style={{ color: 'red' }}>{`${error}`}</div> : null}
           {graph ? (
-            <Graph
-              graph={graph}
-              ref={ref}
-              redraw={redraw}
-              drag={drag}
-              color={colorScheme}
-              drawLabels={drawLabels}
-              drawPaths={drawPaths}
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              onFeatureClick={(data: any) => setFeatureData(data)}
-              settings={settings}
-            />
+            <div ref={ref}>
+              <Graph
+                graph={graph}
+                redraw={redraw}
+                drag={drag}
+                color={colorScheme}
+                drawLabels={drawLabels}
+                drawPaths={drawPaths}
+                onFeatureClick={data => setFeatureData(data)}
+                settings={settings}
+              />
+            </div>
           ) : null}
         </div>
       </div>
