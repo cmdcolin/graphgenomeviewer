@@ -34,6 +34,7 @@ export interface Link {
   target: string
 }
 export function reprocessGraph(G: Graph, chunkSize: number) {
+  console.log({ G, chunkSize })
   const Gp = { nodes: [] as Node[], links: [] as Link[] }
 
   const seen = {} as Record<string, string[]>
@@ -145,28 +146,6 @@ export function generatePaths(edges: Edge[], graph: Record<string, unknown>) {
   }))
 }
 
-type Coord2 = [number, number]
-
-export function generateLinks(links: Edge[], graph: Graph[]) {
-  const result = [] as {
-    links: [Coord2, Coord2]
-    original: { id: string }
-  }[]
-  for (const [i, link] of links.entries()) {
-    const original = graph[i]
-    if (!original.id) {
-      result.push({
-        links: [
-          [link.source.x, link.source.y],
-          [link.target.x, link.target.y],
-        ],
-        original,
-      })
-    }
-  }
-  return result
-}
-
 // implements this algorithm to project a point "forwards" from a given contig
 // node translation of simple vector math here
 // https://math.stackexchange.com/questions/175896
@@ -181,4 +160,29 @@ export function projectLine(
   const vx = (x2 - x1) / d
   const vy = (y2 - y1) / d
   return [x2 + dt * vx, y2 + dt * vy]
+}
+
+export function generateLinks(links: Link[]) {
+  const newlinks = [] as {
+    pathId?: string
+    pathIndex?: number
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [key: string]: any
+  }[]
+  const pathIds = [] as string[]
+  for (const { paths, ...rest } of links) {
+    if (paths) {
+      for (const pathId of paths) {
+        let pathIndex = pathIds.indexOf(pathId)
+        if (pathIndex === -1) {
+          pathIds.push(pathId)
+          pathIndex = pathIds.length - 1
+        }
+        newlinks.push({ ...rest, pathId, pathIndex })
+      }
+    } else {
+      newlinks.push(rest)
+    }
+  }
+  return newlinks
 }

@@ -17,7 +17,9 @@
     "lint": "eslint src",
     "prebuild": "rimraf dist",
     "build": "tsc",
-    "postversion": "git push --follow-tags"
+    "postversion": "git push --follow-tags",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "peerDependencies": {
     "react": "*"
@@ -32,5 +34,19 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "devDependencies": {
+    "@chromatic-com/storybook": "^1.5.0",
+    "@storybook/addon-essentials": "^8.1.6",
+    "@storybook/addon-interactions": "^8.1.6",
+    "@storybook/addon-links": "^8.1.6",
+    "@storybook/addon-onboarding": "^8.1.6",
+    "@storybook/blocks": "^8.1.6",
+    "@storybook/react": "^8.1.6",
+    "@storybook/react-vite": "^8.1.6",
+    "@storybook/test": "^8.1.6",
+    "eslint-plugin-storybook": "^0.8.0",
+    "prop-types": "^15.8.1",
+    "storybook": "^8.1.6"
   }
 }
