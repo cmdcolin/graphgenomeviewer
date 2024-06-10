@@ -153,7 +153,8 @@ function Graph({
       const c = d3interpolate[
         `interpolate${colorScheme}` as keyof typeof d3interpolate
       ] as (n: number) => string
-      const link = select('#nodearea')
+
+      select('#nodearea')
         .selectAll('path')
         .data(drawPaths ? generateLinks(links) : links)
         .join('path')
@@ -177,81 +178,68 @@ function Graph({
           d.linkNum === undefined ? linkThickness : sequenceThickness,
         )
         .on('click', (_, d) => onFeatureClick(d))
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .attr('d', (d: any) => {
+          const x1 = d.source.x
+          const y1 = d.source.y
+          const x2 = d.target.x
+          const y2 = d.target.y
+          if (d.pathIndex === undefined) {
+            let drx = 0
+            let dry = 0
+            let xRotation = 0 // degrees
+            let largeArc = 0 // 1 or 0
+            const sweep = 0 // 1 or 0
 
-      // from https://stackoverflow.com/questions/16358905/
-      link.attr('d', (d: any) => {
-        const x1 = d.source.x
-        const y1 = d.source.y
-        const x2 = d.target.x
-        const y2 = d.target.y
-        if (d.pathIndex === undefined) {
-          let drx = 0
-          let dry = 0
-          let xRotation = 0 // degrees
-          let largeArc = 0 // 1 or 0
-          const sweep = 0 // 1 or 0
+            const dsource = d.source.id || ''
+            const dtarget = d.target.id || ''
+            const sid = dsource.slice(0, dsource.lastIndexOf('-'))
+            const tid = dtarget.slice(0, dtarget.lastIndexOf('-'))
+            const same = sid === tid && !d.id
+            const [s1 = [0, 0], t1 = [0, 0]] = nodePathMap[dsource] || []
+            const [_s2, t2 = [0, 0]] = nodePathMap[dtarget] || []
 
-          const dsource = d.source.id || ''
-          const dtarget = d.target.id || ''
-          const sid = dsource.slice(0, dsource.lastIndexOf('-'))
-          const tid = dtarget.slice(0, dtarget.lastIndexOf('-'))
-          const same = sid === tid && !d.id
-          const [s1 = [0, 0], t1 = [0, 0]] = nodePathMap[dsource] || []
-          const [s2, t2 = [0, 0]] = nodePathMap[dtarget] || []
+            // check dot product of the direction that the node is oriented
+            // (s1,t1) -> (t1,t2) other combinations could be chosen here but
+            // it helps to determine whether to draw the arc or not, a circular
+            // layout is a self-connection but does not need an arc
+            const dotresult = dot(
+              [t1[0] - s1[0], t1[1] - s1[1]],
+              [t1[0] - t2[0], t1[1] - t2[1]],
+            )
 
-          // if (s1 === undefined || t1 === undefined || t2 === undefined) {
-          //   return
-          // }
+            if (same && !Number.isNaN(dotresult) && dotresult > 0) {
+              xRotation = -45
+              largeArc = 1
+              drx = 25
+              dry = 20
+            }
 
-          // this checks the dot product of the direction that the node is
-          // oriented (s1,t1) to where the node is connecting to (t1,t2) other
-          // combinations could be chosen here but it helps to determine
-          // whether to draw the arc or not, a circular layout is a
-          // self-connection but does not need an arc
-          const dotresult = dot(
-            [t1[0] - s1[0], t1[1] - s1[1]],
-            [t1[0] - t2[0], t1[1] - t2[1]],
-          )
-
-          if (same && !Number.isNaN(dotresult) && dotresult > 0) {
-            xRotation = -45
-            largeArc = 1
-            drx = 25
-            dry = 20
-          }
-
-          return `M${x1},${y1}A${drx},${dry},${xRotation},${largeArc},${sweep} ${x2},${y2}`
-        } else {
-          const dsource = d.source.id || ''
-          const dtarget = d.target.id || ''
-          const [s1, t1] = nodePathMap[dsource]
-          const [s2, t2] = nodePathMap[dtarget]
-          const m1 = (y2 - y1) / (x2 - x1)
-          const m2 = (s1[1] - t1[1]) / (s1[0] - t1[0])
-          const m3 = (s2[1] - t2[1]) / (s2[0] - t2[0])
-
-          if (Math.abs(m1 - m2) < 0.2 || Math.abs(m1 - m3) < 0.2) {
-            const dx = x2 - x1
-            const dy = y2 - y1
-            const dr = Math.hypot(dx, dy) + Math.random() * 40
-            const sweep = d.pathIndex % 2
-            return `M${x1},${y1}A${dr},${dr} 0 0,${sweep} ${x2},${y2}`
+            return `M${x1},${y1}A${drx},${dry},${xRotation},${largeArc},${sweep} ${x2},${y2}`
           } else {
-            const p = 20 + d.pathIndex * 30
-            const [cx1, cy1] = projectLine(s1[0], s1[1], t1[0], t1[1], p)
-            const [cx2, cy2] = projectLine(s2[0], s2[1], t2[0], t2[1], p)
-            return `M ${x1} ${y1} C ${cx1} ${cy1}, ${cx2} ${cy2}, ${x2}, ${y2}`
-          }
-        }
-      })
+            const dsource = d.source.id || ''
+            const dtarget = d.target.id || ''
+            const [s1, t1] = nodePathMap[dsource]
+            const [s2, t2] = nodePathMap[dtarget]
+            const m1 = (y2 - y1) / (x2 - x1)
+            const m2 = (s1[1] - t1[1]) / (s1[0] - t1[0])
+            const m3 = (s2[1] - t2[1]) / (s2[0] - t2[0])
 
-      if (edgepaths) {
-        edgepaths.attr(
-          'd',
-          // @ts-expect-error
-          d => `M${d.source.x},${d.source.y}L${d.target.x},${d.target.y}`,
-        )
-      }
+            if (Math.abs(m1 - m2) < 0.2 || Math.abs(m1 - m3) < 0.2) {
+              const dx = x2 - x1
+              const dy = y2 - y1
+              const dr = Math.hypot(dx, dy) + Math.random() * 40
+              const sweep = d.pathIndex % 2
+              return `M${x1},${y1}A${dr},${dr} 0 0,${sweep} ${x2},${y2}`
+            } else {
+              const p = 20 + d.pathIndex * 30
+              const [cx1, cy1] = projectLine(s1[0], s1[1], t1[0], t1[1], p)
+              const [cx2, cy2] = projectLine(s2[0], s2[1], t2[0], t2[1], p)
+              return `M ${x1} ${y1} C ${cx1} ${cy1}, ${cx2} ${cy2}, ${x2}, ${y2}`
+            }
+          }
+        })
+        .attr('id', (_, i) => 'edgepath-' + i)
     })
 
     const svg = select(ref.current)
@@ -269,27 +257,12 @@ function Graph({
       nodePathMap[`${p.original.id}-end`] = [p.links[l - 2], p.links[l - 1]]
     }
 
-    const edgepaths = g
-      .selectAll('.edgepath')
-      .data(links)
-      .enter()
-      .append('path')
-      .attr(
-        'd',
-        // @ts-expect-error
-        d => `M${d.source.x},${d.source.y}L${d.target.x},${d.target.y}`,
-      )
-      .attr('id', (_, i) => 'edgepath-' + i)
-
-    const edgelabels = g
-      .selectAll('.edgelabel')
+    g.selectAll('.edgelabel')
       .data(links)
       .enter()
       .append('text')
       .attr('dy', 12)
       .attr('id', (_, i) => 'edgelabel-' + i)
-
-    edgelabels
       .append('textPath')
       .attr('href', (_, i) => `#edgepath-${i}`)
       .attr('startOffset', '50%')
@@ -347,6 +320,9 @@ function Graph({
     colorScheme,
     sequenceThickness,
     linkThickness,
+    strengthCenter,
+    width,
+    height,
     onFeatureClick,
     colors,
     nodes,
