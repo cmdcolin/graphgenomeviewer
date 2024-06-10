@@ -14,8 +14,10 @@
     "node": ">=10"
   },
   "scripts": {
-    "prebuild": "rimraf dist",
+    "clean": "rimraf dist",
+    "prebuild": "npm run clean",
     "build": "tsc",
+    "preversion": "npm run build",
     "postversion": "git push --follow-tags",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
