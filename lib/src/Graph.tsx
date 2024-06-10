@@ -283,7 +283,7 @@ function Graph({
       .data(nodes)
       .join('circle')
       .attr('r', 12)
-      .attr('fill', 'rgb(255,255,0)')
+      .attr('fill', 'rgba(255,255,255,0.0)')
       .raise()
 
     d3drag
