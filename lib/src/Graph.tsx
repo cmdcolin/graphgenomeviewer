@@ -111,7 +111,7 @@ function Graph({
       .attr('d', 'M 0,-5 L 10 ,0 L 0,5')
       .attr('fill', 'rgba(120,120,120,0.9)')
       .style('stroke', 'none')
-  })
+  }, [])
 
   useEffect(() => {
     if (!ref.current) {
@@ -351,6 +351,7 @@ function Graph({
     colors,
     nodes,
     links,
+    graph.nodes,
   ])
 
   return (
