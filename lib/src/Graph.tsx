@@ -348,6 +348,8 @@ function Graph({
     sequenceThickness,
     linkThickness,
     onFeatureClick,
+    colors,
+    nodes,
     links,
   ])
 

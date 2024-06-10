@@ -22,6 +22,7 @@ export default function GFAGraph(props: {
   const [resultData, setResultData] = useState<string | undefined>(data)
   const [error, setError] = useState<unknown>()
   useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     ;(async () => {
       try {
         if (!url) {
@@ -33,8 +34,9 @@ export default function GFAGraph(props: {
         }
         const data = await res.text()
         setResultData(data)
-      } catch (e) {
-        setError(e)
+      } catch (error_) {
+        setError(error_)
+        console.error(error_)
       }
     })()
   }, [url])

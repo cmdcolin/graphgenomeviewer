@@ -61,7 +61,7 @@ export default function SettingsDialog({
               <Form.Text muted>
                 If a contig is of length 5000, then chunk length 1000 would
                 become 5 segments. Note: contigs smaller than the chunk length
-                may be less proportionally sized (they don't get spaghettified)
+                may be less proportionally sized (they do not get spaghettified)
               </Form.Text>
             </Form.Label>
             <Col>

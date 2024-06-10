@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import queryString from 'querystring'
 import { GFAGraph } from 'graphgenomeviewer'
 import { proxy, subscribe, useSnapshot } from 'valtio'
 import { saveAs } from 'file-saver'
