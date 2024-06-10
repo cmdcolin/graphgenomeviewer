@@ -277,14 +277,13 @@ function Graph({
       })
 
     // add 10px large click handlers invisible (alpha=0) "node handles"
-    // and uses raise to keep them on top
     // todo: add an onclick to map to onFeatureClick
     const node = g
       .selectAll('circle')
       .data(nodes)
       .join('circle')
-      .attr('r', 7)
-      .attr('fill', 'rgba(255,255,255,0.0)')
+      .attr('r', 12)
+      .attr('fill', 'rgb(255,255,0)')
       .raise()
 
     d3drag
