@@ -1,4 +1,3 @@
-//@ts-nocheck
 import React from 'react'
 import Graph from '../../dist/Graph'
 
@@ -108,115 +107,69 @@ function MTGraph() {
             target: 'MTh4001',
             strand1: '+',
             strand2: '+',
-            cigar: '0M',
-            tags: {
-              SR: 0,
-            },
           },
           {
             source: 'MTh4001',
             target: 'MTh4502',
             strand1: '+',
             strand2: '+',
-            cigar: '0M',
-            tags: {
-              SR: 0,
-            },
           },
           {
             source: 'MTh4001',
             target: 'MTh4001',
             strand1: '+',
             strand2: '+',
-            cigar: '0M',
-            tags: {
-              SR: 1,
-            },
           },
           {
             source: 'MTh4502',
             target: 'MTh9505',
             strand1: '+',
             strand2: '+',
-            cigar: '0M',
-            tags: {
-              SR: 0,
-            },
           },
           {
             source: 'MTh9505',
             target: 'MTh13014',
             strand1: '+',
             strand2: '+',
-            cigar: '0M',
-            tags: {
-              SR: 0,
-            },
           },
           {
             source: 'MTh13014',
             target: 'MTh13516',
             strand1: '+',
             strand2: '+',
-            cigar: '0M',
-            tags: {
-              SR: 0,
-            },
           },
           {
             source: 'MTh0',
             target: 'MTo3426',
             strand1: '+',
             strand2: '-',
-            cigar: '0M',
-            tags: {
-              SR: 1,
-            },
           },
           {
             source: 'MTo3426',
             target: 'MTh4502',
             strand1: '-',
             strand2: '+',
-            cigar: '0M',
-            tags: {
-              SR: 1,
-            },
           },
           {
             source: 'MTh4502',
             target: 'MTo8961',
             strand1: '+',
             strand2: '+',
-            cigar: '0M',
-            tags: {
-              SR: 1,
-            },
           },
           {
             source: 'MTo8961',
             target: 'MTh9505',
             strand1: '+',
             strand2: '+',
-            cigar: '0M',
-            tags: {
-              SR: 1,
-            },
           },
           {
             source: 'MTh9505',
             target: 'MTh13516',
             strand1: '+',
             strand2: '+',
-            cigar: '0M',
-            tags: {
-              SR: 1,
-            },
           },
         ],
         paths: [],
-        header: [],
-        id: '',
       }}
     />
   )

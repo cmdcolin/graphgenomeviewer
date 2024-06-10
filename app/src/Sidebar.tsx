@@ -4,6 +4,7 @@ import { useSnapshot } from 'valtio'
 export default function Sidebar({
   store,
   onExportSVG,
+  onRedraw,
 }: {
   store: {
     colorScheme: string
@@ -11,6 +12,7 @@ export default function Sidebar({
     drawLabels: boolean
   }
   onExportSVG: () => void
+  onRedraw: () => void
 }) {
   const snap = useSnapshot(store)
   return (
@@ -47,6 +49,9 @@ export default function Sidebar({
         />
       </Form.Group>
       <Button onClick={() => onExportSVG()}>Export SVG</Button>
+      <Button style={{ marginLeft: 2 }} onClick={() => onRedraw()}>
+        Redraw
+      </Button>
     </div>
   )
 }

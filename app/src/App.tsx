@@ -8,14 +8,13 @@ import { saveAs } from 'file-saver'
 import FeatureDialog from './FeatureDialog'
 import Sidebar from './Sidebar'
 import Header from './Header'
-import { parseGFA } from './util'
+import { defaults, parseGFA } from './util'
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './App.css'
 
 interface StoreProps {
   strengthCenter: number
-  strengthXY: number
   chunkSize: number
   forceSteps: number
   linkSteps: number
@@ -34,30 +33,34 @@ const coerceB = (a: unknown) => (a ? Boolean(JSON.parse(`${a}`)) : undefined)
 function ParamAdapter() {
   const params = new URLSearchParams(window.location.search)
   const store = proxy({
-    strengthCenter: coerceN(params.get('strengthCenter')) ?? -50,
-    strengthXY: coerceN(params.get('strengthXY')) ?? 0.1,
-    chunkSize: coerceN(params.get('chunkSize')) ?? 1000,
-    linkSteps: coerceN(params.get('linkSteps')) ?? 3,
-    forceSteps: coerceN(params.get('forceSteps')) ?? 200,
-    sequenceThickness: coerceN(params.get('sequenceThickness')) ?? 10,
-    linkThickness: coerceN(params.get('linkThickness')) ?? 2,
-    theta: coerceN(params.get('theta')) ?? 0.9,
-    forceType: coerceS(params.get('forceType')) ?? 'center',
-    dataset: coerceS(params.get('dataset')) ?? 'MT.gfa',
-    colorScheme: coerceS(params.get('colorScheme')) ?? 'Rainbow',
-    drawLabels: coerceB(params.get('drawLabels')) ?? false,
-    drawPaths: coerceB(params.get('drawPaths')) ?? false,
+    strengthCenter:
+      coerceN(params.get('strengthCenter')) ?? defaults.strengthCenter,
+    chunkSize: coerceN(params.get('chunkSize')) ?? defaults.chunkSize,
+    linkSteps: coerceN(params.get('linkSteps')) ?? defaults.linkSteps,
+    forceSteps: coerceN(params.get('forceSteps')) ?? defaults.forceSteps,
+    sequenceThickness:
+      coerceN(params.get('sequenceThickness')) ?? defaults.sequenceThickness,
+    linkThickness:
+      coerceN(params.get('linkThickness')) ?? defaults.linkThickness,
+    theta: coerceN(params.get('theta')) ?? defaults.theta,
+    dataset: coerceS(params.get('dataset')) ?? defaults.dataset,
+    colorScheme: coerceS(params.get('colorScheme')) ?? defaults.colorScheme,
+    drawLabels: coerceB(params.get('drawLabels')) ?? defaults.drawLabels,
+    drawPaths: coerceB(params.get('drawPaths')) ?? defaults.drawPaths,
   })
-  useEffect(() => {
-    return subscribe(store, () => {
-      window.history.pushState(null, '', '?' + queryString.stringify(store))
-    })
-  }, [store])
+  useEffect(
+    () =>
+      subscribe(store, () => {
+        window.history.pushState(null, '', '?' + queryString.stringify(store))
+      }),
+    [store],
+  )
   return <App store={store} />
 }
 
 function App({ store }: { store: StoreProps }) {
   const [exportSVG, setExportSVG] = useState(0)
+  const [redraw, setRedraw] = useState(0)
 
   return (
     <div>
@@ -67,8 +70,9 @@ function App({ store }: { store: StoreProps }) {
         <Sidebar
           store={store}
           onExportSVG={() => setExportSVG(exportSVG + 1)}
+          onRedraw={() => setRedraw(redraw + 1)}
         />
-        <GraphArea store={store} exportSVG={exportSVG} />
+        <GraphArea store={store} exportSVG={exportSVG} redraw={redraw} />
       </div>
     </div>
   )
@@ -77,9 +81,11 @@ function App({ store }: { store: StoreProps }) {
 function GraphArea({
   exportSVG,
   store,
+  redraw,
 }: {
   exportSVG: number
   store: StoreProps
+  redraw: number
 }) {
   const [featureData, setFeatureData] = useState<Record<string, unknown>>()
   const ref = useRef<HTMLDivElement>(null)
@@ -133,7 +139,7 @@ function GraphArea({
         <ErrorMessage error={error} />
       ) : graph ? (
         <Graph
-          key={JSON.stringify(graph)}
+          key={JSON.stringify(graph) + '-' + redraw}
           graph={graph}
           onFeatureClick={data => setFeatureData(data)}
           {...snap}

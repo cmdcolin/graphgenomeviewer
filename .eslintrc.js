@@ -27,11 +27,13 @@ module.exports = {
   },
   plugins: ['react-refresh'],
   rules: {
-    'unicorn/prevent-abbreviations': 0,
-    'unicorn/no-null': 0,
-    'unicorn/filename-case': 0,
-    'unicorn/numeric-separators-style': 0,
-    'react/prop-types': 0,
+    'unicorn/prevent-abbreviations': 'off',
+    'unicorn/no-null': 'off',
+    'unicorn/filename-case': 'off',
+    'unicorn/prefer-node-protocol': 'off',
+    'unicorn/numeric-separators-style': 'off',
+    'react/prop-types': 'off',
+    'react/react-in-jsx-scope': 'off',
     'react-refresh/only-export-components': 'warn',
 
     '@typescript-eslint/no-unsafe-member-access': 'off',
@@ -41,7 +43,8 @@ module.exports = {
     '@typescript-eslint/no-unsafe-return': 'off',
     '@typescript-eslint/ban-ts-comment': 'off',
     '@typescript-eslint/no-empty-function': 'off',
-
+    '@typescript-eslint/no-base-to-string': 'off',
+    '@typescript-eslint/restrict-template-expressions': 'off',
     '@typescript-eslint/no-unused-vars': [
       'warn',
       { argsIgnorePattern: '^_', ignoreRestSiblings: true },
