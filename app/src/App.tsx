@@ -86,7 +86,6 @@ function GraphArea({
   const snap = useSnapshot(store)
   const [data, setData] = useState<string>()
   const [error, setError] = useState<unknown>()
-  console.log({ featureData })
 
   useEffect(() => {
     if (!ref.current) {

@@ -21,16 +21,14 @@ function generateLinks(links: Link[]) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: any
   }[]
-  const pathIds = [] as string[]
+  const pathIds = new Map<string, number>()
   for (const { paths, ...rest } of links) {
     if (paths) {
       for (const pathId of paths) {
-        let pathIndex = pathIds.indexOf(pathId)
-        if (pathIndex === -1) {
-          pathIds.push(pathId)
-          pathIndex = pathIds.length - 1
+        if (!pathIds.has(pathId)) {
+          pathIds.set(pathId, pathIds.size)
         }
-        newlinks.push({ ...rest, pathId, pathIndex })
+        newlinks.push({ ...rest, pathId, pathIndex: pathIds.get(pathId) })
       }
     } else {
       newlinks.push(rest)
@@ -68,26 +66,24 @@ function Graph({
   strengthCenter?: number
   onFeatureClick?: (arg?: Record<string, unknown>) => void
 }) {
-  console.log({ onFeatureClick })
   const ref = useRef<SVGSVGElement>(null)
   const { colors, links, nodes } = useMemo(() => {
     const data = reprocessGraph(graph, chunkSize)
-    const links = data.links.map(d => ({
-      ...d,
-    }))
-    const nodes = data.nodes.map(d => ({
-      ...d,
-    }))
+
+    // clone links/nodes because the x,y positions will be mutated by d3 force layout
+    const links = data.links.map(d => ({ ...d }))
+    const nodes = data.nodes.map(d => ({ ...d }))
     const colors = Object.fromEntries(
       graph.paths?.map((p, i) => [p.name, schemeCategory10[i]]) ?? [],
     )
-    return { data, links, nodes, colors }
+    return {
+      data,
+      links,
+      nodes,
+      colors,
+    }
   }, [chunkSize, graph])
 
-  const d3Link = useRef<any>()
-
-  // @ts-expect-error
-  const paths = useMemo(() => generatePaths(links, graph.nodes), [])
   useEffect(() => {
     if (!ref.current) {
       return
@@ -122,52 +118,6 @@ function Graph({
       return
     }
 
-    const c = d3interpolate[`interpolate${colorScheme}`] as (
-      n: number,
-    ) => string
-    const link = select('#nodearea')
-      .selectAll('path')
-      .data(drawPaths ? generateLinks(links) : links)
-      .join('path')
-      .attr('marker-end', d => (d.id ? '' : 'url(#arrowhead)'))
-      .attr('stroke', d => {
-        const same = d.linkNum !== undefined
-        if (same) {
-          // @ts-expect-error
-          const idx = paths.findIndex(path => path.original.id === d.id)
-          return colorScheme.startsWith('Just')
-            ? colorScheme.replace('Just', '').toLowerCase()
-            : hsl(c(idx / paths.length))
-                .darker()
-                .toString()
-        } else {
-          return drawPaths ? colors[d.pathId ?? ''] : 'rgba(120,120,120,0.8)'
-        }
-      })
-      .attr('fill', 'none')
-      .attr('stroke-width', d =>
-        d.linkNum === undefined ? linkThickness : sequenceThickness,
-      )
-      .on('click', (_, d) => onFeatureClick(d))
-
-    d3Link.current = link
-  }, [
-    colors,
-    colorScheme,
-    drawPaths,
-    sequenceThickness,
-    linkThickness,
-    onFeatureClick,
-  ])
-
-  useEffect(() => {
-    if (!ref.current) {
-      return
-    }
-    if (!d3Link.current) {
-      return
-    }
-
     // @ts-expect-error
     const sim = forceSimulation().nodes(nodes)
     const chargeForce = forceManyBody().strength(strengthCenter).theta(theta)
@@ -187,19 +137,49 @@ function Graph({
       // @ts-expect-error
       node.attr('cx', d => d.x).attr('cy', d => d.y)
 
-      const nodePathMap = {}
+      const nodePathMap = {} as Record<
+        string,
+        [[number, number], [number, number]]
+      >
+      // @ts-expect-error
+      const paths = generatePaths(links, graph.nodes)
       for (const p of paths) {
-        console.log('wtf', p.links)
         const l = p.links.length
         // @ts-expect-error
         nodePathMap[`${p.original.id}-start`] = [p.links[1], p.links[0]]
         // @ts-expect-error
         nodePathMap[`${p.original.id}-end`] = [p.links[l - 2], p.links[l - 1]]
       }
+      const c = d3interpolate[
+        `interpolate${colorScheme}` as keyof typeof d3interpolate
+      ] as (n: number) => string
+      const link = select('#nodearea')
+        .selectAll('path')
+        .data(drawPaths ? generateLinks(links) : links)
+        .join('path')
+        .attr('marker-end', d => (d.id ? '' : 'url(#arrowhead)'))
+        .attr('stroke', d => {
+          const same = d.linkNum !== undefined
+          if (same) {
+            // @ts-expect-error
+            const idx = paths.findIndex(path => path.original.id === d.id)
+            return colorScheme.startsWith('Just')
+              ? colorScheme.replace('Just', '').toLowerCase()
+              : hsl(c(idx / paths.length))
+                  .darker()
+                  .toString()
+          } else {
+            return drawPaths ? colors[d.pathId ?? ''] : 'rgba(120,120,120,0.8)'
+          }
+        })
+        .attr('fill', 'none')
+        .attr('stroke-width', d =>
+          d.linkNum === undefined ? linkThickness : sequenceThickness,
+        )
+        .on('click', (_, d) => onFeatureClick(d))
 
       // from https://stackoverflow.com/questions/16358905/
-      d3Link.current.attr('d', (d: any) => {
-        console.log({ d }, d.source)
+      link.attr('d', (d: any) => {
         const x1 = d.source.x
         const y1 = d.source.y
         const x2 = d.target.x
@@ -216,8 +196,12 @@ function Graph({
           const sid = dsource.slice(0, dsource.lastIndexOf('-'))
           const tid = dtarget.slice(0, dtarget.lastIndexOf('-'))
           const same = sid === tid && !d.id
-          const [s1 = 0, t1 = 0] = nodePathMap[dsource] || []
-          const [s2 = 0, t2 = 0] = nodePathMap[dtarget] || []
+          const [s1 = [0, 0], t1 = [0, 0]] = nodePathMap[dsource] || []
+          const [s2, t2 = [0, 0]] = nodePathMap[dtarget] || []
+
+          // if (s1 === undefined || t1 === undefined || t2 === undefined) {
+          //   return
+          // }
 
           // this checks the dot product of the direction that the node is
           // oriented (s1,t1) to where the node is connecting to (t1,t2) other
@@ -285,13 +269,6 @@ function Graph({
       nodePathMap[`${p.original.id}-end`] = [p.links[l - 2], p.links[l - 1]]
     }
 
-    const node = g
-      .selectAll('circle')
-      .data(nodes)
-      .join('circle')
-      .attr('r', 7)
-      .attr('fill', 'rgba(255,255,255,0.0)')
-
     const edgepaths = g
       .selectAll('.edgepath')
       .data(links)
@@ -326,6 +303,13 @@ function Graph({
         return same ? sid : ''
       })
 
+    // add 10px large click handlers invisible (alpha=0) "node handles")
+    const node = g
+      .selectAll('circle')
+      .data(nodes)
+      .join('circle')
+      .attr('r', 10)
+      .attr('fill', 'rgba(255,255,255,0.0)')
     d3drag
       .drag()
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -355,9 +339,8 @@ function Graph({
       g.attr('transform', event.transform)
       // @ts-expect-error
     })(svg)
-  }, [drawPaths, drawLabels, linkSteps, theta, links])
+  }, [drawPaths, drawLabels, linkSteps, theta, colorScheme, links])
 
-  console.log({ drawLabels })
   return (
     <svg
       width={width}
