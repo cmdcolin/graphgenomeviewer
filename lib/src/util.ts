@@ -35,7 +35,6 @@ export interface Link {
   target: string
 }
 export function reprocessGraph(G: Graph, chunkSize: number) {
-  console.log({ G, chunkSize })
   const Gp = { nodes: [] as Node[], links: [] as Link[] }
 
   const seen = {} as Record<string, string[]>
@@ -118,7 +117,7 @@ export function groupBy<T>(
 }
 
 export interface Edge {
-  linkNum: number
+  linkNum?: number
   source: Coord
   target: Coord
 }
@@ -138,10 +137,9 @@ function makePath(edges: Edge[]) {
 
 // groups the edges data structure by the linkNum attribute
 export function generatePaths(edges: Edge[], graph: Record<string, unknown>) {
-  const ret2 = groupBy(edges, e =>
-    e.linkNum === undefined ? undefined : `${e.linkNum}`,
-  )
-  return Object.entries(ret2).map(([key, value]) => ({
+  return Object.entries(
+    groupBy(edges, e => (e.linkNum === undefined ? undefined : `${e.linkNum}`)),
+  ).map(([key, value]) => ({
     links: makePath(value),
     original: graph[key],
   }))

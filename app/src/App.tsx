@@ -1,59 +1,120 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import queryString from 'querystring'
 import Graph from 'graphgenomeviewer'
-import saveAs from 'file-saver'
-import {
-  useQueryParams,
-  BooleanParam,
-  StringParam,
-  NumberParam,
-  withDefault,
-} from 'use-query-params'
+import { proxy, subscribe, useSnapshot } from 'valtio'
+import { saveAs } from 'file-saver'
 
+// locals
 import FeatureDialog from './FeatureDialog'
 import Sidebar from './Sidebar'
 import Header from './Header'
-import { parseGFA, serialize } from './util'
+import { defaults, parseGFA } from './util'
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './App.css'
 
-function App() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [featureData, setFeatureData] = useState<any>()
+interface StoreProps {
+  strengthCenter: number
+  chunkSize: number
+  forceSteps: number
+  linkSteps: number
+  sequenceThickness: number
+  linkThickness: number
+  theta: number
+  dataset: string
+  colorScheme: string
+  drawLabels: boolean
+  drawPaths: boolean
+}
+const coerceN = (a: unknown) => (a ? Number(a) : undefined)
+const coerceS = (a: unknown) => (a ? String(a) : undefined)
+const coerceB = (a: unknown) => (a ? Boolean(JSON.parse(`${a}`)) : undefined)
+
+function ParamAdapter() {
+  const params = new URLSearchParams(window.location.search)
+  const store = proxy({
+    strengthCenter:
+      coerceN(params.get('strengthCenter')) ?? defaults.strengthCenter,
+    chunkSize: coerceN(params.get('chunkSize')) ?? defaults.chunkSize,
+    linkSteps: coerceN(params.get('linkSteps')) ?? defaults.linkSteps,
+    forceSteps: coerceN(params.get('forceSteps')) ?? defaults.forceSteps,
+    sequenceThickness:
+      coerceN(params.get('sequenceThickness')) ?? defaults.sequenceThickness,
+    linkThickness:
+      coerceN(params.get('linkThickness')) ?? defaults.linkThickness,
+    theta: coerceN(params.get('theta')) ?? defaults.theta,
+    dataset: coerceS(params.get('dataset')) ?? defaults.dataset,
+    colorScheme: coerceS(params.get('colorScheme')) ?? defaults.colorScheme,
+    drawLabels: coerceB(params.get('drawLabels')) ?? defaults.drawLabels,
+    drawPaths: coerceB(params.get('drawPaths')) ?? defaults.drawPaths,
+  })
+  useEffect(
+    () =>
+      subscribe(store, () => {
+        window.history.pushState(null, '', '?' + queryString.stringify(store))
+      }),
+    [store],
+  )
+  return <App store={store} />
+}
+
+function App({ store }: { store: StoreProps }) {
+  const [exportSVG, setExportSVG] = useState(0)
+  const [redraw, setRedraw] = useState(0)
+
+  return (
+    <div>
+      <Header store={store} onExportSVG={() => setExportSVG(exportSVG + 1)} />
+
+      <div className="flexcontainer">
+        <Sidebar
+          store={store}
+          onExportSVG={() => setExportSVG(exportSVG + 1)}
+          onRedraw={() => setRedraw(redraw + 1)}
+        />
+        <GraphArea store={store} exportSVG={exportSVG} redraw={redraw} />
+      </div>
+    </div>
+  )
+}
+
+function GraphArea({
+  exportSVG,
+  store,
+  redraw,
+}: {
+  exportSVG: number
+  store: StoreProps
+  redraw: number
+}) {
+  const [featureData, setFeatureData] = useState<Record<string, unknown>>()
+  const ref = useRef<HTMLDivElement>(null)
+  const snap = useSnapshot(store)
   const [data, setData] = useState<string>()
   const [error, setError] = useState<unknown>()
-  const [, updateState] = useState<unknown>()
-  const forceUpdate = React.useCallback(() => updateState({}), [])
-  const [redraw, setRedraw] = useState(0)
-  const [query, setQuery] = useQueryParams({
-    strengthCenter: withDefault(NumberParam, -50),
-    strengthXY: withDefault(NumberParam, 0.1),
-    chunkSize: withDefault(NumberParam, 1000),
-    forceSteps: withDefault(NumberParam, 200),
-    linkSteps: withDefault(NumberParam, 1),
-    sequenceThickness: withDefault(NumberParam, 10),
-    linkThickness: withDefault(NumberParam, 2),
-    theta: withDefault(NumberParam, 0.9),
-    forceType: withDefault(StringParam, 'center'),
-    dataset: withDefault(StringParam, 'MT.gfa'),
-    colorScheme: withDefault(StringParam, 'Rainbow'),
-    drawLabels: withDefault(BooleanParam, false),
-    drawPaths: withDefault(BooleanParam, false),
-    drag: withDefault(BooleanParam, true),
-  })
 
-  const { dataset, drawLabels, drawPaths, colorScheme, drag, ...settings } =
-    query
+  useEffect(() => {
+    if (!ref.current) {
+      return
+    }
+    if (exportSVG) {
+      saveAs(
+        new Blob([ref.current.innerHTML || ''], { type: 'image/svg+xml' }),
+        'out.svg',
+      )
+    }
+  }, [exportSVG])
 
-  const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     ;(async () => {
       try {
         setError(undefined)
-        const result = await fetch(dataset)
+        const result = await fetch(snap.dataset)
         if (!result.ok) {
-          throw new Error(`Failed to fetch ${result.statusText}`)
+          throw new Error(
+            `HTTP ${result.status} fetching ${snap.dataset} (${await result.text()})`,
+          )
         }
         const text = await result.text()
         setData(text)
@@ -62,80 +123,36 @@ function App() {
         setError(error)
       }
     })()
-  }, [dataset])
+  }, [snap.dataset])
 
   const graph = useMemo(() => (data ? parseGFA(data) : undefined), [data])
-
   return (
-    <div>
-      <Header
-        onData={value => {
-          setQuery({ dataset: value })
-          forceUpdate()
-        }}
-        onGraph={graph => setData(graph)}
-        onSettings={settings => {
-          setQuery(settings)
-          forceUpdate()
-        }}
-        onExportSVG={() => {
-          if (!ref.current) {
-            return
-          }
-          saveAs(
-            new Blob([ref.current.innerHTML || ''], { type: 'image/svg+xml' }),
-            'out.svg',
-          )
-        }}
-        settings={settings}
-      />
+    <div className="body" ref={ref}>
       {featureData ? (
         <FeatureDialog
           data={featureData}
           onHide={() => setFeatureData(undefined)}
         />
       ) : null}
-      <div className="flexcontainer">
-        <div id="sidebar" className="sidebar">
-          <Sidebar
-            colorScheme={colorScheme}
-            drawPaths={drawPaths}
-            drawLabels={drawLabels}
-            onColorChange={value => {
-              setQuery({ colorScheme: value })
-              forceUpdate()
-            }}
-            onDrawLabels={value => {
-              setQuery({ drawLabels: value })
-              forceUpdate()
-            }}
-            onPathDraw={value => {
-              setQuery({ drawPaths: value })
-              forceUpdate()
-            }}
-            onRedraw={() => setRedraw(redraw => redraw + 1)}
-          />
-        </div>
-        <div className="body">
-          {error ? <div style={{ color: 'red' }}>{`${error}`}</div> : null}
-          {graph ? (
-            <div ref={ref}>
-              <Graph
-                graph={graph}
-                redraw={redraw}
-                drag={drag}
-                color={colorScheme}
-                drawLabels={drawLabels}
-                drawPaths={drawPaths}
-                onFeatureClick={data => setFeatureData(data)}
-                settings={settings}
-              />
-            </div>
-          ) : null}
-        </div>
-      </div>
+
+      {error ? (
+        <ErrorMessage error={error} />
+      ) : graph ? (
+        <Graph
+          key={JSON.stringify(graph) + '-' + redraw}
+          graph={graph}
+          onFeatureClick={data => setFeatureData(data)}
+          {...snap}
+        />
+      ) : (
+        <div>Loading...</div>
+      )}
     </div>
   )
 }
 
-export default App
+function ErrorMessage({ error }: { error: unknown }) {
+  return <div style={{ color: 'red' }}>{`${error}`}</div>
+}
+
+export default ParamAdapter

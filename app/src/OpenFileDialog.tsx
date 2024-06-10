@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { Button, Form, Modal } from 'react-bootstrap'
 
 export default function OpenFileDialog({
