@@ -51,7 +51,18 @@ function ParamAdapter() {
   useEffect(
     () =>
       subscribe(store, () => {
-        window.history.pushState(null, '', '?' + queryString.stringify(store))
+        const s = new URLSearchParams(
+          Object.fromEntries(
+            Object.entries(store)
+              .map(([key, val]) =>
+                val === defaults[key as keyof typeof defaults]
+                  ? undefined
+                  : [key, `${val}`],
+              )
+              .filter((f): f is [string, string] => !!f),
+          ),
+        )
+        window.history.pushState(null, '', '?' + s.toString())
       }),
     [store],
   )
