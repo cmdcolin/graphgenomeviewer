@@ -151,7 +151,7 @@ function GraphArea({
         <ErrorMessage error={error} />
       ) : data ? (
         <GFAGraph
-          key={data + '-' + redraw}
+          key={data + '-' + redraw + '-' + snap.chunkSize}
           data={data}
           onFeatureClick={data => setFeatureData(data)}
           {...snap}
