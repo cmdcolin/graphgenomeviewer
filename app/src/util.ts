@@ -8,6 +8,7 @@ export const defaults = {
   dataset: 'MT.gfa',
   drawLabels: false,
   drawPaths: false,
+  drawNodeHandles: false,
   forceSteps: 200,
   colorScheme: 'Rainbow',
 }

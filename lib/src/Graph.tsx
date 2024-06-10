@@ -41,6 +41,7 @@ function Graph({
   graph,
   drawPaths = false,
   drawLabels = false,
+  drawNodeHandles = false,
   colorScheme = 'Rainbow',
   chunkSize = 1000,
   linkSteps = 10,
@@ -55,6 +56,7 @@ function Graph({
   graph: Graph
   drawPaths?: boolean
   drawLabels?: boolean
+  drawNodeHandles?: boolean
   colorScheme?: string
   width?: number
   height?: number
@@ -283,8 +285,10 @@ function Graph({
       .data(nodes)
       .join('circle')
       .attr('r', 12)
-      .attr('fill', 'rgba(255,255,255,0.0)')
-      .raise()
+      .attr(
+        'fill',
+        drawNodeHandles ? 'rgb(255,255,0)' : 'rgba(255,255,255,0.0)',
+      )
 
     d3drag
       .drag()
@@ -318,6 +322,7 @@ function Graph({
   }, [
     drawPaths,
     drawLabels,
+    drawNodeHandles,
     linkSteps,
     theta,
     colorScheme,

@@ -10,6 +10,7 @@ export default function Sidebar({
     colorScheme: string
     drawPaths: boolean
     drawLabels: boolean
+    drawNodeHandles: boolean
   }
   onExportSVG: () => void
   onRedraw: () => void
@@ -37,6 +38,14 @@ export default function Sidebar({
           type="checkbox"
           label="Draw paths"
           checked={snap.drawPaths}
+        />
+      </Form.Group>
+      <Form.Group>
+        <Form.Check
+          onChange={event => (store.drawNodeHandles = event.target.checked)}
+          type="checkbox"
+          label="Draw node handles"
+          checked={snap.drawNodeHandles}
         />
       </Form.Group>
 

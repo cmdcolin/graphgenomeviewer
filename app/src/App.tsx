@@ -23,6 +23,7 @@ interface StoreProps {
   dataset: string
   colorScheme: string
   drawLabels: boolean
+  drawNodeHandles: boolean
   drawPaths: boolean
 }
 const coerceN = (a: unknown) => (a ? Number(a) : undefined)
@@ -46,6 +47,8 @@ function ParamAdapter() {
     colorScheme: coerceS(params.get('colorScheme')) ?? defaults.colorScheme,
     drawLabels: coerceB(params.get('drawLabels')) ?? defaults.drawLabels,
     drawPaths: coerceB(params.get('drawPaths')) ?? defaults.drawPaths,
+    drawNodeHandles:
+      coerceB(params.get('drawNodeHandles')) ?? defaults.drawPaths,
   })
   useEffect(
     () =>
