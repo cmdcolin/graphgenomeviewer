@@ -2,7 +2,7 @@
 
 This repo provides an NPM module https://www.npmjs.com/package/graphgenomeviewer
 which is a react component and a demo instance that shows some demo files in a
-create-react-app instance
+vite app
 
 See the lib [README](lib/README.md) for details on using the NPM module
 
