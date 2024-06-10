@@ -62,7 +62,7 @@ function ParamAdapter() {
               .filter((f): f is [string, string] => !!f),
           ),
         )
-        window.history.pushState(null, '', '?' + s.toString())
+        window.history.replaceState(null, '', '?' + s.toString())
       }),
     [store],
   )
