@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import queryString from 'querystring'
-import Graph from 'graphgenomeviewer'
+import { GFAGraph } from 'graphgenomeviewer'
 import { proxy, subscribe, useSnapshot } from 'valtio'
 import { saveAs } from 'file-saver'
 
@@ -8,7 +8,7 @@ import { saveAs } from 'file-saver'
 import FeatureDialog from './FeatureDialog'
 import Sidebar from './Sidebar'
 import Header from './Header'
-import { defaults, parseGFA } from './util'
+import { defaults } from './util'
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './App.css'
@@ -125,7 +125,6 @@ function GraphArea({
     })()
   }, [snap.dataset])
 
-  const graph = useMemo(() => (data ? parseGFA(data) : undefined), [data])
   return (
     <div className="body" ref={ref}>
       {featureData ? (
@@ -137,10 +136,10 @@ function GraphArea({
 
       {error ? (
         <ErrorMessage error={error} />
-      ) : graph ? (
-        <Graph
-          key={JSON.stringify(graph) + '-' + redraw}
-          graph={graph}
+      ) : data ? (
+        <GFAGraph
+          key={data + '-' + redraw}
+          data={data}
           onFeatureClick={data => setFeatureData(data)}
           {...snap}
         />

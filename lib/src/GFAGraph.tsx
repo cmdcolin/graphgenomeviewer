@@ -3,8 +3,8 @@ import Graph from './Graph'
 import { parseGFA } from './gfa'
 
 export default function GFAGraph(props: {
-  url: string
-  data: string
+  url?: string
+  data?: string
   drawPaths?: boolean
   drawLabels?: boolean
   colorScheme?: string
@@ -19,7 +19,7 @@ export default function GFAGraph(props: {
   onFeatureClick?: (arg?: Record<string, unknown>) => void
 }) {
   const { url, data, ...rest } = props
-  const [resultData, setResultData] = useState<string>(data)
+  const [resultData, setResultData] = useState<string | undefined>(data)
   const [error, setError] = useState<unknown>()
   useEffect(() => {
     ;(async () => {
@@ -41,7 +41,7 @@ export default function GFAGraph(props: {
 
   return error ? (
     <div style={{ color: 'red' }}>{`${error}`}</div>
-  ) : data ? (
+  ) : resultData ? (
     <Graph graph={parseGFA(resultData)} {...rest} />
   ) : (
     <div>Loading...</div>
