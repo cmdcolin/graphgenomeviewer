@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import Graph from './Graph'
 import { parseGFA } from './gfa'
 
@@ -39,10 +39,16 @@ export default function GFAGraph(props: {
     })()
   }, [url])
 
+  // not ideal but memo important for stability of re-rendering, otherwise restarts force sim
+  const graph = useMemo(
+    () => (resultData ? parseGFA(resultData) : undefined),
+    [resultData],
+  )
+
   return error ? (
     <div style={{ color: 'red' }}>{`${error}`}</div>
-  ) : resultData ? (
-    <Graph graph={parseGFA(resultData)} {...rest} />
+  ) : graph ? (
+    <Graph graph={graph} {...rest} />
   ) : (
     <div>Loading...</div>
   )
