@@ -84,12 +84,15 @@ function Graph({
 }
 ```
 
-The GFAGraph everything is the same except a url is supplied instead of graph
-data structure
+The GFAGraph everything is the same except you use either
+
+- a url to a GFA file supplied to the url prop
+- a string of GFA data supplied to the data prop
 
 ```typescript
 function GFAGraph({
   url,
+  data,
   drawPaths = false,
   drawLabels = false,
   colorScheme = 'Rainbow',
@@ -104,6 +107,7 @@ function GFAGraph({
   onFeatureClick = () => {},
 }: {
   url: string
+  data: string
   drawPaths?: boolean
   drawLabels?: boolean
   colorScheme?: string
