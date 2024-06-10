@@ -276,13 +276,17 @@ function Graph({
         return same ? sid : ''
       })
 
-    // add 10px large click handlers invisible (alpha=0) "node handles")
+    // add 10px large click handlers invisible (alpha=0) "node handles"
+    // and uses raise to keep them on top
+    // todo: add an onclick to map to onFeatureClick
     const node = g
       .selectAll('circle')
       .data(nodes)
       .join('circle')
-      .attr('r', 10)
+      .attr('r', 7)
       .attr('fill', 'rgba(255,255,255,0.0)')
+      .raise()
+
     d3drag
       .drag()
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
