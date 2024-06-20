@@ -251,7 +251,8 @@ function Graph({
 
     const svg = select(ref.current)
 
-    const g = select(`#${id}`)
+    const g = select(`#${nodearea}`)
+    console.log({ g })
     // @ts-expect-error
     const paths = generatePaths(links, graph.nodes)
 
@@ -321,6 +322,7 @@ function Graph({
       })(node)
 
     d3zoom().on('zoom', event => {
+      console.log('wtf', g, svg, event.transform)
       g.attr('transform', event.transform)
       // @ts-expect-error
     })(svg)
