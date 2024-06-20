@@ -28,6 +28,7 @@ module.exports = {
   },
   plugins: ['react-refresh'],
   rules: {
+    'no-console': ['error', { allow: ['warn', 'error'] }],
     'unicorn/prevent-abbreviations': 'off',
     'unicorn/no-null': 'off',
     'unicorn/filename-case': 'off',
