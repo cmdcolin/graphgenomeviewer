@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useRef } from 'react'
+import React, { useMemo, useEffect, useRef, useId } from 'react'
 import { hsl } from 'd3-color'
 import * as d3drag from 'd3-drag'
 import { select } from 'd3-selection'
@@ -69,6 +69,11 @@ function Graph({
   onFeatureClick?: (arg?: Record<string, unknown>) => void
 }) {
   const ref = useRef<SVGSVGElement>(null)
+  const id = useId().replaceAll(':', '_')
+  const nodearea = `nodearea-${id}`
+  const edgelabel = `edgelabel-${id}`
+  const edgepath = `edgelabel-${id}`
+
   const { colors, links, nodes } = useMemo(() => {
     const data = reprocessGraph(graph, chunkSize)
 
@@ -156,7 +161,7 @@ function Graph({
         `interpolate${colorScheme}` as keyof typeof d3interpolate
       ] as (n: number) => string
 
-      select('#nodearea')
+      select(`#${nodearea}`)
         .selectAll('path')
         .data(drawPaths ? generateLinks(links) : links)
         .join('path')
@@ -241,12 +246,12 @@ function Graph({
             }
           }
         })
-        .attr('id', (_, i) => 'edgepath-' + i)
+        .attr('id', (_, i) => `${edgepath}-${i}`)
     })
 
     const svg = select(ref.current)
 
-    const g = select('#nodearea')
+    const g = select(`#${id}`)
     // @ts-expect-error
     const paths = generatePaths(links, graph.nodes)
 
@@ -259,14 +264,14 @@ function Graph({
       nodePathMap[`${p.original.id}-end`] = [p.links[l - 2], p.links[l - 1]]
     }
 
-    g.selectAll('.edgelabel')
+    g.selectAll(`.${edgelabel}`)
       .data(links)
       .enter()
       .append('text')
       .attr('dy', 12)
-      .attr('id', (_, i) => 'edgelabel-' + i)
+      .attr('id', (_, i) => `${edgelabel}-${i}`)
       .append('textPath')
-      .attr('href', (_, i) => `#edgepath-${i}`)
+      .attr('href', (_, i) => `#${edgepath}-${i}`)
       .attr('startOffset', '50%')
       .attr('text-anchor', 'middle')
       .text(d => {
@@ -320,6 +325,10 @@ function Graph({
       // @ts-expect-error
     })(svg)
   }, [
+    id,
+    nodearea,
+    edgelabel,
+    edgepath,
     drawPaths,
     drawLabels,
     drawNodeHandles,
@@ -348,7 +357,7 @@ function Graph({
       style={{ fontSize: drawLabels ? 8 : 0 }}
       viewBox={[0, 0, width, height].toString()}
     >
-      <g id="nodearea"></g>
+      <g id={nodearea}></g>
     </svg>
   )
 }
