@@ -67,7 +67,7 @@ function App() {
 
   return (
     <div>
-      <Header store={store} onExportSVG={() => setExportSVG(exportSVG + 1)} />
+      <Header onExportSVG={() => setExportSVG(exportSVG + 1)} />
 
       <div className="flexcontainer">
         <Sidebar
