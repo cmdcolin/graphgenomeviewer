@@ -161,6 +161,7 @@ function Graph({
         `interpolate${colorScheme}` as keyof typeof d3interpolate
       ] as (n: number) => string
 
+      const hasTraversedYet = {} as Record<string, number>
       select(`#${nodearea}`)
         .selectAll('path')
         .data(drawPaths ? generateLinks(links) : links)
@@ -191,6 +192,12 @@ function Graph({
           const y1 = d.source.y
           const x2 = d.target.x
           const y2 = d.target.y
+          if (!hasTraversedYet[`${x1}_${y1}_${x2}_${y2}`]) {
+            hasTraversedYet[`${x1}_${y1}_${x2}_${y2}`] = 0
+          }
+
+          const val = hasTraversedYet[`${x1}_${y1}_${x2}_${y2}`]++
+
           if (d.pathIndex === undefined) {
             let drx = 0
             let dry = 0
@@ -236,10 +243,10 @@ function Graph({
               const dx = x2 - x1
               const dy = y2 - y1
               const dr = Math.hypot(dx, dy) + Math.random() * 40
-              const sweep = d.pathIndex % 2
+              const sweep = val % 2
               return `M${x1},${y1}A${dr},${dr} 0 0,${sweep} ${x2},${y2}`
             } else {
-              const p = 20 + d.pathIndex * 30
+              const p = 20 + val * 30
               const [cx1, cy1] = projectLine(s1[0], s1[1], t1[0], t1[1], p)
               const [cx2, cy2] = projectLine(s2[0], s2[1], t2[0], t2[1], p)
               return `M ${x1} ${y1} C ${cx1} ${cy1}, ${cx2} ${cy2}, ${x2}, ${y2}`
