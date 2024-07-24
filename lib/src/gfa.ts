@@ -65,7 +65,7 @@ export function parseGFA(file: string) {
       }
       graph.nodes.push({ id: name, length: len, sequence: seq, tags })
     } else if (line.startsWith('E')) {
-      // eslint-disable-next-line no-unused-vars,unicorn/no-unreadable-array-destructuring
+      // eslint-disable-next-line unicorn/no-unreadable-array-destructuring
       const [, , source, target, , , , , cigar, ...rest] = line.split('\t')
       const source1 = source.slice(0, -1)
       const target1 = target.slice(0, -1)

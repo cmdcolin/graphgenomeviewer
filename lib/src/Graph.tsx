@@ -204,7 +204,7 @@ function Graph({
             const tid = dtarget.slice(0, dtarget.lastIndexOf('-'))
             const same = sid === tid && !d.id
             const [s1 = [0, 0], t1 = [0, 0]] = nodePathMap[dsource] || []
-            const [_s2, t2 = [0, 0]] = nodePathMap[dtarget] || []
+            const [, t2 = [0, 0]] = nodePathMap[dtarget] || []
 
             // check dot product of the direction that the node is oriented
             // (s1,t1) -> (t1,t2) other combinations could be chosen here but

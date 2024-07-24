@@ -1,20 +1,23 @@
 {
   "private": true,
   "scripts": {
-    "lint": "eslint --ext .js,.ts,.jsx,.tsx ."
+    "lint": "eslint --report-unused-disable-directives --max-warnings 0 ."
   },
   "workspaces": [
     "lib",
     "app"
   ],
   "devDependencies": {
+    "@eslint/compat": "^1.1.1",
+    "@eslint/eslintrc": "^3.1.0",
+    "@eslint/js": "^9.7.0",
     "@types/d3-color": "^3.1.0",
     "@types/d3-drag": "^3.0.3",
     "@types/d3-selection": "^3.0.6",
     "@types/file-saver": "^2.0.5",
     "@typescript-eslint/eslint-plugin": "^7.12.0",
     "@typescript-eslint/parser": "^7.12.0",
-    "eslint": "^8.49.0",
+    "eslint": "^9.7.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.1.3",
     "eslint-plugin-react": "^7.33.2",
@@ -22,6 +25,7 @@
     "eslint-plugin-react-refresh": "^0.4.3",
     "eslint-plugin-unicorn": "^54.0.0",
     "eslint-plugin-valtio": "^0.6.3",
+    "globals": "^15.8.0",
     "prettier": "^3.0.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
