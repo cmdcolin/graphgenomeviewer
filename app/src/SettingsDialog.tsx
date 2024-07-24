@@ -1,24 +1,17 @@
 import { useState } from 'react'
 import { Button, Col, Form, Modal, Row } from 'react-bootstrap'
-import { useSnapshot } from 'valtio'
+import { useAppStore } from './store'
 
-export default function SettingsDialog({
-  store,
-  onHide,
-}: {
-  store: {
-    chunkSize: number
-    linkSteps: number
-    strengthCenter: number
-    dataset: string
-    theta: number
-    linkThickness: number
-    sequenceThickness: number
-  }
-  onHide: () => void
-}) {
-  const snap = useSnapshot(store)
-  const [chunkSize, setChunkSize] = useState(`${snap.chunkSize}`)
+export default function SettingsDialog({ onHide }: { onHide: () => void }) {
+  const store = useAppStore()
+  const {
+    chunkSize: storeChunkSize,
+    strengthCenter,
+    linkThickness,
+    sequenceThickness,
+    linkSteps,
+  } = store
+  const [chunkSize, setChunkSize] = useState(`${storeChunkSize}`)
   return (
     <Modal show={true} onHide={onHide} size="lg">
       <Modal.Header closeButton>
@@ -28,7 +21,7 @@ export default function SettingsDialog({
       <Modal.Body>
         <Form
           onSubmit={event => {
-            store.chunkSize = +chunkSize
+            store.setChunkSize(+chunkSize)
             event.preventDefault()
             onHide()
           }}
@@ -48,10 +41,10 @@ export default function SettingsDialog({
                 min={1}
                 max={20}
                 style={{ width: '100%' }}
-                value={snap.linkSteps}
-                onChange={event => (store.linkSteps = +event.target.value)}
+                value={linkSteps}
+                onChange={event => store.setLinkSteps(+event.target.value)}
               />
-              Current value: {snap.linkSteps}
+              Current value: {linkSteps}
             </Col>
           </Form.Group>
           <Form.Group as={Row}>
@@ -86,10 +79,10 @@ export default function SettingsDialog({
                 min={-100}
                 max={-1}
                 style={{ width: '100%' }}
-                value={snap.strengthCenter}
-                onChange={event => (store.strengthCenter = +event.target.value)}
+                value={strengthCenter}
+                onChange={event => store.setStrengthCenter(+event.target.value)}
               />
-              Current value: {snap.strengthCenter}
+              Current value: {strengthCenter}
             </Col>
           </Form.Group>
           <Form.Group as={Row}>
@@ -106,12 +99,12 @@ export default function SettingsDialog({
                 min={1}
                 max={20}
                 style={{ width: '100%' }}
-                value={snap.sequenceThickness}
+                value={sequenceThickness}
                 onChange={event =>
                   (store.sequenceThickness = +event.target.value)
                 }
               />
-              Current value: {snap.sequenceThickness}px
+              Current value: {sequenceThickness}px
             </Col>
           </Form.Group>
           <Form.Group as={Row}>
@@ -126,10 +119,10 @@ export default function SettingsDialog({
                 min={1}
                 max={20}
                 style={{ width: '100%' }}
-                value={snap.linkThickness}
+                value={linkThickness}
                 onChange={event => (store.linkThickness = +event.target.value)}
               />
-              Current value: {snap.linkThickness}px
+              Current value: {linkThickness}px
             </Col>
           </Form.Group>
 

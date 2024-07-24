@@ -1,26 +1,20 @@
 import { Form, Button } from 'react-bootstrap'
-import { useSnapshot } from 'valtio'
+import { useAppStore } from './store'
 
 export default function Sidebar({
-  store,
   onExportSVG,
   onRedraw,
 }: {
-  store: {
-    colorScheme: string
-    drawPaths: boolean
-    drawLabels: boolean
-    drawNodeHandles: boolean
-  }
   onExportSVG: () => void
   onRedraw: () => void
 }) {
-  const snap = useSnapshot(store)
+  const store = useAppStore()
+  const { drawPaths, drawLabels, colorScheme, drawNodeHandles } = store
   return (
     <div id="sidebar" className="sidebar">
       <Form.Label>Color</Form.Label>
       <Form.Control
-        value={snap.colorScheme}
+        value={colorScheme}
         onChange={event => (store.colorScheme = event.target.value)}
         as="select"
       >
@@ -34,27 +28,27 @@ export default function Sidebar({
       <br />
       <Form.Group>
         <Form.Check
-          onChange={event => (store.drawPaths = event.target.checked)}
+          onChange={event => store.setDrawPaths(event.target.checked)}
           type="checkbox"
           label="Draw paths"
-          checked={snap.drawPaths}
+          checked={drawPaths}
         />
       </Form.Group>
       <Form.Group>
         <Form.Check
-          onChange={event => (store.drawNodeHandles = event.target.checked)}
+          onChange={event => store.setDrawNodeHandles(event.target.checked)}
           type="checkbox"
           label="Draw node handles"
-          checked={snap.drawNodeHandles}
+          checked={drawNodeHandles}
         />
       </Form.Group>
 
       <Form.Group>
         <Form.Check
-          onChange={event => (store.drawLabels = event.target.checked)}
+          onChange={event => store.setDrawLabels(event.target.checked)}
           type="checkbox"
           label="Draw labels"
-          checked={snap.drawLabels}
+          checked={drawLabels}
         />
       </Form.Group>
       <Button onClick={() => onExportSVG()}>Export SVG</Button>
