@@ -269,7 +269,7 @@ function Graph({
       .enter()
       .append('text')
       .attr('dy', 12)
-      .attr('id', (_, i) => `${edgelabel}-${i}`)
+      .attr('id', (_, i) => `label-${edgelabel}-${i}`)
       .append('textPath')
       .attr('href', (_, i) => `#${edgepath}-${i}`)
       .attr('startOffset', '50%')
@@ -330,7 +330,6 @@ function Graph({
     edgelabel,
     edgepath,
     drawPaths,
-    drawLabels,
     drawNodeHandles,
     linkSteps,
     theta,
@@ -338,6 +337,7 @@ function Graph({
     sequenceThickness,
     linkThickness,
     strengthCenter,
+    drawLabels,
     width,
     height,
     onFeatureClick,

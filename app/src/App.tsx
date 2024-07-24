@@ -18,12 +18,40 @@ function App() {
   const [exportSVG, setExportSVG] = useState(0)
   const [redraw, setRedraw] = useState(0)
   const store = useAppStore()
+
   useEffect(
     () =>
-      useAppStore.subscribe(() => {
+      useAppStore.subscribe(state => {
+        const {
+          strengthCenter,
+          chunkSize,
+          forceSteps,
+          linkSteps,
+          sequenceThickness,
+          linkThickness,
+          theta,
+          dataset,
+          colorScheme,
+          drawLabels,
+          drawNodeHandles,
+          drawPaths,
+        } = state
         const s = new URLSearchParams(
           Object.fromEntries(
-            Object.entries(store)
+            Object.entries({
+              strengthCenter,
+              chunkSize,
+              forceSteps,
+              linkSteps,
+              sequenceThickness,
+              linkThickness,
+              theta,
+              dataset,
+              colorScheme,
+              drawLabels,
+              drawNodeHandles,
+              drawPaths,
+            })
               .map(([key, val]) =>
                 val === defaults[key as keyof typeof defaults]
                   ? undefined
@@ -34,7 +62,7 @@ function App() {
         )
         window.history.replaceState(null, '', '?' + s.toString())
       }),
-    [store],
+    [],
   )
 
   return (

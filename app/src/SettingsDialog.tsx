@@ -101,7 +101,7 @@ export default function SettingsDialog({ onHide }: { onHide: () => void }) {
                 style={{ width: '100%' }}
                 value={sequenceThickness}
                 onChange={event =>
-                  (store.sequenceThickness = +event.target.value)
+                  store.setSequenceThickness(+event.target.value)
                 }
               />
               Current value: {sequenceThickness}px
@@ -120,7 +120,7 @@ export default function SettingsDialog({ onHide }: { onHide: () => void }) {
                 max={20}
                 style={{ width: '100%' }}
                 value={linkThickness}
-                onChange={event => (store.linkThickness = +event.target.value)}
+                onChange={event => store.setLinkThickness(+event.target.value)}
               />
               Current value: {linkThickness}px
             </Col>
