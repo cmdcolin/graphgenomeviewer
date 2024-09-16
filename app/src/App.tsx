@@ -17,7 +17,6 @@ import './App.css'
 function App() {
   const [exportSVG, setExportSVG] = useState(0)
   const [redraw, setRedraw] = useState(0)
-  const store = useAppStore()
 
   useEffect(
     () =>

@@ -8,10 +8,15 @@
     "declaration": true,
     "moduleResolution": "node",
     "sourceMap": true,
+    "skipLibCheck": true,
     "strict": true,
     "noImplicitAny": false,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "esModuleInterop": true
-  }
+  },
+  "exclude": [
+    "**/build/",
+    "**/dist/"
+  ]
 }
