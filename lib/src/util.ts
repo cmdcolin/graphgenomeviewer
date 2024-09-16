@@ -83,7 +83,7 @@ export function reprocessGraph(G: Graph, chunkSize: number) {
   }
 
   for (const { strand1, strand2, source, target, ...rest } of G.links) {
-    const paths = seen[`${source}${strand1}_${target}${strand2}`] || []
+    const paths = seen[`${source}${strand1}_${target}${strand2}`] ?? []
     const loop = source === target
 
     // enumerates cases for which end of source connects to
@@ -110,8 +110,10 @@ export function groupBy<T>(
     if (!p) {
       continue
     }
-    const entry = (result[p] ||= [])
-    entry.push(value)
+    if (!result[p]) {
+      result[p] = []
+    }
+    result[p].push(value)
   }
   return result
 }

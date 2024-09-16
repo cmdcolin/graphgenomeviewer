@@ -104,8 +104,8 @@ function Graph({
       .append('marker')
       .attr('id', 'arrowhead')
       .attr('viewBox', '-0 -5 10 10')
-      //the bound of the SVG viewport for the current SVG fragment. defines a
-      //coordinate system 10 wide and 10 high starting on (0,-5)
+      // the bound of the SVG viewport for the current SVG fragment. defines a
+      // coordinate system 10 wide and 10 high starting on (0,-5)
       .attr('refX', 10)
       // x coordinate for the reference point of the marker. If circle is
       // bigger, this need to be bigger.
@@ -185,7 +185,9 @@ function Graph({
         .attr('stroke-width', d =>
           d.linkNum === undefined ? linkThickness : sequenceThickness,
         )
-        .on('click', (_, d) => onFeatureClick(d))
+        .on('click', (_, d) => {
+          onFeatureClick(d)
+        })
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .attr('d', (d: any) => {
           const x1 = d.source.x
@@ -210,8 +212,8 @@ function Graph({
             const sid = dsource.slice(0, dsource.lastIndexOf('-'))
             const tid = dtarget.slice(0, dtarget.lastIndexOf('-'))
             const same = sid === tid && !d.id
-            const [s1 = [0, 0], t1 = [0, 0]] = nodePathMap[dsource] || []
-            const [, t2 = [0, 0]] = nodePathMap[dtarget] || []
+            const [s1 = [0, 0], t1 = [0, 0]] = nodePathMap[dsource] ?? []
+            const [, t2 = [0, 0]] = nodePathMap[dtarget] ?? []
 
             // check dot product of the direction that the node is oriented
             // (s1,t1) -> (t1,t2) other combinations could be chosen here but

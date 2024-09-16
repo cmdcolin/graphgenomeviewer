@@ -28,7 +28,9 @@ export default function Sidebar({
       <br />
       <Form.Group>
         <Form.Check
-          onChange={event => store.setDrawPaths(event.target.checked)}
+          onChange={event => {
+            store.setDrawPaths(event.target.checked)
+          }}
           type="checkbox"
           label="Draw paths"
           checked={drawPaths}
@@ -36,7 +38,9 @@ export default function Sidebar({
       </Form.Group>
       <Form.Group>
         <Form.Check
-          onChange={event => store.setDrawNodeHandles(event.target.checked)}
+          onChange={event => {
+            store.setDrawNodeHandles(event.target.checked)
+          }}
           type="checkbox"
           label="Draw node handles"
           checked={drawNodeHandles}
@@ -45,14 +49,27 @@ export default function Sidebar({
 
       <Form.Group>
         <Form.Check
-          onChange={event => store.setDrawLabels(event.target.checked)}
+          onChange={event => {
+            store.setDrawLabels(event.target.checked)
+          }}
           type="checkbox"
           label="Draw labels"
           checked={drawLabels}
         />
       </Form.Group>
-      <Button onClick={() => onExportSVG()}>Export SVG</Button>
-      <Button style={{ marginLeft: 2 }} onClick={() => onRedraw()}>
+      <Button
+        onClick={() => {
+          onExportSVG()
+        }}
+      >
+        Export SVG
+      </Button>
+      <Button
+        style={{ marginLeft: 2 }}
+        onClick={() => {
+          onRedraw()
+        }}
+      >
         Redraw
       </Button>
     </div>

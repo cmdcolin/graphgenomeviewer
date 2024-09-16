@@ -9,7 +9,7 @@ export default function OpenFileDialog({
   onGraph: (arg: string) => void
 }) {
   const ref = useRef<HTMLInputElement>(null)
-  const [error, setError] = useState('')
+  const [error, setError] = useState<unknown>()
   return (
     <Modal show={true} onHide={onHide}>
       <Modal.Header closeButton>
@@ -34,7 +34,7 @@ export default function OpenFileDialog({
                 }
               } catch (error) {
                 console.error(error)
-                setError(`${error}`)
+                setError(error)
               }
             })()
           }}

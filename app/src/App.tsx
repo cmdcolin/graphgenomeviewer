@@ -66,12 +66,20 @@ function App() {
 
   return (
     <div>
-      <Header onExportSVG={() => setExportSVG(exportSVG + 1)} />
+      <Header
+        onExportSVG={() => {
+          setExportSVG(exportSVG + 1)
+        }}
+      />
 
       <div className="flexcontainer">
         <Sidebar
-          onExportSVG={() => setExportSVG(exportSVG + 1)}
-          onRedraw={() => setRedraw(redraw + 1)}
+          onExportSVG={() => {
+            setExportSVG(exportSVG + 1)
+          }}
+          onRedraw={() => {
+            setRedraw(redraw + 1)
+          }}
         />
         <GraphArea exportSVG={exportSVG} redraw={redraw} />
       </div>
@@ -130,7 +138,9 @@ function GraphArea({
       {featureData ? (
         <FeatureDialog
           data={featureData}
-          onHide={() => setFeatureData(undefined)}
+          onHide={() => {
+            setFeatureData(undefined)
+          }}
         />
       ) : null}
 
@@ -140,7 +150,9 @@ function GraphArea({
         <GFAGraph
           key={data + '-' + redraw + '-' + chunkSize}
           data={data}
-          onFeatureClick={data => setFeatureData(data)}
+          onFeatureClick={data => {
+            setFeatureData(data)
+          }}
           {...store}
         />
       ) : (

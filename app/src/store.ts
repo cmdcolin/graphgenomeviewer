@@ -71,7 +71,7 @@ export function getStringArray(key: string, def = [] as string[]): string[] {
 }
 
 export function setStringArray(key: string, val: string[]) {
-  return localStorage.setItem(key, JSON.stringify(val))
+  localStorage.setItem(key, JSON.stringify(val))
 }
 
 const coerceN = (a: unknown) => (a ? Number(a) : undefined)
@@ -91,16 +91,40 @@ export const useAppStore = create<AppState>()(set => ({
   drawLabels: coerceB(drawLabels) ?? defaults.drawLabels,
   drawNodeHandles: coerceB(drawNodeHandles) ?? defaults.drawNodeHandles,
   drawPaths: coerceB(drawPaths) ?? defaults.drawPaths,
-  setStrengthCenter: arg => set(() => ({ strengthCenter: arg })),
-  setChunkSize: arg => set(() => ({ chunkSize: arg })),
-  setForceSteps: arg => set(() => ({ forceSteps: arg })),
-  setLinkSteps: arg => set(() => ({ linkSteps: arg })),
-  setSequenceThickness: arg => set(() => ({ sequenceThickness: arg })),
-  setLinkThickness: arg => set(() => ({ linkThickness: arg })),
-  setTheta: arg => set(() => ({ theta: arg })),
-  setDataset: arg => set(() => ({ dataset: arg })),
-  setColorScheme: arg => set(() => ({ colorScheme: arg })),
-  setDrawLabels: arg => set(() => ({ drawLabels: arg })),
-  setDrawNodeHandles: arg => set(() => ({ drawNodeHandles: arg })),
-  setDrawPaths: arg => set(() => ({ drawPaths: arg })),
+  setStrengthCenter: arg => {
+    set(() => ({ strengthCenter: arg }))
+  },
+  setChunkSize: arg => {
+    set(() => ({ chunkSize: arg }))
+  },
+  setForceSteps: arg => {
+    set(() => ({ forceSteps: arg }))
+  },
+  setLinkSteps: arg => {
+    set(() => ({ linkSteps: arg }))
+  },
+  setSequenceThickness: arg => {
+    set(() => ({ sequenceThickness: arg }))
+  },
+  setLinkThickness: arg => {
+    set(() => ({ linkThickness: arg }))
+  },
+  setTheta: arg => {
+    set(() => ({ theta: arg }))
+  },
+  setDataset: arg => {
+    set(() => ({ dataset: arg }))
+  },
+  setColorScheme: arg => {
+    set(() => ({ colorScheme: arg }))
+  },
+  setDrawLabels: arg => {
+    set(() => ({ drawLabels: arg }))
+  },
+  setDrawNodeHandles: arg => {
+    set(() => ({ drawNodeHandles: arg }))
+  },
+  setDrawPaths: arg => {
+    set(() => ({ drawPaths: arg }))
+  },
 }))

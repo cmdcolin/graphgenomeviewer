@@ -42,7 +42,9 @@ export default function SettingsDialog({ onHide }: { onHide: () => void }) {
                 max={20}
                 style={{ width: '100%' }}
                 value={linkSteps}
-                onChange={event => store.setLinkSteps(+event.target.value)}
+                onChange={event => {
+                  store.setLinkSteps(+event.target.value)
+                }}
               />
               Current value: {linkSteps}
             </Col>
@@ -60,7 +62,9 @@ export default function SettingsDialog({ onHide }: { onHide: () => void }) {
             <Col>
               <Form.Control
                 value={chunkSize}
-                onChange={event => setChunkSize(event.target.value)}
+                onChange={event => {
+                  setChunkSize(event.target.value)
+                }}
               />
             </Col>
           </Form.Group>
@@ -80,7 +84,9 @@ export default function SettingsDialog({ onHide }: { onHide: () => void }) {
                 max={-1}
                 style={{ width: '100%' }}
                 value={strengthCenter}
-                onChange={event => store.setStrengthCenter(+event.target.value)}
+                onChange={event => {
+                  store.setStrengthCenter(+event.target.value)
+                }}
               />
               Current value: {strengthCenter}
             </Col>
@@ -100,9 +106,9 @@ export default function SettingsDialog({ onHide }: { onHide: () => void }) {
                 max={20}
                 style={{ width: '100%' }}
                 value={sequenceThickness}
-                onChange={event =>
+                onChange={event => {
                   store.setSequenceThickness(+event.target.value)
-                }
+                }}
               />
               Current value: {sequenceThickness}px
             </Col>
@@ -120,7 +126,9 @@ export default function SettingsDialog({ onHide }: { onHide: () => void }) {
                 max={20}
                 style={{ width: '100%' }}
                 value={linkThickness}
-                onChange={event => store.setLinkThickness(+event.target.value)}
+                onChange={event => {
+                  store.setLinkThickness(+event.target.value)
+                }}
               />
               Current value: {linkThickness}px
             </Col>

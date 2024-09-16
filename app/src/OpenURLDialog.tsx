@@ -29,7 +29,9 @@ export default function OpenURLDialog({
             <Form.Control
               type="input"
               value={value}
-              onChange={event => setValue(event.target.value)}
+              onChange={event => {
+                setValue(event.target.value)
+              }}
             />
           </Form.Group>
           <Button type="submit">Submit</Button>

@@ -1,7 +1,8 @@
 {
   "private": true,
   "scripts": {
-    "lint": "eslint --report-unused-disable-directives --max-warnings 0"
+    "lint": "eslint --report-unused-disable-directives --max-warnings 0",
+    "format": "prettier --write ."
   },
   "workspaces": [
     "lib",
@@ -28,6 +29,7 @@
     "react-dom": "^18.3.1",
     "rimraf": "^6.0.1",
     "typescript": "^5.2.2",
+    "typescript-eslint": "^8.5.0",
     "vite": "^5.3.4"
   }
 }
