@@ -45,7 +45,7 @@
     "@storybook/react": "^8.1.6",
     "@storybook/react-vite": "^8.1.6",
     "@storybook/test": "^8.1.6",
-    "eslint-plugin-storybook": "^0.8.0",
+    "eslint-plugin-storybook": "^0.10.1",
     "prop-types": "^15.8.1",
     "storybook": "^8.1.6"
   }

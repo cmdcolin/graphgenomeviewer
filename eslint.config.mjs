@@ -49,6 +49,7 @@ export default tseslint.config(
       'unicorn/prefer-node-protocol': 'off',
       'unicorn/numeric-separators-style': 'off',
       'unicorn/no-nested-ternary': 'off',
+      'unicorn/prefer-global-this': 'off',
       'react/prop-types': 'off',
       'react/react-in-jsx-scope': 'off',
       '@typescript-eslint/no-unsafe-member-access': 'off',
