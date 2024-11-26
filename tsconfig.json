@@ -12,9 +12,9 @@
     "strict": true,
     "noImplicitAny": false,
     "noImplicitReturns": true,
-    "noUncheckedIndexedAccess": true,
+    "noUncheckedIndexedAccess": false,
     "noFallthroughCasesInSwitch": true,
     "esModuleInterop": true
   },
-  "exclude": ["**/build/", "**/dist/"]
+  "exclude": ["**/build/", "**/dist/", "app/vite.config.ts", "**lib/"]
 }

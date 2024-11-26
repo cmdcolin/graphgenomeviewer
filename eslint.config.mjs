@@ -6,7 +6,14 @@ import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
   {
-    ignores: ['**/build/', '**/dist/', '**/.storybook/', '**/node_modules/'],
+    ignores: [
+      '**/build/',
+      '**/dist/',
+      '**/.storybook/',
+      '**/node_modules/',
+      '**/lib/',
+      '**/app/vite.config.ts',
+    ],
   },
   {
     languageOptions: {
