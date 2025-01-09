@@ -1,5 +1,6 @@
-import { create } from 'zustand'
 import queryString from 'query-string'
+import { create } from 'zustand'
+
 import { defaults } from './util'
 
 export interface AppState {

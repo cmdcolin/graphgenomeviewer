@@ -1,15 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
-import { GFAGraph } from 'graphgenomeviewer'
+
 import { saveAs } from 'file-saver'
+import { GFAGraph } from 'graphgenomeviewer'
 
-// locals
 import FeatureDialog from './FeatureDialog'
-import Sidebar from './Sidebar'
 import Header from './Header'
-
-// utils
-import { defaults } from './util'
+import Sidebar from './Sidebar'
 import { useAppStore } from './store'
+import { defaults } from './util'
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './App.css'

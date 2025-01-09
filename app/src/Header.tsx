@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { Navbar, Nav, NavDropdown } from 'react-bootstrap'
+
+import { Nav, NavDropdown, Navbar } from 'react-bootstrap'
 
 // locals
-import SettingsDialog from './SettingsDialog'
 import AboutDialog from './AboutDialog'
-import OpenURLDialog from './OpenURLDialog'
 import OpenFileDialog from './OpenFileDialog'
+import OpenURLDialog from './OpenURLDialog'
+import SettingsDialog from './SettingsDialog'
 import { useAppStore } from './store'
 
 export default function Header({ onExportSVG }: { onExportSVG: () => void }) {

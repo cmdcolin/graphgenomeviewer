@@ -26,12 +26,22 @@
     "react": "*"
   },
   "dependencies": {
+    "@storybook/addon-essentials": "^8.1.6",
+    "@storybook/addon-interactions": "^8.1.6",
+    "@storybook/addon-links": "^8.1.6",
+    "@storybook/addon-onboarding": "^8.1.6",
+    "@storybook/blocks": "^8.1.6",
+    "@storybook/react": "^8.1.6",
+    "@storybook/react-vite": "^8.1.6",
+    "@storybook/test": "^8.1.6",
     "@types/d3-force": "^3.0.5",
     "@types/d3-scale-chromatic": "^3.0.0",
     "@types/d3-zoom": "^3.0.4",
     "d3": "^7.8.5",
     "d3-interpolate": "^3.0.1",
-    "mathjs": "^14.0.0"
+    "eslint": "^9.7.0",
+    "mathjs": "^14.0.0",
+    "storybook": "^8.1.6"
   },
   "publishConfig": {
     "access": "public"
