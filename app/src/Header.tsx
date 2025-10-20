@@ -69,6 +69,14 @@ export default function Header({ onExportSVG }: { onExportSVG: () => void }) {
               </NavDropdown.Item>
               <NavDropdown.Item
                 onClick={() => {
+                  store.setDataset('chr1_sub.gfa')
+                }}
+              >
+                HPRC Chr1 (vg find output)
+              </NavDropdown.Item>
+
+              <NavDropdown.Item
+                onClick={() => {
                   store.setDataset('big1.gfa')
                 }}
               >
