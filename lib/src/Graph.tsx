@@ -11,31 +11,15 @@ import {
 } from 'd3-force'
 import * as d3interpolate from 'd3-scale-chromatic'
 import { zoom as d3zoom } from 'd3-zoom'
-import { projectLine, reprocessGraph, generatePaths, Link, Graph } from './util'
-const { schemeCategory10 } = d3interpolate
+import {
+  projectLine,
+  reprocessGraph,
+  generatePaths,
+  generateLinks,
+} from './util'
+import type { TupleCoord, Graph } from './types'
 
-function generateLinks(links: Link[]) {
-  const newlinks = [] as {
-    pathId?: string
-    pathIndex?: number
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [key: string]: any
-  }[]
-  const pathIds = new Map<string, number>()
-  for (const { paths, ...rest } of links) {
-    if (paths) {
-      for (const pathId of paths) {
-        if (!pathIds.has(pathId)) {
-          pathIds.set(pathId, pathIds.size)
-        }
-        newlinks.push({ ...rest, pathId, pathIndex: pathIds.get(pathId) })
-      }
-    } else {
-      newlinks.push(rest)
-    }
-  }
-  return newlinks
-}
+const { schemeCategory10 } = d3interpolate
 
 function Graph({
   graph,
@@ -144,10 +128,7 @@ function Graph({
       // @ts-expect-error
       node.attr('cx', d => d.x).attr('cy', d => d.y)
 
-      const nodePathMap = {} as Record<
-        string,
-        [[number, number], [number, number]]
-      >
+      const nodePathMap = {} as Record<string, [TupleCoord, TupleCoord]>
       // @ts-expect-error
       const paths = generatePaths(links, graph.nodes)
       for (const p of paths) {

@@ -16,7 +16,9 @@ export default function Sidebar({
       <Form.Label>Color</Form.Label>
       <Form.Control
         value={colorScheme}
-        onChange={event => (store.colorScheme = event.target.value)}
+        onChange={event => {
+          store.setColorScheme(event.target.value)
+        }}
         as="select"
       >
         <option>JustGrey</option>
