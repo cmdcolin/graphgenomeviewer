@@ -6,6 +6,8 @@ vite app
 
 See the lib [README](lib/README.md) for details on using the NPM module
 
+Please see https://github.com/cmdcolin/BandageJS as an alternative approach that uses the actual layout algorithm (cross-compiled from C++ to WASM for use in JS) that BandageNG uses into a web app
+
 ## Demo
 
 ![](img/1.png)
